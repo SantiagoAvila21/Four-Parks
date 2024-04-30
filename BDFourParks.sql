@@ -412,20 +412,29 @@ alter table VEHICULO
 
 
 /* Inserciones Necesarias */
+/* TIPO USUARIO */
 INSERT INTO tipo_usuario VALUES (1, 'Administrador General');
 INSERT INTO tipo_usuario VALUES (2, 'Administrador de Punto');
 INSERT INTO tipo_usuario VALUES (3, 'Cliente');
 
-
+/* TIPO VEHICULO */
 INSERT INTO tipo_vehiculo VALUES (1, 'Carro');
 INSERT INTO tipo_vehiculo VALUES (2, 'Moto');
 INSERT INTO tipo_vehiculo VALUES (3, 'Bicicleta');
 
+/* TIPO DOCUMENTO */
 INSERT INTO tipo_documento VALUES ('CC', 'Cedula');
 INSERT INTO tipo_documento VALUES ('TI', 'Tarjeta de identidad');
 INSERT INTO tipo_documento VALUES ('TE', 'Tarjeta de Extranjería');
 INSERT INTO tipo_documento VALUES ('CE', 'Cédula de extranjería');
 INSERT INTO tipo_documento VALUES ('NIT', 'Nit');
 INSERT INTO tipo_documento VALUES ('PAS', 'Pasaporte');
+
+/* TIPO PARQUEADERO */
+INSERT INTO tipo_parqueadero VALUES ('1', 'Cubierto');
+INSERT INTO tipo_parqueadero VALUES ('2', 'Semi-Cubierto');
+INSERT INTO tipo_parqueadero VALUES ('3', 'Descubierto');
+
+
 
 

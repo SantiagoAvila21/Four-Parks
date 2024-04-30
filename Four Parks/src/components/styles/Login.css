@@ -1,0 +1,28 @@
+.Login{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.login{
+    display: flex;
+    flex-direction: column;
+}
+
+.Page{
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.Form{
+    width: 500px;
+    height: 250px;
+    background-color: #FFBC4B;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

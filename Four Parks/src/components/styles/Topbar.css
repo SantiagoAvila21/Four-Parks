@@ -1,0 +1,29 @@
+.topbar{
+    width: 98%;
+    height: 100px;
+    margin: 3px;
+    border: 1px solid red;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+}
+
+#nombreEmpresa{
+    font-size: 64px;
+    font-weight: bold;
+}
+
+.botonesLogin{
+    display: flex;
+    flex-direction: row;
+
+}
+
+.botonesLogin > a{
+    cursor: pointer;
+    padding: 0 20px;
+    border-right: 1px solid black;
+    border-left: 1px solid black;
+}
