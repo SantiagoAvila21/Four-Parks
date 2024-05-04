@@ -1,14 +1,15 @@
 import "./styles/Topbar.css";
 import { Link } from 'react-router-dom'
+import logoFP from '../assets/FourParksLogo.png'
 
 const TopBar = () => {
     return (
         <div className="topbar">
-            <p>Logo</p>
+            <img id="logoTop" src={logoFP} alt="Logo Four Parks" />
             <p id="nombreEmpresa">Four Parks</p>
             <div className="botonesLogin">
-                <Link to="/login"><a>Iniciar sesion</a></Link>
-                <Link to="/register"><a>Registrarse</a></Link>
+                <Link style={{ textDecoration: 'none' }} to="/login" id="loginLink">Iniciar sesion</Link>
+                <Link style={{ textDecoration: 'none' }} to="/register" id="registerLink">Registrarse</Link>
             </div>
         </div>
     );

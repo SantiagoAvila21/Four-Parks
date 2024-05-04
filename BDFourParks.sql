@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      PostgreSQL 9.x                               */
-/* Created on:     23/04/2024 11:56:53 p. m.                    */
+/* Created on:     23/04/2024 11:56:53 p.ï¿½m.                    */
 /*==============================================================*/
 
 
@@ -425,8 +425,8 @@ INSERT INTO tipo_vehiculo VALUES (3, 'Bicicleta');
 /* TIPO DOCUMENTO */
 INSERT INTO tipo_documento VALUES ('CC', 'Cedula');
 INSERT INTO tipo_documento VALUES ('TI', 'Tarjeta de identidad');
-INSERT INTO tipo_documento VALUES ('TE', 'Tarjeta de Extranjería');
-INSERT INTO tipo_documento VALUES ('CE', 'Cédula de extranjería');
+INSERT INTO tipo_documento VALUES ('TE', 'Tarjeta de Extranjerï¿½a');
+INSERT INTO tipo_documento VALUES ('CE', 'Cï¿½dula de extranjerï¿½a');
 INSERT INTO tipo_documento VALUES ('NIT', 'Nit');
 INSERT INTO tipo_documento VALUES ('PAS', 'Pasaporte');
 
@@ -434,7 +434,3 @@ INSERT INTO tipo_documento VALUES ('PAS', 'Pasaporte');
 INSERT INTO tipo_parqueadero VALUES ('1', 'Cubierto');
 INSERT INTO tipo_parqueadero VALUES ('2', 'Semi-Cubierto');
 INSERT INTO tipo_parqueadero VALUES ('3', 'Descubierto');
-
-
-
-

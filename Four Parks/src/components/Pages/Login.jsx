@@ -1,0 +1,69 @@
+import { useState } from "react";
+import SideLogo from "../SideLogo";
+import "../styles/Login.css"
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
+const Login = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    const onChangeEmail = (event) => {
+        setEmail(event.target.value);
+    }
+    
+    const onChangePassword = (event) => {
+        setPassword(event.target.value);
+    }
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        toast.success('Inicio sesion correctamente!', {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+        });
+        console.log(`Email y Password: ${email} ${password}`);
+    }
+
+    return (
+        <div className="Login">
+            <SideLogo />
+            <div className="login Page">
+                <h1>INICIAR SESION</h1>
+                <div className="login Form">
+                    <form>
+                        <div className="login info">
+                            <label>CORREO ELECTRONICO</label>
+                            <input 
+                                type="text" 
+                                value={email} 
+                                onChange={onChangeEmail} 
+                                className="inputForm"
+                            />
+                        </div>
+                        <div className="login info">
+                            <label>CONTRASEÑA</label>
+                            <input 
+                                type="password" 
+                                value={password} 
+                                onChange={onChangePassword}
+                                className="inputForm"  
+                            />
+                        </div>
+                    </form>
+                </div>
+                <button id="submitButton" type="submit" onClick={handleSubmit}>Iniciar sesión</button>
+            </div>
+            <ToastContainer />
+        </div>
+    )
+}
+
+export default Login;

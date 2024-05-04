@@ -1,7 +1,9 @@
 .sideLogo{
     width: 20%;
     height: 100%;
-    display: grid;
-    place-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     background-color: #E0E0E0;
 }

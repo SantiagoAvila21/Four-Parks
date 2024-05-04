@@ -1,7 +1,7 @@
-import TopBar from "./TopBar"
-import Sidebar from "./Sidebar"
-import MyMap from "./MyMap"
-import './styles/Home.css'
+import TopBar from "../TopBar"
+import Sidebar from "../Sidebar"
+import MyMap from "../MyMap"
+import '../styles/Home.css'
 
 const Home = () => {
   return (
