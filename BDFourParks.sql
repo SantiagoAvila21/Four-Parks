@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      PostgreSQL 9.x                               */
-/* Created on:     23/04/2024 11:56:53 p. m.                    */
+/* Created on:     23/04/2024 11:56:53 p.ï¿½m.                    */
 /*==============================================================*/
 
 
@@ -423,9 +423,27 @@ INSERT INTO tipo_vehiculo VALUES (3, 'Bicicleta');
 
 INSERT INTO tipo_documento VALUES ('CC', 'Cedula');
 INSERT INTO tipo_documento VALUES ('TI', 'Tarjeta de identidad');
-INSERT INTO tipo_documento VALUES ('TE', 'Tarjeta de Extranjería');
-INSERT INTO tipo_documento VALUES ('CE', 'Cédula de extranjería');
+INSERT INTO tipo_documento VALUES ('TE', 'Tarjeta de Extranjerï¿½a');
+INSERT INTO tipo_documento VALUES ('CE', 'Cï¿½dula de extranjerï¿½a');
 INSERT INTO tipo_documento VALUES ('NIT', 'Nit');
 INSERT INTO tipo_documento VALUES ('PAS', 'Pasaporte');
+
+INSERT INTO tipo_parqueadero VALUES (1,'Cubierto');
+INSERT INTO tipo_parqueadero VALUES (2,'Semi-cubierto');
+INSERT INTO tipo_parqueadero VALUES (3,'Descubierto');
+
+INSERT INTO MARCAVEHICULO VALUES (1,'Chevrolet');
+INSERT INTO MARCAVEHICULO VALUES (2,'Renault');
+INSERT INTO MARCAVEHICULO VALUES (3,'Mazda');
+
+INSERT INTO METODO_PAGO VALUES (1,'Tarjeta');
+INSERT INTO METODO_PAGO VALUES (2,'PSE');
+
+INSERT INTO TIPODESCUENTO VALUES (1,'Comun',0);
+INSERT INTO TIPODESCUENTO VALUES (2,'Fidelizacion',1000);
+
+
+
+
 
 
