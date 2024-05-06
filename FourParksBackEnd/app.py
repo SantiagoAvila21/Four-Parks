@@ -9,9 +9,9 @@ load_dotenv()
 # Create the Flask application
 app = Flask(__name__)
 # Load Database URL from .env
-#url = os.getenv("DATABASE_URL")
+url = os.getenv("DATABASE_URL")
 # Connect to the DB
-#connection = psycopg2.connect(url)
+connection = psycopg2.connect(url)
 
 
 # Define a route for the root URL
@@ -23,12 +23,7 @@ SELECT_ALL_TIPODOC = "SELECT * FROM tipo_documento;"
 
 @app.route("/api/tipodoc", methods=["GET"])
 def get_all_tipodoc():
-    connection = psycopg2.connect(
-    host="localhost",
-    database="FourParks",
-    user="postgres",
-    password="12345"
-    )
+    connection = psycopg2.connect(url)
     with connection:
         with connection.cursor() as cursor:
             cursor.execute(SELECT_ALL_TIPODOC)
@@ -46,12 +41,7 @@ def get_all_tipodoc():
 @app.route("/register", methods=["POST"])
 def register():
     try:
-        connection = psycopg2.connect(
-        host="localhost",
-        database="FourParks",
-        user="postgres",
-        password="12345"
-        )
+        connection = psycopg2.connect(url)
         data = request.get_json()
         cursor = connection.cursor()
         sql_query ="""
@@ -82,12 +72,7 @@ def login():
     
     try:
         # Connect to the PostgreSQL database
-        conn = psycopg2.connect(
-        host="localhost",
-        database="FourParks",
-        user="postgres",
-        password="12345"
-        )
+        conn = psycopg2.connect(url)
 
         cur = conn.cursor()
 
@@ -114,12 +99,7 @@ def crear_reserva():
     data = request.get_json()
     try:
         # Connect to the PostgreSQL database
-        conn = psycopg2.connect(
-        host="localhost",
-        database="FourParks",
-        user="postgres",
-        password="12345"
-        )
+        conn = psycopg2.connect(url)
         
 
         # SQL query to insert data into the reserva table
@@ -152,12 +132,7 @@ def crear_reserva():
 def agregar_vehiculo():
     try:
         # Connect to the PostgreSQL database
-        conn = psycopg2.connect(
-        host="localhost",
-        database="FourParks",
-        user="postgres",
-        password="12345"
-        )
+        conn = psycopg2.connect(url)
         cur = conn.cursor()
         data = request.get_json()
 
@@ -187,12 +162,7 @@ def agregar_vehiculo():
 def crear_parqueadero():
     try:
         # Connect to the PostgreSQL database
-        conn = psycopg2.connect(
-        host="localhost",
-        database="FourParks",
-        user="postgres",
-        password="12345"
-        )
+        conn = psycopg2.connect(url)
         cur = conn.cursor()
         data = request.get_json()
 
@@ -224,12 +194,7 @@ def crear_parqueadero():
 @app.route("/api/get_usuario/<idusuario>", methods=["GET"])
 def get_usuario(idusuario):
     try:
-        conn = psycopg2.connect(
-            host="localhost",
-            database="FourParks",
-            user="postgres",
-            password="12345"
-        )
+        conn = psycopg2.connect(url)
         cur = conn.cursor()
         sql_query = "SELECT * FROM usuario WHERE idusuario = %s"
         cur.execute(sql_query, (idusuario,))
@@ -247,12 +212,7 @@ def get_usuario(idusuario):
 @app.route("/api/get_reserva/<numreserva>", methods=["GET"])
 def get_reserva(numreserva):
     try:
-        conn = psycopg2.connect(
-            host="localhost",
-            database="FourParks",
-            user="postgres",
-            password="12345"
-        )
+        conn = psycopg2.connect(url)
         cur = conn.cursor()
         sql_query = "SELECT * FROM reserva WHERE numreserva = %s"
         cur.execute(sql_query, (numreserva,))
@@ -270,12 +230,7 @@ def get_reserva(numreserva):
 @app.route("/api/get_vehiculo/<idvehiculo>", methods=["GET"])
 def get_vehiculo(idvehiculo):
     try:
-        conn = psycopg2.connect(
-            host="localhost",
-            database="FourParks",
-            user="postgres",
-            password="12345"
-        )
+        conn = psycopg2.connect(url)
         cur = conn.cursor()
         sql_query = "SELECT * FROM vehiculo WHERE idvehiculo = %s"
         cur.execute(sql_query, (idvehiculo,))
@@ -293,12 +248,7 @@ def get_vehiculo(idvehiculo):
 @app.route("/api/get_parqueadero/<idparqueadero>", methods=["GET"])
 def get_parqueadero(idparqueadero):
     try:
-        conn = psycopg2.connect(
-            host="localhost",
-            database="FourParks",
-            user="postgres",
-            password="12345"
-        )
+        conn = psycopg2.connect(url)
         cur = conn.cursor()
         sql_query = "SELECT * FROM parqueadero WHERE idparqueadero = %s"
         cur.execute(sql_query, (idparqueadero,))
@@ -316,12 +266,7 @@ def get_parqueadero(idparqueadero):
 @app.route("/api/get_parqueaderos/", methods=["GET"])
 def get_parqueaderos():
     try:
-        conn = psycopg2.connect(
-            host="localhost",
-            database="FourParks",
-            user="postgres",
-            password="12345"
-        )
+        conn = psycopg2.connect(url)
         cur = conn.cursor()
         sql_query = "SELECT * FROM parqueadero"
         cur.execute(sql_query)
