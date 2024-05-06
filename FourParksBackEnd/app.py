@@ -221,6 +221,121 @@ def crear_parqueadero():
         conn.close()
         return jsonify({"error": str(e)}), 400
 
+@app.route("/api/get_usuario/<idusuario>", methods=["GET"])
+def get_usuario(idusuario):
+    try:
+        conn = psycopg2.connect(
+            host="localhost",
+            database="FourParks",
+            user="postgres",
+            password="12345"
+        )
+        cur = conn.cursor()
+        sql_query = "SELECT * FROM usuario WHERE idusuario = %s"
+        cur.execute(sql_query, (idusuario,))
+        user_info = cur.fetchone()
+        if user_info:
+            return jsonify(user_info), 200
+        else:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route("/api/get_reserva/<numreserva>", methods=["GET"])
+def get_reserva(numreserva):
+    try:
+        conn = psycopg2.connect(
+            host="localhost",
+            database="FourParks",
+            user="postgres",
+            password="12345"
+        )
+        cur = conn.cursor()
+        sql_query = "SELECT * FROM reserva WHERE numreserva = %s"
+        cur.execute(sql_query, (numreserva,))
+        reserva_info = cur.fetchone()
+        if reserva_info:
+            return jsonify(reserva_info), 200
+        else:
+            return jsonify({"error": "Reserva no encontrada"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route("/api/get_vehiculo/<idvehiculo>", methods=["GET"])
+def get_vehiculo(idvehiculo):
+    try:
+        conn = psycopg2.connect(
+            host="localhost",
+            database="FourParks",
+            user="postgres",
+            password="12345"
+        )
+        cur = conn.cursor()
+        sql_query = "SELECT * FROM vehiculo WHERE idvehiculo = %s"
+        cur.execute(sql_query, (idvehiculo,))
+        vehiculo_info = cur.fetchone()
+        if vehiculo_info:
+            return jsonify(vehiculo_info), 200
+        else:
+            return jsonify({"error": "Vehículo no encontrado"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route("/api/get_parqueadero/<idparqueadero>", methods=["GET"])
+def get_parqueadero(idparqueadero):
+    try:
+        conn = psycopg2.connect(
+            host="localhost",
+            database="FourParks",
+            user="postgres",
+            password="12345"
+        )
+        cur = conn.cursor()
+        sql_query = "SELECT * FROM parqueadero WHERE idparqueadero = %s"
+        cur.execute(sql_query, (idparqueadero,))
+        parqueadero_info = cur.fetchone()
+        if parqueadero_info:
+            return jsonify(parqueadero_info), 200
+        else:
+            return jsonify({"error": "Parqueadero no encontrado"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route("/api/get_parqueaderos/", methods=["GET"])
+def get_parqueaderos():
+    try:
+        conn = psycopg2.connect(
+            host="localhost",
+            database="FourParks",
+            user="postgres",
+            password="12345"
+        )
+        cur = conn.cursor()
+        sql_query = "SELECT * FROM parqueadero"
+        cur.execute(sql_query)
+        parqueadero_info = cur.fetchall()
+        if parqueadero_info:
+            return jsonify(parqueadero_info), 200
+        else:
+            return jsonify({"error": "Parqueadero no encontrado"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
 
 if __name__ == "__main__":
     app.run(host='localhost', port=5000, debug=True)
