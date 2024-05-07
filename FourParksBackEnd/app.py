@@ -3,11 +3,13 @@ import psycopg2
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from werkzeug.security import check_password_hash
+from flask_cors import CORS
 
 load_dotenv()
 
 # Create the Flask application
 app = Flask(__name__)
+CORS(app)
 # Load Database URL from .env
 url = os.getenv("DATABASE_URL")
 # Connect to the DB
@@ -44,11 +46,18 @@ def register():
         connection = psycopg2.connect(url)
         data = request.get_json()
         cursor = connection.cursor()
+        # Obtener el número total de usuarios en la tabla usuario
+        cursor.execute("SELECT COUNT(idusuario) FROM usuario")
+        total_usuarios = cursor.fetchone()[0]
+
+        # Calcular el nuevo idusuario
+        nuevo_idusuario = 'P' + str(total_usuarios + 1)
+
         sql_query ="""
             INSERT INTO usuario (idusuario, idtipousuario, idtipodocumento, nombreusuario, numdocumento, contrasenia, puntosacumulados, correoelectronico)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
-        values = (data['idusuario'], data['idtipousuario'], data['idtipodocumento'], data['nombreusuario'], 
+        values = (nuevo_idusuario, data['idtipousuario'], data['idtipodocumento'], data['nombreusuario'], 
 
                     data['numdocumento'], data['contrasenia'], data['puntosacumulados'], data['correoelectronico'])
         print(values)
