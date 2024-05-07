@@ -8,7 +8,7 @@ const TopBar = () => {
             <img id="logoTop" src={logoFP} alt="Logo Four Parks" />
             <p id="nombreEmpresa">Four Parks</p>
             <div className="botonesLogin">
-                <Link style={{ textDecoration: 'none' }} to="/login" id="loginLink">Iniciar sesion</Link>
+                <Link style={{ textDecoration: 'none' }} to="/login" id="loginLink">Iniciar sesión</Link>
                 <Link style={{ textDecoration: 'none' }} to="/register" id="registerLink">Registrarse</Link>
             </div>
         </div>

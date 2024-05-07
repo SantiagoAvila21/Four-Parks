@@ -14,7 +14,6 @@ const MyMap = () => {
         position.coords.latitude,
         position.coords.longitude
       ])
-      console.log(position.coords.latitude, position.coords.longitude);
     });
   }, []);
 

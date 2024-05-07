@@ -1,7 +1,47 @@
 .sidebar{
-    width: 200px; 
+    width: 250px; 
     height: 100%;
     display: flex;
     flex-direction: column;
     background-color: #E0E0E0;
+    position: relative;
+}
+
+.filter{
+    width: 100%;
+    height: 56px;
+    background-color: #3948DF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tipoParqueadero{
+    width: 80%; 
+    height: 100%;
+    padding: 10px;
+    background-color: #3948DF;
+    color: #B0B8CC;
+    border: none;
+    outline: none;
+    font-size: 16px;
+}
+
+.tipoParqueadero:hover{
+    border: 1px solid grey;
+}
+
+#botonAyuda {
+    width: fit-content;
+    position: absolute;
+    bottom: 0;
+    left: calc(250px - 30%);
+    display: flex;
+    flex-direction: row;
+    cursor: pointer;
+}
+
+#botonAyuda > p{
+    font-weight: bold;
+    margin-top: -3px;
 }

@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from werkzeug.security import check_password_hash
 from flask_cors import CORS
+import hashlib
 
 load_dotenv()
 
@@ -58,7 +59,6 @@ def register():
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
         values = (nuevo_idusuario, data['idtipousuario'], data['idtipodocumento'], data['nombreusuario'], 
-
                     data['numdocumento'], data['contrasenia'], data['puntosacumulados'], data['correoelectronico'])
         print(values)
         cursor.execute(sql_query, values)
@@ -88,11 +88,12 @@ def login():
         # Query to find user by email
         cur.execute("SELECT contrasenia FROM usuario WHERE correoelectronico = %s", (email,))
         user_password = cur.fetchone()    
+        password_hash = hashlib.sha1(password.encode()).hexdigest()
 
         if user_password is None:
             return jsonify({"error": "Usuario no encontrado"}), 404       
         # Check if the provided password matches the hashed password in the database
-        if user_password[0] == password:
+        if password_hash == user_password[0]:
             return jsonify({"message": "Inicio de sesión exitoso"}), 200
         else:
             return jsonify({"error": "Contraseña incorrecta"}), 401

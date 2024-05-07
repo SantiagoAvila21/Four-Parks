@@ -8,19 +8,3 @@
     flex-direction: row;
     height: 85%;
 }
-
-.filter{
-    width: 100%;
-    height: 56px;
-    background-color: #3948DF;
-}
-
-#arrowBack{
-    position: absolute;
-    top: 0;
-    left: 0;
-    font-size: 50px;
-    cursor: pointer;
-    width: fit-content;
-    height: fit-content;
-}

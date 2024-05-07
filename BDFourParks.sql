@@ -277,10 +277,10 @@ IDTIPOVEHICULO
 create table USUARIO (
    IDUSUARIO            VARCHAR(5)           not null,
    IDTIPOUSUARIO        INT4                 not null,
-   IDTIPODOCUMENTO      VARCHAR(2)           not null,
+   IDTIPODOCUMENTO      VARCHAR(3)           not null,
    NOMBREUSUARIO        VARCHAR(35)          not null,
-   NUMDOCUMENTO         INT8                 not null,
-   CONTRASENIA          VARCHAR(8)           not null,
+   NUMDOCUMENTO         VARCHAR(20)          not null,
+   CONTRASENIA          VARCHAR(40)          not null,
    PUNTOSACUMULADOS     INT4                 not null,
    CORREOELECTRONICO    VARCHAR(35)          null,
    constraint PK_USUARIO primary key (IDUSUARIO)
@@ -444,7 +444,9 @@ INSERT INTO METODO_PAGO VALUES (2,'PSE');
 INSERT INTO TIPODESCUENTO VALUES (1,'Comun',0);
 INSERT INTO TIPODESCUENTO VALUES (2,'Fidelizacion',1000);
 
-
+/* Insercion usuario de prueba */
+INSERT INTO usuario (idusuario, idtipousuario, idtipodocumento, nombreusuario, numdocumento, contrasenia, puntosacumulados, correoelectronico)
+            VALUES (1, 3, 1, 'usuarioTest', '1000834814', 'admintest', 0, 'test@gmail.com') 
 
 
 

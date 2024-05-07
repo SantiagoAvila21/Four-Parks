@@ -17,7 +17,8 @@
     "react-icons": "^5.1.0",
     "react-router": "^6.23.0",
     "react-router-dom": "^6.23.0",
-    "react-toastify": "^10.0.5"
+    "react-toastify": "^10.0.5",
+    "sha1": "^1.1.1"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",
