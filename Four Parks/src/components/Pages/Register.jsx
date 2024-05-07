@@ -22,7 +22,10 @@ const Login = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        //console.table(`${JSON.stringify(formulario)}`);
+        console.log(`${JSON.stringify(formulario)}`);
+        if(Object.values(formulario).includes('')){
+            console.log('Hay almenos un espacio en blanco');
+        }
     }
 
     return (
@@ -55,6 +58,7 @@ const Login = () => {
                         <div className="register info">
                             <label>TIPO DOCUMENTO</label>
                             <select name="tipoDoc" onChange={handleChange} className="inputForm">
+                                <option value={""}>Cedula Ciudadania</option>
                                 <option value={"CC"}>Cedula Ciudadania</option>
                                 <option value={"TI"}>Tarjeta Identidad</option>
                             </select>

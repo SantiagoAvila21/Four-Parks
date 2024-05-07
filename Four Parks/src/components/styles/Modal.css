@@ -1,0 +1,26 @@
+.ModalFull{
+    display: flex; 
+    overflow: auto; 
+    position: fixed; 
+    justify-content: center; 
+    align-items: center; 
+    background-color: hsla(0, 49%, 7%, 0.2);
+    backdrop-filter: blur(5px)!important;
+    width: 100vw; 
+    height: 100vh; 
+}
+
+.modalDiv{
+    padding: 1.25rem; 
+    border-radius: 0.5rem; 
+    width: 50%; 
+    background-color: #FFBC4B;
+}
+
+#closeButton{
+    font-size: 1.25rem;
+    line-height: 1.75rem; 
+    border: none;
+    background: none;
+    cursor: pointer;
+}
