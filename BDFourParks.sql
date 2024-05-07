@@ -430,7 +430,22 @@ INSERT INTO tipo_documento VALUES ('CE', 'C�dula de extranjer�a');
 INSERT INTO tipo_documento VALUES ('NIT', 'Nit');
 INSERT INTO tipo_documento VALUES ('PAS', 'Pasaporte');
 
-/* TIPO PARQUEADERO */
-INSERT INTO tipo_parqueadero VALUES ('1', 'Cubierto');
-INSERT INTO tipo_parqueadero VALUES ('2', 'Semi-Cubierto');
-INSERT INTO tipo_parqueadero VALUES ('3', 'Descubierto');
+INSERT INTO tipo_parqueadero VALUES (1,'Cubierto');
+INSERT INTO tipo_parqueadero VALUES (2,'Semi-cubierto');
+INSERT INTO tipo_parqueadero VALUES (3,'Descubierto');
+
+INSERT INTO MARCAVEHICULO VALUES (1,'Chevrolet');
+INSERT INTO MARCAVEHICULO VALUES (2,'Renault');
+INSERT INTO MARCAVEHICULO VALUES (3,'Mazda');
+
+INSERT INTO METODO_PAGO VALUES (1,'Tarjeta');
+INSERT INTO METODO_PAGO VALUES (2,'PSE');
+
+INSERT INTO TIPODESCUENTO VALUES (1,'Comun',0);
+INSERT INTO TIPODESCUENTO VALUES (2,'Fidelizacion',1000);
+
+
+
+
+
+
