@@ -1,18 +1,23 @@
 import { useState } from "react";
 import SideLogo from "../SideLogo";
 import "../styles/Login.css"
-import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Modal from "../Modal";
-import axios from 'axios'
 import { ToastContainer } from "react-toastify";
+import useNotification from "../Hooks/useNotification";
+import { useAuth } from "../../Context/AuthProvider";
+
 
 const Login = () => {
+
+    const {updateNotification} = useNotification();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showModal, setshowModal] = useState(false);
     const [twoFactorCode, setTwoFactorCode] = useState('');
+
+    const auth = useAuth();
 
     const onChangeEmail = (event) => {
         setEmail(event.target.value);
@@ -26,77 +31,27 @@ const Login = () => {
         setPassword(event.target.value);
     }
 
-    const handleLogin = async (event) => {
+    const handleLogin = (event) => {
         event.preventDefault();
         // Revisar si el formulario tiene datos
         if(email == "" || password == ""){
-            toast.error('Hay campos vacíos en el formulario', {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-            });
+            updateNotification({ type: 'error', message: 'Hay al menos un espacio en blanco' });
             return;
         }
         // Revisar El Regex del correo Electronico
         const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/; // eslint-disable-line
 
         if(!emailRegex.test(email)){
-            toast.error('Porfavor ingrese un email válido', {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-            });
+            updateNotification({ type: 'error', message: 'Por favor ingrese un email válido' });
             return;
         }
-        try {
-            const response = await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/login`, {
-              correoelectronico: email,
-              contrasenia: password
-            });
-      
-            console.log('Respuesta del servidor:', response);
-            if(response.status == 200){
-                setshowModal((prev) => !prev);
-            }
-          } catch (error) {
-            console.log("Error de la solicitud: ", error.response.data.error)
-            toast.error(error.response.data.error, {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-            });
-            
-        }
-        //console.log(`Email y Password: ${email} ${password}`);
+        auth.loginAction({email: email, password: password}, () => {setshowModal((prev) => !prev)});
+
     }
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        toast.success('Inicio sesión correctamente!', {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-        });
+        updateNotification({ type: 'success', message: 'Sesión iniciada correctamente!' });
         console.log(twoFactorCode);
         setshowModal((prev) => !prev);
     }

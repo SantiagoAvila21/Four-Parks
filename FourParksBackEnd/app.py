@@ -86,7 +86,7 @@ def login():
         cur = conn.cursor()
 
         # Query to find user by email
-        cur.execute("SELECT contrasenia FROM usuario WHERE correoelectronico = %s", (email,))
+        cur.execute("SELECT contrasenia, nombreusuario FROM usuario WHERE correoelectronico = %s", (email,))
         user_password = cur.fetchone()    
         password_hash = hashlib.sha1(password.encode()).hexdigest()
 
@@ -94,7 +94,7 @@ def login():
             return jsonify({"error": "Usuario no encontrado"}), 404       
         # Check if the provided password matches the hashed password in the database
         if password_hash == user_password[0]:
-            return jsonify({"message": "Inicio de sesión exitoso"}), 200
+            return jsonify({"usuario": user_password[1], "message": "Inicio de sesión exitoso"}), 200
         else:
             return jsonify({"error": "Contraseña incorrecta"}), 401
     except Exception as e:

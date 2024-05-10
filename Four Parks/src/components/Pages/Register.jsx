@@ -1,12 +1,14 @@
 import { useState } from "react";
 import SideLogo from "../SideLogo";
-import "../styles/Register.css"
-import { toast } from 'react-toastify';
+import "../styles/Register.css";
 import axios from 'axios';
 import sha1 from 'sha1';
 import { ToastContainer } from "react-toastify";
+import useNotification from "../Hooks/useNotification";
 
 const Register = () => {
+
+    const {updateNotification} = useNotification();
 
     const [formulario, setFormulario] = useState({
         nombre: '',
@@ -33,46 +35,19 @@ const Register = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
         if(Object.values(formulario).includes('')){
-            toast.error('Hay al menos un espacio en blanco', {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-            });
+            updateNotification({ type: 'error', message: 'Hay al menos un espacio en blanco' });
             return;
         }
         // Revisar El Regex del correo Electronico
         const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/; // eslint-disable-line
 
         if(!emailRegex.test(formulario.email)){
-            toast.error('Porfavor ingrese un email válido', {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-            });
+            updateNotification({ type: 'error', message: 'Porfavor ingrese un email válido' });
             return;
         }
 
         if(!validatePassword(formulario.password)){
-            toast.error('La contraseña debe tener al menos 8 caracteres y contener al menos un número, una letra minúscula y una letra mayúscula.', {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-            });
+            updateNotification({ type: 'error', message: 'La contraseña debe tener al menos 8 caracteres y contener al menos un número, una letra minúscula y una letra mayúscula.' });
             return;
         }
 
@@ -87,30 +62,12 @@ const Register = () => {
                 correoelectronico: formulario.email
             });
             if(responseRegister.status == 201){
-                toast.success('Cuenta creada satisfactoriamente', {
-                    position: "top-right",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "light",
-                });
+                updateNotification({ type: 'success', message: 'Cuenta creada satisfactoriamente' });
             }
             console.log(responseRegister);
         }catch(error){
             console.log("Error de la solicitud: ", error.response.data.error)
-            toast.error(error.response.data.error, {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-            });
+            updateNotification({ type: 'error', message: error.response.data.error });
         }
     }
 

@@ -28,15 +28,38 @@ a:hover{
     font-weight: bold;
 }
 
-.botonesLogin{
+.botonesLogin, .infoUser{
     display: flex;
     flex-direction: row;
     color: black;
+    justify-content: center;
+    align-items: center;
 }
 
-.botonesLogin > a{
+.botonesLogin > a, .infoUser > a{
     cursor: pointer;
     padding: 0 20px;
     border-right: 1px solid black;
     border-left: 1px solid black;
+    margin-top: -3px;
+}
+
+.infoUser > p{
+    margin: 0 5px;
+    font-weight: bold;
+    margin-top: -3px;
+}
+
+.account{
+    display: flex;
+    flex-direction: column;
+    margin: 0 15px;
+}
+
+.account p:first-child{
+    font-weight: bold;
+}
+
+#myAccount{
+    cursor: pointer;
 }

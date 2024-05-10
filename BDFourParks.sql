@@ -107,15 +107,17 @@ IDMETODOPAGO
 /*==============================================================*/
 /* Table: PARQUEADERO                                           */
 /*==============================================================*/
-create table PARQUEADERO (
-   IDPARQUEADERO        VARCHAR(5)           not null,
-   IDTIPOPARQUEADERO    INT4                 not null,
-   NOMBREPARQUEADERO    VARCHAR(20)          not null,
-   DIRECCION            VARCHAR(40)          not null,
-   CAPACIDADTOTAL       INT4                 not null,
-   CAPACIDADACTUAL      INT4                 not null,
-   NUMEROCONTACTO       INT8                 not null,
-   constraint PK_PARQUEADERO primary key (IDPARQUEADERO)
+CREATE TABLE PARQUEADERO (
+   IDPARQUEADERO        VARCHAR(5)           NOT NULL,
+   IDTIPOPARQUEADERO    INT4                 NOT NULL,
+   NOMBREPARQUEADERO    VARCHAR(20)          NOT NULL,
+   DIRECCION            VARCHAR(40)          NOT NULL,
+   CAPACIDADTOTAL       INT4                 NOT NULL,
+   CAPACIDADACTUAL      INT4                 NOT NULL,
+   NUMEROCONTACTO       INT8                 NOT NULL,
+   LATITUD              DOUBLE PRECISION     NOT NULL,  -- Campo para latitud
+   ALTITUD              DOUBLE PRECISION     NOT NULL,  -- Campo para altitud
+   CONSTRAINT PK_PARQUEADERO PRIMARY KEY (IDPARQUEADERO)
 );
 
 /*==============================================================*/
