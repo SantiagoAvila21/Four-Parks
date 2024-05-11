@@ -1,0 +1,81 @@
+.sidebar{
+    width: 250px; 
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #E0E0E0;
+    position: relative;
+}
+
+.filter{
+    width: 100%;
+    height: 56px;
+    background-color: #3948DF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tipoParqueadero{
+    width: 80%; 
+    height: 100%;
+    padding: 10px;
+    background-color: #3948DF;
+    color: #B0B8CC;
+    border: none;
+    outline: none;
+    font-size: 16px;
+}
+
+.tipoParqueadero:hover{
+    border: 1px solid grey;
+}
+
+#botonAyuda {
+    width: fit-content;
+    position: absolute;
+    bottom: 0;
+    left: calc(250px - 30%);
+    display: flex;
+    flex-direction: row;
+    cursor: pointer;
+}
+
+#botonAyuda > p{
+    font-weight: bold;
+    margin-top: -3px;
+}
+
+.parqueaderos{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.parqueaderos > a{
+    cursor: pointer;
+    margin: 10px;
+}
+
+.parqueaderos-container {
+    margin-top: 20%;
+    max-height: 60%; /* Ajusta esta altura máxima según tus necesidades */
+    overflow-y: auto; /* Muestra una barra de desplazamiento vertical cuando sea necesario */
+}
+
+.parqueaderos-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.parqueaderos-container::-webkit-scrollbar-track {
+    border-radius: 8px;
+    background-color: #e7e7e7;
+    border: 1px solid #cacaca;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
+}
+
+.parqueaderos-container::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background-color: #363636;
+}

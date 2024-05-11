@@ -107,15 +107,17 @@ IDMETODOPAGO
 /*==============================================================*/
 /* Table: PARQUEADERO                                           */
 /*==============================================================*/
-create table PARQUEADERO (
-   IDPARQUEADERO        VARCHAR(5)           not null,
-   IDTIPOPARQUEADERO    INT4                 not null,
-   NOMBREPARQUEADERO    VARCHAR(20)          not null,
-   DIRECCION            VARCHAR(40)          not null,
-   CAPACIDADTOTAL       INT4                 not null,
-   CAPACIDADACTUAL      INT4                 not null,
-   NUMEROCONTACTO       INT8                 not null,
-   constraint PK_PARQUEADERO primary key (IDPARQUEADERO)
+CREATE TABLE PARQUEADERO (
+   IDPARQUEADERO        VARCHAR(5)           NOT NULL,
+   IDTIPOPARQUEADERO    INT4                 NOT NULL,
+   NOMBREPARQUEADERO    VARCHAR(20)          NOT NULL,
+   DIRECCION            VARCHAR(40)          NOT NULL,
+   CAPACIDADTOTAL       INT4                 NOT NULL,
+   CAPACIDADACTUAL      INT4                 NOT NULL,
+   NUMEROCONTACTO       INT8                 NOT NULL,
+   LATITUD              DOUBLE PRECISION     NOT NULL,  -- Campo para latitud
+   ALTITUD              DOUBLE PRECISION     NOT NULL,  -- Campo para altitud
+   CONSTRAINT PK_PARQUEADERO PRIMARY KEY (IDPARQUEADERO)
 );
 
 /*==============================================================*/
@@ -277,10 +279,10 @@ IDTIPOVEHICULO
 create table USUARIO (
    IDUSUARIO            VARCHAR(5)           not null,
    IDTIPOUSUARIO        INT4                 not null,
-   IDTIPODOCUMENTO      VARCHAR(2)           not null,
+   IDTIPODOCUMENTO      VARCHAR(3)           not null,
    NOMBREUSUARIO        VARCHAR(35)          not null,
-   NUMDOCUMENTO         INT8                 not null,
-   CONTRASENIA          VARCHAR(8)           not null,
+   NUMDOCUMENTO         VARCHAR(20)          not null,
+   CONTRASENIA          VARCHAR(40)          not null,
    PUNTOSACUMULADOS     INT4                 not null,
    CORREOELECTRONICO    VARCHAR(35)          null,
    constraint PK_USUARIO primary key (IDUSUARIO)
@@ -412,15 +414,17 @@ alter table VEHICULO
 
 
 /* Inserciones Necesarias */
+/* TIPO USUARIO */
 INSERT INTO tipo_usuario VALUES (1, 'Administrador General');
 INSERT INTO tipo_usuario VALUES (2, 'Administrador de Punto');
 INSERT INTO tipo_usuario VALUES (3, 'Cliente');
 
-
+/* TIPO VEHICULO */
 INSERT INTO tipo_vehiculo VALUES (1, 'Carro');
 INSERT INTO tipo_vehiculo VALUES (2, 'Moto');
 INSERT INTO tipo_vehiculo VALUES (3, 'Bicicleta');
 
+/* TIPO DOCUMENTO */
 INSERT INTO tipo_documento VALUES ('CC', 'Cedula');
 INSERT INTO tipo_documento VALUES ('TI', 'Tarjeta de identidad');
 INSERT INTO tipo_documento VALUES ('TE', 'Tarjeta de Extranjer�a');
@@ -442,7 +446,9 @@ INSERT INTO METODO_PAGO VALUES (2,'PSE');
 INSERT INTO TIPODESCUENTO VALUES (1,'Comun',0);
 INSERT INTO TIPODESCUENTO VALUES (2,'Fidelizacion',1000);
 
-
+/* Insercion usuario de prueba */
+INSERT INTO usuario (idusuario, idtipousuario, idtipodocumento, nombreusuario, numdocumento, contrasenia, puntosacumulados, correoelectronico)
+            VALUES (1, 3, 1, 'usuarioTest', '1000834814', 'admintest', 0, 'test@gmail.com') 
 
 
 

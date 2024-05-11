@@ -1,0 +1,10 @@
+.Home{
+    width: 100vw;
+    height: calc(100vh - 100px);
+}
+
+.contentDiv{
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+}
