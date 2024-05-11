@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import MarkerInfo from "./MarkerInfo";
 import './styles/Markerinfo.css'
 import { useMarkerContext } from "../Context/MarkerProvider";
+import { useParking } from "../Context/ParkingsProvider";
 
 function mapTiler(x, y, z, dpr) {
   return `https://api.maptiler.com/maps/${import.meta.env.VITE_MAP_ID}/256/${z}/${x}/${y}${
@@ -11,9 +12,12 @@ function mapTiler(x, y, z, dpr) {
 }
 
 const MyMap = () => {
+  const parking = useParking();
+  
   const [currentLocation, setCurrentLocation] = useState([0, 0]);
   const [showOverlay, setShowOverlay] = useState(false);
   const [overlayPosition, setOverlayPosition] = useState([0, 0]);
+  const [selectedParking, setSelectedParking] = useState({});
 
   const { selectedMarkerPosition } = useMarkerContext();
 
@@ -23,7 +27,13 @@ const MyMap = () => {
     });
   }, []);
 
-  const handleMarkerClick = (position) => {
+  const handleMarkerClick = (position, parqueaderoInfo) => {
+    setSelectedParking({
+      nombreParqueadero: parqueaderoInfo[2],
+      direccion: parqueaderoInfo[3],
+      tipo: parqueaderoInfo[1],
+      espacioActual: parqueaderoInfo[5]
+    });
     setOverlayPosition(position);
     setShowOverlay(true);
   };
@@ -35,41 +45,19 @@ const MyMap = () => {
       center = {selectedMarkerPosition || currentLocation}
       defaultZoom = {17}
     >
-      <Marker
-        onClick={() => handleMarkerClick([4.62958, -74.065738])}
-        width={40}
-        color={"#F96E08"}
-        anchor={[4.62958, -74.065738]}
-      />
-      <Marker
-        onClick={() => handleMarkerClick([4.60971, -74.08175])}
-        width={40}
-        color={"#F96E08"}
-        anchor={[4.60971, -74.08175]} 
-      />
-      <Marker
-        onClick={() => handleMarkerClick([4.648283, -74.077133])}
-        width={40}
-        color={"#F96E08"}
-        anchor={[4.648283, -74.077133]} 
-      />
-      <Marker
-        onClick={() => handleMarkerClick([4.63615, -74.06856])}
-        width={40}
-        color={"#F96E08"}
-        anchor={[4.63615, -74.06856]} 
-      />
-      <Marker
-        onClick={() => handleMarkerClick([4.60971, -74.06606])}
-        width={40}
-        color={"#F96E08"}
-        anchor={[4.60971, -74.06606]} 
-      />
-
+      {parking.parqueaderos.map((parqueadero) => {
+        return <Marker
+          key={parqueadero[0]}
+          onClick={() => handleMarkerClick([parqueadero[8], parqueadero[7]], parqueadero)}
+          width={40}
+          color={"#F96E08"}
+          anchor={[parqueadero[8], parqueadero[7]]}
+        />
+      })}
       {showOverlay && (
         <Overlay anchor={overlayPosition} offset={[100, 0]}>
           <div onClick={() => setShowOverlay(false)} className="overlay">
-            <MarkerInfo />
+            <MarkerInfo info={selectedParking}/> 
           </div>
         </Overlay>
       )}
