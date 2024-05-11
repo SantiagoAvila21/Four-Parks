@@ -4,18 +4,21 @@ import { Route, Routes } from 'react-router-dom';
 import Login from './components/Pages/Login';
 import Register from './components/Pages/Register'
 import AuthProvider from './Context/AuthProvider';
+import ParkingProvider from './Context/ParkingsProvider';
 
 function App() {
 
   return (
     <div className='App'>
-      <AuthProvider>
-        <Routes>
-          <Route path='/' element={<Home/>} />
-          <Route path='/login' element={<Login/>} />
-          <Route path='/register' element={<Register/>} />
-        </Routes>
-      </AuthProvider>
+      <ParkingProvider>
+        <AuthProvider>
+          <Routes>
+            <Route path='/' element={<Home/>} />
+            <Route path='/login' element={<Login/>} />
+            <Route path='/register' element={<Register/>} />
+          </Routes>
+        </AuthProvider>
+      </ParkingProvider>
     </div>
   )
 }

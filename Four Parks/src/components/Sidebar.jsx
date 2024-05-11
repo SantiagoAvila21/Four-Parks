@@ -3,8 +3,11 @@ import parkImg from '../assets/Parkimg.png'
 import { IoMdHelpCircleOutline } from "react-icons/io";
 import { FaParking } from "react-icons/fa";
 import { useMarkerContext } from '../Context/MarkerProvider';
+import { useParking } from '../Context/ParkingsProvider';
 
 const Sidebar = () => {
+  const parking = useParking();
+
   const handleChange = () => {
     console.log("Holitas");
   }
@@ -29,16 +32,9 @@ const Sidebar = () => {
         
         <div className='parqueaderos-container'>
           <div className="parqueaderos">
-              <a onClick={() => handleMarkerButtonClick([4.62958, -74.065738])}> <FaParking /> Parqueadero 1 </a>
-              <a onClick={() => handleMarkerButtonClick([4.60971, -74.08175])}> <FaParking /> Parqueadero 2 </a>
-              <a onClick={() => handleMarkerButtonClick([4.648283, -74.077133])}> <FaParking /> Parqueadero 3 </a>
-              <a onClick={() => handleMarkerButtonClick([4.63615, -74.06856])}> <FaParking /> Parqueadero 4 </a>
-              <a onClick={() => handleMarkerButtonClick([4.60971, -74.06606])}> <FaParking /> Parqueadero 5 </a>
-              <a onClick={() => handleMarkerButtonClick([4.62958, -74.065738])}> <FaParking /> Parqueadero 1 </a>
-              <a onClick={() => handleMarkerButtonClick([4.60971, -74.08175])}> <FaParking /> Parqueadero 2 </a>
-              <a onClick={() => handleMarkerButtonClick([4.648283, -74.077133])}> <FaParking /> Parqueadero 3 </a>
-              <a onClick={() => handleMarkerButtonClick([4.63615, -74.06856])}> <FaParking /> Parqueadero 4 </a>
-              <a onClick={() => handleMarkerButtonClick([4.60971, -74.06606])}> <FaParking /> Parqueadero 5 </a>
+              {parking.parqueaderos.map((parqueadero) => {
+                return <a key={parqueadero[0]} onClick={() => handleMarkerButtonClick([parqueadero[8], parqueadero[7]])}> <FaParking /> {parqueadero[2]} </a>
+              })}
           </div>
         </div>
 
