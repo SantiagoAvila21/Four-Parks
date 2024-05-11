@@ -12,7 +12,6 @@ const TopBar = () => {
     const { user } = useAuth();
     const [isAccountVisible, setIsAccountVisible] = useState(false);
 
-
     return (
         <div className="topbar">
             <img id="logoTop" src={logoFP} alt="Logo Four Parks" />

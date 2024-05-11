@@ -1,4 +1,4 @@
-import {useContext, createContext, useState} from 'react'
+import { useContext, createContext, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import useNotification from '../components/Hooks/useNotification';
 import axios from 'axios';
@@ -11,8 +11,15 @@ const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
     const {updateNotification} = useNotification();
 
+    useEffect(() => {
+        // Comprobar si hay un usuario almacenado en el localStorage al iniciar la aplicación
+        const userFromLocalStorage = localStorage.getItem("userLogged");
+        if (userFromLocalStorage) {
+            setUser(userFromLocalStorage); // Convertir la cadena JSON almacenada en el localStorage de nuevo a un objeto
+        }
+    }, []);
+
     const loginAction = async (data, cb) => {
-        console.log("Holi");
         try {
             const response = await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/login`, {
               correoelectronico: data.email,
@@ -23,8 +30,9 @@ const AuthProvider = ({ children }) => {
             if(response.status == 200){
                 setUser(response.data.usuario);
                 localStorage.setItem("userLogged", response.data.usuario);
-                navigate("/");
                 cb();
+                // TO DO, despues de verificar el Codigo mandado, se hace el navigate(/);
+                navigate("/");
                 return;
             }
           } catch (error) {
