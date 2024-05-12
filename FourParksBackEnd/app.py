@@ -30,11 +30,11 @@ def get_all_tipodoc():
     with connection:
         with connection.cursor() as cursor:
             cursor.execute(SELECT_ALL_TIPODOC)
-            users = cursor.fetchall()
-            if users:
+            tiposdocs = cursor.fetchall()
+            if tiposdocs:
                 result = []
-                for user in users:
-                    result.append({"id": user[0], "tipodocs": user[1]})
+                for tipodoc in tiposdocs:
+                    result.append({"id": tipodoc[0], "tipodocs": tipodoc[1]})
                     cursor.close()
                 return jsonify(result)
             else:
@@ -290,6 +290,20 @@ def get_parqueaderos():
     finally:
         cur.close()
         conn.close()
+
+@app.route("/api/get_parqueaderos/<idtipoparqueadero>", methods=["GET"])
+def get_parqueaderos_tipo(idtipoparqueadero):
+    connection = psycopg2.connect(url)
+    with connection:
+        with connection.cursor() as cursor:
+            sql_query = "SELECT * FROM parqueadero WHERE idtipoparqueadero = %s"
+            cursor.execute(sql_query, (idtipoparqueadero,))
+            parqueaderos = cursor.fetchall()
+            if parqueaderos:
+                return jsonify(parqueaderos), 200
+            else:
+                cursor.close()
+                return jsonify({"error": f"Parqueaderos no encontrados."}), 404
 
 
 if __name__ == "__main__":
