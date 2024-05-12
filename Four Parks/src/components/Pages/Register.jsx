@@ -142,7 +142,7 @@ const Register = () => {
                         </div>
                     </form>
                 </div>
-                <button id="submitButton" type="submit" onClick={handleSubmit}>Crear Cuenta</button>
+                <button id="submitButton" type="submit" onClick={handleSubmit}>CREAR CUENTA</button>
             </div>
             <ToastContainer />
         </div>

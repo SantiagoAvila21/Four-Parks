@@ -4,6 +4,8 @@ import { IoMdHelpCircleOutline } from "react-icons/io";
 import { FaParking } from "react-icons/fa";
 import { useMarkerContext } from '../Context/MarkerProvider';
 import { useParking } from '../Context/ParkingsProvider';
+import { CircularProgress } from "@mui/material";
+import { useEffect } from 'react';
 
 const Sidebar = () => {
   const parking = useParking();
@@ -18,6 +20,7 @@ const Sidebar = () => {
     setSelectedMarkerPosition(position);
   };
 
+
   return (
     <div className="sidebar">
         <img src={parkImg} alt='Imagen Parqueadero' />
@@ -30,12 +33,20 @@ const Sidebar = () => {
           </select>
         </div>
         
-        <div className='parqueaderos-container'>
-          <div className="parqueaderos">
+        {parking.isLoading && 
+          <div id="loadingDiv">
+            <CircularProgress />
+          </div>
+        }
+
+        <div className='parqueaderos-container' >
+          {!parking.isLoading && 
+            <div className="parqueaderos">
               {parking.parqueaderos.map((parqueadero) => {
                 return <a key={parqueadero[0]} onClick={() => handleMarkerButtonClick([parqueadero[8], parqueadero[7]])}> <FaParking /> {parqueadero[2]} </a>
               })}
-          </div>
+            </div> 
+          }
         </div>
 
         <div id="botonAyuda" className="botonAyuda">

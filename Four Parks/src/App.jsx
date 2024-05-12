@@ -5,6 +5,7 @@ import Login from './components/Pages/Login';
 import Register from './components/Pages/Register'
 import AuthProvider from './Context/AuthProvider';
 import ParkingProvider from './Context/ParkingsProvider';
+import Reserva from './components/Pages/Reserva';
 
 function App() {
 
@@ -16,6 +17,7 @@ function App() {
             <Route path='/' element={<Home/>} />
             <Route path='/login' element={<Login/>} />
             <Route path='/register' element={<Register/>} />
+            <Route path='/reserva' element={<Reserva />} />
           </Routes>
         </AuthProvider>
       </ParkingProvider>

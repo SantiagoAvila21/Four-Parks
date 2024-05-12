@@ -1,5 +1,6 @@
 import './styles/Markerinfo.css'
 import { useAuth } from '../Context/AuthProvider'
+import { Link } from 'react-router-dom';
 
 const MarkerInfo = ({ info }) => {
   const auth = useAuth();
@@ -10,11 +11,11 @@ const MarkerInfo = ({ info }) => {
 
   return (
     <>
-      <h3>{info.nombreParqueadero}</h3>
+      <h4>{info.nombreParqueadero}</h4>
       <p>{info.direccion}</p>
       <p>Tipo: {tipoPark}</p>
       <p>Available Spaces: {info.espacioActual}</p>
-      {auth.user && <button id="btnReservar">Reservar</button>}
+      {auth.user && <Link to='/reserva' state={{nombreParqueadero: info.nombreParqueadero}}><button id="btnReservar">Reservar</button></Link>}
     </>
   )
 }

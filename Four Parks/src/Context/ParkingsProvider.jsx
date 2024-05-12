@@ -5,6 +5,7 @@ const ParkingContext = createContext();
 
 /* eslint-disable react/prop-types */
 const ParkingProvider = ({ children }) => {
+    const [isLoading, setisLoading] = useState(true);
     const [parqueaderos, setParqueaderos] = useState([]);
 
     useEffect(() => {
@@ -15,6 +16,7 @@ const ParkingProvider = ({ children }) => {
                 console.log('Respuesta del servidor:', response);
                 if(response.status == 200){
                     setParqueaderos(response.data);
+                    setisLoading(false);
                     return;
                 }
               } catch (error) {
@@ -24,7 +26,7 @@ const ParkingProvider = ({ children }) => {
     }, []);
 
     return (
-        <ParkingContext.Provider value={{ parqueaderos }} >
+        <ParkingContext.Provider value={{ parqueaderos, isLoading }} >
             {children}
         </ParkingContext.Provider>
     );

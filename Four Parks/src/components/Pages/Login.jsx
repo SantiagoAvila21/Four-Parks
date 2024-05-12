@@ -6,6 +6,7 @@ import Modal from "../Modal";
 import { ToastContainer } from "react-toastify";
 import useNotification from "../Hooks/useNotification";
 import { useAuth } from "../../Context/AuthProvider";
+import { Link } from "react-router-dom";
 
 
 const Login = () => {
@@ -97,6 +98,7 @@ const Login = () => {
                             />
                         </div>
                     </form>
+                    <Link to="/register"> No tienes cuenta? Registrate aquí</Link>
                 </div>
                 <button id="submitButton" type="submit" onClick={handleLogin}>Iniciar sesión</button>
             </div>
