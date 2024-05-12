@@ -1,11 +1,11 @@
 import { useState } from "react";
-import SideLogo from "../SideLogo";
+import SideLogo from "../components/SideLogo";
 import "../styles/Login.css"
 import 'react-toastify/dist/ReactToastify.css';
-import Modal from "../Modal";
+import Modal from "../components/Modal";
 import { ToastContainer } from "react-toastify";
 import useNotification from "../Hooks/useNotification";
-import { useAuth } from "../../Context/AuthProvider";
+import { useAuth } from "../Context/AuthProvider";
 import { Link } from "react-router-dom";
 
 

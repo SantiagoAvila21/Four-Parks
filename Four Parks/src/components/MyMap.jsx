@@ -1,7 +1,7 @@
 import { Map, Marker, Overlay } from "pigeon-maps";
 import { useEffect, useState } from "react";
 import MarkerInfo from "./MarkerInfo";
-import './styles/Markerinfo.css'
+import '../styles/Markerinfo.css'
 import { useMarkerContext } from "../Context/MarkerProvider";
 import { useParking } from "../Context/ParkingsProvider";
 

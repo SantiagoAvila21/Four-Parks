@@ -1,4 +1,4 @@
-import './styles/Sidelogo.css'
+import '../styles/Sidelogo.css'
 import logoFP from '../assets/FourParksLogo.png'
 import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
 import { useNavigate  } from "react-router-dom";

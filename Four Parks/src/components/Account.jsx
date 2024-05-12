@@ -1,4 +1,4 @@
-import './styles/Account.css'
+import '../styles/Account.css'
 import { useAuth } from '../Context/AuthProvider'
 
 const Account = () => {

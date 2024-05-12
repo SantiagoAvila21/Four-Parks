@@ -1,8 +1,8 @@
-import TopBar from "../TopBar"
-import Sidebar from "../Sidebar"
-import MyMap from "../MyMap"
+import TopBar from "../components/TopBar"
+import Sidebar from "../components/Sidebar"
+import MyMap from "../components/MyMap"
 import '../styles/Home.css'
-import { MarkerProvider } from "../../Context/MarkerProvider"
+import { MarkerProvider } from "../Context/MarkerProvider"
 
 const Home = () => {
   return (

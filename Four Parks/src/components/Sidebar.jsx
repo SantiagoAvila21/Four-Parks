@@ -1,11 +1,10 @@
-import './styles/Sidebar.css'
+import '../styles/Sidebar.css'
 import parkImg from '../assets/Parkimg.png'
 import { IoMdHelpCircleOutline } from "react-icons/io";
 import { FaParking } from "react-icons/fa";
 import { useMarkerContext } from '../Context/MarkerProvider';
 import { useParking } from '../Context/ParkingsProvider';
 import { CircularProgress } from "@mui/material";
-import { useEffect } from 'react';
 
 const Sidebar = () => {
   const parking = useParking();

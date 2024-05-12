@@ -1,4 +1,4 @@
-import './styles/Modal.css'
+import '../styles/Modal.css'
 
 /* eslint-disable react/prop-types */
 const Modal = ({ shouldShow, onRequestClose, children }) => {

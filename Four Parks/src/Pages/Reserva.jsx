@@ -1,4 +1,4 @@
-import SideLogo from "../SideLogo";
+import SideLogo from "../components/SideLogo";
 import "../styles/Reserva.css";
 import { ToastContainer } from "react-toastify";
 import dayjs from 'dayjs';
@@ -23,7 +23,7 @@ const Reserva = () => {
             <SideLogo />
             <div className="reserva Page">
                 <h1>RESERVA</h1>
-                <div className="reserva Form">
+                <div className="reserva FormReserva">
                     <form>
                         <div className="reserva info">
                             <label>PARQUEADERO</label>

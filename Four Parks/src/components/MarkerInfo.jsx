@@ -1,7 +1,8 @@
-import './styles/Markerinfo.css'
+import '../styles/Markerinfo.css'
 import { useAuth } from '../Context/AuthProvider'
 import { Link } from 'react-router-dom';
 
+/* eslint-disable react/prop-types */
 const MarkerInfo = ({ info }) => {
   const auth = useAuth();
 

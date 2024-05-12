@@ -1,5 +1,5 @@
 import { useState } from "react";
-import SideLogo from "../SideLogo";
+import SideLogo from "../components/SideLogo";
 import "../styles/Register.css";
 import axios from 'axios';
 import sha1 from 'sha1';

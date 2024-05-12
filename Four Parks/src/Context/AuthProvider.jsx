@@ -1,6 +1,6 @@
 import { useContext, createContext, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
-import useNotification from '../components/Hooks/useNotification';
+import useNotification from '../Hooks/useNotification';
 import axios from 'axios';
 
 const AuthContext = createContext();

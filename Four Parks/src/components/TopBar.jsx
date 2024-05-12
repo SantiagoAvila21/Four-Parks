@@ -1,4 +1,4 @@
-import "./styles/Topbar.css";
+import "../styles/Topbar.css";
 import { Link } from 'react-router-dom';
 import { useState } from "react";
 import logoFP from '../assets/FourParksLogo.png';
