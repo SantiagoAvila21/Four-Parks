@@ -1,13 +1,13 @@
 import { useState } from "react";
 import SideLogo from "../components/SideLogo";
 import "../styles/Register.css";
-import axios from 'axios';
-import sha1 from 'sha1';
 import { ToastContainer } from "react-toastify";
 import useNotification from "../Hooks/useNotification";
+import { useAuth } from "../Context/AuthProvider";
 
 const Register = () => {
 
+    const auth = useAuth();
     const {updateNotification} = useNotification();
 
     const [formulario, setFormulario] = useState({
@@ -15,14 +15,8 @@ const Register = () => {
         apellido: '',
         tipoDoc: '',
         numDoc: '',
-        email: '',
-        password: ''
+        email: ''
     });
-
-    const validatePassword = (password) => {
-        const regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
-        return regex.test(password);
-      };
 
     const handleChangeForm = (event) => {
         const { name, value } = event.target;
@@ -32,7 +26,7 @@ const Register = () => {
         }));
     };
 
-    const handleSubmit = async (event) => {
+    const handleSubmit = (event) => {
         event.preventDefault();
         if(Object.values(formulario).includes('')){
             updateNotification({ type: 'error', message: 'Hay al menos un espacio en blanco' });
@@ -45,30 +39,7 @@ const Register = () => {
             updateNotification({ type: 'error', message: 'Porfavor ingrese un email válido' });
             return;
         }
-
-        if(!validatePassword(formulario.password)){
-            updateNotification({ type: 'error', message: 'La contraseña debe tener al menos 8 caracteres y contener al menos un número, una letra minúscula y una letra mayúscula.' });
-            return;
-        }
-
-        try{
-            const responseRegister = await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/register`, {
-                idtipousuario: "3",
-                idtipodocumento: formulario.tipoDoc,
-                nombreusuario: `${formulario.nombre}_${formulario.apellido}`,
-                numdocumento: formulario.numDoc,
-                contrasenia: sha1(formulario.password),
-                puntosacumulados: 0,
-                correoelectronico: formulario.email
-            });
-            if(responseRegister.status == 201){
-                updateNotification({ type: 'success', message: 'Cuenta creada satisfactoriamente' });
-            }
-            console.log(responseRegister);
-        }catch(error){
-            console.log("Error de la solicitud: ", error.response.data.error)
-            updateNotification({ type: 'error', message: error.response.data.error });
-        }
+        auth.registerAction(formulario);
     }
 
     return (
@@ -128,16 +99,6 @@ const Register = () => {
                                 value={formulario.email} 
                                 onChange={handleChangeForm} 
                                 className="inputForm"
-                            />
-                        </div>
-                        <div className="register info">
-                            <label>CONTRASEÑA</label>
-                            <input 
-                                type="password" 
-                                name="password"
-                                value={formulario.password} 
-                                onChange={handleChangeForm}
-                                className="inputForm"  
                             />
                         </div>
                     </form>

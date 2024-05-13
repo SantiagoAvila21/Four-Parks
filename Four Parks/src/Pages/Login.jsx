@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SideLogo from "../components/SideLogo";
 import "../styles/Login.css"
 import 'react-toastify/dist/ReactToastify.css';
@@ -8,17 +8,21 @@ import useNotification from "../Hooks/useNotification";
 import { useAuth } from "../Context/AuthProvider";
 import { Link } from "react-router-dom";
 
-
 const Login = () => {
+    const { updateNotification } = useNotification();
+    const auth = useAuth();
 
-    const {updateNotification} = useNotification();
+    useEffect(() => {
+        if(auth.state == 'registered') updateNotification({type: "info", message: "Se ha mandado la contraseña al correo proporcionado."});
+
+        auth.setState("");
+    },[]);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showModal, setshowModal] = useState(false);
     const [twoFactorCode, setTwoFactorCode] = useState('');
 
-    const auth = useAuth();
 
     const onChangeEmail = (event) => {
         setEmail(event.target.value);
@@ -54,7 +58,6 @@ const Login = () => {
         event.preventDefault();
         updateNotification({ type: 'success', message: 'Sesión iniciada correctamente!' });
         console.log(twoFactorCode);
-        setshowModal((prev) => !prev);
     }
 
     return (

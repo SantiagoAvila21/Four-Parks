@@ -13,5 +13,5 @@ export const MarkerProvider = ({ children }) => {
   );
 };
 
-
+// eslint-disable-next-line react-refresh/only-export-components
 export const useMarkerContext = () => useContext(MarkerContext);

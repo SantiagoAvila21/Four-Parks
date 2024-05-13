@@ -2,14 +2,49 @@ import os
 import psycopg2
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
+from flask_mail import Mail, Message
 from werkzeug.security import check_password_hash
 from flask_cors import CORS
 import hashlib
+import string
+import secrets
+import random
 
 load_dotenv()
 
 # Create the Flask application
 app = Flask(__name__)
+
+# Configuracion del correo de la aplicacion
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Servidor SMTP de Gmail
+app.config['MAIL_PORT'] = 587  # Puerto SMTP de Gmail
+app.config['MAIL_USE_TLS'] = True  # Habilitar TLS (Transport Layer Security)
+app.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
+app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+
+def generate_password():
+    # Definir los caracteres permitidos para generar la contraseña
+    characters = string.ascii_letters + string.digits
+    
+    # Generar la contraseña aleatoria
+    while True:
+        password = ''.join(secrets.choice(characters) for _ in range(secrets.randbelow(5) + 4))  # Entre 5 y 8 caracteres
+        # Verificar si la contraseña cumple con los requisitos
+        if (any(char.isdigit() for char in password) and  # Al menos un número
+            any(char.isupper() for char in password) and  # Al menos una letra mayúscula
+            any(char.islower() for char in password)):    # Al menos una letra minúscula
+            break
+    
+    return password
+
+# Generar código aleatorio de 6 dígitos
+def generate_verification_code():
+    return ''.join(random.choices(string.digits, k=6))
+
+
+mail = Mail(app)
 CORS(app)
 # Load Database URL from .env
 url = os.getenv("DATABASE_URL")
@@ -44,9 +79,17 @@ def get_all_tipodoc():
 @app.route("/register", methods=["POST"])
 def register():
     try:
+        # Conexion con la BD
         connection = psycopg2.connect(url)
         data = request.get_json()
         cursor = connection.cursor()
+
+        # Verificar si el correo electrónico ya está en uso
+        cursor.execute("SELECT COUNT(*) FROM usuario WHERE correoelectronico = %s", (data['correoelectronico'],))
+        existe_usuario = cursor.fetchone()[0]
+        if existe_usuario > 0:
+            return jsonify({"error": "El correo electrónico ya está en uso"}), 400
+
         # Obtener el número total de usuarios en la tabla usuario
         cursor.execute("SELECT COUNT(idusuario) FROM usuario")
         total_usuarios = cursor.fetchone()[0]
@@ -54,18 +97,32 @@ def register():
         # Calcular el nuevo idusuario
         nuevo_idusuario = 'P' + str(total_usuarios + 1)
 
+        # Se genera la contraseña para el nuevo usuario
+        nueva_contrasenia = generate_password()
+        # Se le hace un hash a esa misma contraseña para subirla a la base de datos
+        contraseniaHashed = hashlib.sha1(nueva_contrasenia.encode()).hexdigest()
+
+        # Se realiza la query en cuestion
         sql_query ="""
             INSERT INTO usuario (idusuario, idtipousuario, idtipodocumento, nombreusuario, numdocumento, contrasenia, puntosacumulados, correoelectronico)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
         values = (nuevo_idusuario, data['idtipousuario'], data['idtipodocumento'], data['nombreusuario'], 
-                    data['numdocumento'], data['contrasenia'], data['puntosacumulados'], data['correoelectronico'])
-        print(values)
+                    data['numdocumento'], contraseniaHashed, data['puntosacumulados'], data['correoelectronico'])
         cursor.execute(sql_query, values)
         connection.commit()
-        # Close the connection
+
+        # Cerrar la Conexion
         cursor.close()
         connection.close()
+
+        # Se manda directamente el correo al nuevo usuario con su contraseña 
+        msg = Message("Nueva Contraseña para Four Parks",
+            sender=os.getenv("MAIL_USERNAME"),
+            recipients=[data['correoelectronico']])
+        msg.body = f'Tu nueva contraseña para el sistema Four Parks es: {nueva_contrasenia}'
+        mail.send(msg)
+
         return jsonify({"message": "Usuario insertado con éxito"}), 201  
     except Exception as e:
         return jsonify({"error": str(e)}), 400
@@ -85,18 +142,57 @@ def login():
 
         cur = conn.cursor()
 
-        # Query to find user by email
+        # Query para encontrar el usuario por correo electronico
         cur.execute("SELECT contrasenia, nombreusuario FROM usuario WHERE correoelectronico = %s", (email,))
         user_password = cur.fetchone()    
         password_hash = hashlib.sha1(password.encode()).hexdigest()
 
         if user_password is None:
             return jsonify({"error": "Usuario no encontrado"}), 404       
-        # Check if the provided password matches the hashed password in the database
+        
+        # Revisamos si la contraseña hasheada es la misma que esta en la Base de Datos
         if password_hash == user_password[0]:
-            return jsonify({"usuario": user_password[1], "message": "Inicio de sesión exitoso"}), 200
+            # Generacion del codigo de verificacion
+            verification_code = generate_verification_code()
+
+            # Subir el codigo de verificacion a la base de datos
+            cur.execute('UPDATE usuario SET codigo = %s WHERE correoelectronico = %s', (verification_code, email))
+
+            msg = Message('Código de verificación', 
+                sender=os.getenv("MAIL_USERNAME"), 
+                recipients=[email])
+            msg.body = f'Su código de verificación es: {verification_code}'
+            mail.send(msg)
+            
+            conn.commit() 
+            return jsonify({"usuario": user_password[1], "message": "Codigo de Verificacion enviado por Correo Electronico"}), 200
         else:
             return jsonify({"error": "Contraseña incorrecta"}), 401
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route('/verify', methods=['POST'])
+def verify():
+    data = request.json
+    email = data.get('correoelectronico')
+    verification_code = data.get('codigo')
+    try:
+        # Connect to the PostgreSQL database
+        conn = psycopg2.connect(url)
+
+        cur = conn.cursor()
+
+        # Verificar si el usuario y el código coinciden
+        cur.execute("SELECT codigo FROM usuario WHERE correoelectronico = %s", (email,))
+        stored_verification_code = cur.fetchone()
+
+        if stored_verification_code and stored_verification_code[0] == verification_code:
+            return {'message': 'Código de verificación correcto.'}, 200
+        else:
+            return {'error': 'Código de verificación incorrecto.'}, 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
@@ -305,8 +401,31 @@ def get_parqueaderos_tipo(idtipoparqueadero):
                 cursor.close()
                 return jsonify({"error": f"Parqueaderos no encontrados."}), 404
 
+@app.route("/api/send_passw/<idusuario>", methods=["GET"])
+def send_passw(idusuario):
+    try:
+        conn = psycopg2.connect(url)
+        cur = conn.cursor()
+        sql_query = "SELECT correoelectronico  FROM usuario WHERE idusuario = %s"
+        cur.execute(sql_query, (idusuario,))
+        correoUser = cur.fetchone()
+        print(correoUser[0]);
+        if correoUser:
+            msg = Message("Hello",
+                    sender=os.getenv("MAIL_USERNAME"),
+                    recipients=[correoUser[0]])
+            msg.body = 'Este es un correo de prueba'
+            mail.send(msg)
+            return jsonify(correoUser), 200
+        else:
+            return jsonify({"Error": "Correo no disponible"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+
 
 if __name__ == "__main__":
     app.run(host='localhost', port=5000, debug=True)
-
-

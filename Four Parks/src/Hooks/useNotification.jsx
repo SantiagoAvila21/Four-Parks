@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 
 const useNotification = (initialNotification) => {
     const defaultNotification = {
-        type: "info",
+        type: "",
         message: "",
         position: "top-right",
         autoClose: 5000,
@@ -23,7 +23,7 @@ const useNotification = (initialNotification) => {
     const { type, message, position, autoClose, hideProgressBar, closeOnClick, pauseOnHover, draggable, progress, theme } = notification;
 
     useEffect(() => {
-        if (type === 'error' || type === 'success') {
+        if (type === 'error' || type === 'success' || type === 'info') {
             toast[type](message, {
                 position,
                 autoClose,
