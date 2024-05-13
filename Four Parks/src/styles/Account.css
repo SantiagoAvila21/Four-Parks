@@ -14,4 +14,9 @@
 
 .accountDiv > h4{
     cursor: pointer;
+    text-align: start;
+}
+
+h4:before{
+    content:"• ";
 }

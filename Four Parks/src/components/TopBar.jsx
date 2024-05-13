@@ -1,4 +1,4 @@
-import "./styles/Topbar.css";
+import "../styles/Topbar.css";
 import { Link } from 'react-router-dom';
 import { useState } from "react";
 import logoFP from '../assets/FourParksLogo.png';
@@ -18,7 +18,7 @@ const TopBar = () => {
             <p id="nombreEmpresa">Four Parks</p>
             {user ? 
                 <div className="infoUser">
-                    <Link style={{ textDecoration: 'none' }} to="/reserva" id="reservaLink">Mis Reservas</Link>
+                    <Link style={{ textDecoration: 'none' }} to="/mis_reservas" id="reservaLink">Mis Reservas</Link>
                     <>
                         <div className="account">
                             <p>Hola, {user.split('_')[0]}</p>

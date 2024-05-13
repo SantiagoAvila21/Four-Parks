@@ -137,18 +137,18 @@ IDTIPOPARQUEADERO
 /*==============================================================*/
 /* Table: RESERVA                                               */
 /*==============================================================*/
-create table RESERVA (
-   NUMRESERVA           VARCHAR(25)          not null,
-   IDVEHICULO           VARCHAR(5)           not null,
-   IDMETODOPAGO         INT4                 not null,
-   IDUSUARIO            VARCHAR(5)           not null,
-   IDPARQUEADERO        VARCHAR(5)           not null,
-   IDTIPODESCUENTO      INT4                 not null,
-   MONTOTOTAL           INT8                 not null,
-   DURACIONESTADIA      INT4                 not null,
-   FECHARESERVA         DATE                 not null,
-   constraint PK_RESERVA primary key (NUMRESERVA)
-);
+   create table RESERVA (
+      NUMRESERVA           VARCHAR(25)          not null,
+      IDVEHICULO           VARCHAR(5)           not null,
+      IDMETODOPAGO         INT4                 not null,
+      IDUSUARIO            VARCHAR(5)           not null,
+      IDPARQUEADERO        VARCHAR(5)           not null,
+      IDTIPODESCUENTO      INT4                 not null,
+      MONTOTOTAL           INT8                 not null,
+      DURACIONESTADIA      INT4                 not null,
+      FECHARESERVA         TIMESTAMP            not null,
+      constraint PK_RESERVA primary key (NUMRESERVA)
+   );
 
 /*==============================================================*/
 /* Index: RESERVA_PK                                            */
@@ -285,6 +285,8 @@ create table USUARIO (
    CONTRASENIA          VARCHAR(40)          not null,
    PUNTOSACUMULADOS     INT4                 not null,
    CORREOELECTRONICO    VARCHAR(35)          null,
+   ESTADO               VARCHAR(25)          not null,
+   FIRST_LOGIN          BOOLEAN              not null
    constraint PK_USUARIO primary key (IDUSUARIO)
 );
 

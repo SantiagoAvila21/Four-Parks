@@ -1,24 +1,27 @@
-import { useState } from "react";
-import SideLogo from "../SideLogo";
+import { useEffect, useState } from "react";
+import SideLogo from "../components/SideLogo";
 import "../styles/Login.css"
 import 'react-toastify/dist/ReactToastify.css';
-import Modal from "../Modal";
+import Modal from "../components/Modal";
 import { ToastContainer } from "react-toastify";
 import useNotification from "../Hooks/useNotification";
-import { useAuth } from "../../Context/AuthProvider";
+import { useAuth } from "../Context/AuthProvider";
 import { Link } from "react-router-dom";
 
-
 const Login = () => {
+    const { updateNotification } = useNotification();
+    const auth = useAuth();
 
-    const {updateNotification} = useNotification();
+    useEffect(() => {
+        if(auth.state == 'registered') updateNotification({type: "info", message: "Se ha mandado la contraseña al correo proporcionado."});
+        auth.setState("");
+    },[]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showModal, setshowModal] = useState(false);
     const [twoFactorCode, setTwoFactorCode] = useState('');
 
-    const auth = useAuth();
 
     const onChangeEmail = (event) => {
         setEmail(event.target.value);
@@ -52,9 +55,12 @@ const Login = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        updateNotification({ type: 'success', message: 'Sesión iniciada correctamente!' });
-        console.log(twoFactorCode);
-        setshowModal((prev) => !prev);
+        if(twoFactorCode == '' || twoFactorCode.length != 6){
+            updateNotification({ type: 'error', message: 'Ingrese el codigo enviado al correo' });
+            return;
+        }
+
+        auth.verifyCode(twoFactorCode, email);
     }
 
     return (

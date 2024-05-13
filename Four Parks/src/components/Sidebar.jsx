@@ -1,17 +1,17 @@
-import './styles/Sidebar.css'
+import '../styles/Sidebar.css'
 import parkImg from '../assets/Parkimg.png'
 import { IoMdHelpCircleOutline } from "react-icons/io";
 import { FaParking } from "react-icons/fa";
 import { useMarkerContext } from '../Context/MarkerProvider';
 import { useParking } from '../Context/ParkingsProvider';
 import { CircularProgress } from "@mui/material";
-import { useEffect } from 'react';
 
 const Sidebar = () => {
   const parking = useParking();
 
-  const handleChange = () => {
-    console.log("Holitas");
+  const handleChange = (event) => {
+    console.log(event.target.value);
+    parking.fetchParqueaderos(event.target.value);
   }
 
   const { setSelectedMarkerPosition } = useMarkerContext();
@@ -26,7 +26,7 @@ const Sidebar = () => {
         <img src={parkImg} alt='Imagen Parqueadero' />
         <div className="filter">
           <select name="tipoParqueadero" defaultValue={""} onChange={handleChange} className="tipoParqueadero">
-            <option value="">Tipo de parqueadero</option>
+            <option value={""}>Tipo de parqueadero</option>
             <option value={"1"}>Cubierto</option>
             <option value={"2"}>Semi-Cubierto</option>
             <option value={"3"}>Descubierto</option>
