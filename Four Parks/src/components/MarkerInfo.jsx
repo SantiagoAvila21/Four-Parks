@@ -16,7 +16,7 @@ const MarkerInfo = ({ info }) => {
       <p>{info.direccion}</p>
       <p>Tipo: {tipoPark}</p>
       <p>Espacios disponibles: {info.espacioActual}</p>
-      {auth.user && <Link to='/reserva' state={{nombreParqueadero: info.nombreParqueadero}}><button id="btnReservar">Reservar</button></Link>}
+      {auth.user && <Link to='/reserva' state={{nombreParqueadero: info.nombreParqueadero}}><button id="btnReservar">RESERVAR</button></Link>}
     </>
   )
 }
