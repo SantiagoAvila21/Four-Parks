@@ -1,14 +1,15 @@
 import os 
 import psycopg2
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from flask_mail import Mail, Message
 from werkzeug.security import check_password_hash
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import hashlib
 import string
 import secrets
 import random
+from payments import *
 
 load_dotenv()
 
@@ -23,6 +24,13 @@ app.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
 app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
+
+mail = Mail(app)
+CORS(app)
+# Load Database URL from .env
+url = os.getenv("DATABASE_URL")
+# Connect to the DB
+connection = psycopg2.connect(url)
 
 def generate_password():
     # Definir los caracteres permitidos para generar la contraseña
@@ -43,13 +51,12 @@ def generate_password():
 def generate_verification_code():
     return ''.join(random.choices(string.digits, k=6))
 
-
-mail = Mail(app)
-CORS(app)
-# Load Database URL from .env
-url = os.getenv("DATABASE_URL")
-# Connect to the DB
-connection = psycopg2.connect(url)
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        res = Response()
+        res.headers['X-Content-Type-Options'] = '*'
+        return res
 
 
 # Define a route for the root URL
@@ -99,6 +106,7 @@ def register():
 
         # Se genera la contraseña para el nuevo usuario
         nueva_contrasenia = generate_password()
+        print(nueva_contrasenia)
         # Se le hace un hash a esa misma contraseña para subirla a la base de datos
         contraseniaHashed = hashlib.sha1(nueva_contrasenia.encode()).hexdigest()
 
@@ -190,11 +198,18 @@ def verify():
         cur = conn.cursor()
 
         # Verificar si el usuario y el código coinciden
-        cur.execute("SELECT codigo, nombreusuario FROM usuario WHERE correoelectronico = %s", (email,))
+        cur.execute("SELECT codigo, nombreusuario, first_login FROM usuario WHERE correoelectronico = %s", (email,))
         stored_verification_code = cur.fetchone()
 
         if stored_verification_code and stored_verification_code[0] == verification_code:
-            return {"usuario": stored_verification_code[1], 'message': 'Código de verificación correcto.'}, 200
+            # Actualizar el campo first_login en la base de datos
+            first_log = stored_verification_code[2] 
+            print(first_log, "----")
+            if(first_log):
+                cur.execute("UPDATE usuario SET first_login = %s WHERE correoelectronico = %s", (False, email))
+                conn.commit()
+
+            return {"primerLog": first_log, "usuario": stored_verification_code[1] , 'message': 'Código de verificación correcto.'}, 200
         else:
             return {'error': 'Código de verificación incorrecto.'}, 400
     except Exception as e:
@@ -300,6 +315,69 @@ def crear_parqueadero():
         cur.close()
         conn.close()
         return jsonify({"error": str(e)}), 400
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route("/modificar_parqueadero", methods=["POST"])
+def modificar_parqueadero():
+    try:
+        # Connect to the PostgreSQL database
+        conn = psycopg2.connect(url)
+        cur = conn.cursor()
+        data = request.get_json()
+
+        # SQL query to update data into the parqueadero table
+        sql_query = "UPDATE parqueadero SET capacidadtotal = %s, capacidadactual = %s WHERE idparqueadero = %s"
+
+        values = (
+            data['capacidadtotal'], data['capacidadactual'],data['idparqueadero']
+        )
+        # Execute the query
+        cur.execute(sql_query, values)
+        conn.commit()
+        
+        cur.close()
+        conn.close()
+
+        return jsonify({"message": "Parqueadero modificado con éxito"}), 201
+    except Exception as e:
+        cur.close()
+        conn.close()
+        return jsonify({"error": str(e)}), 400
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route("/pago_tarjeta", methods=["POST"])
+def pago_tarjeta():
+    try:
+        # Connect to the PostgreSQL database
+        #conn = psycopg2.connect(url)
+        #cur = conn.cursor()
+        data = request.get_json()
+
+        # SQL query to update data into the parqueadero table
+        #sql_query = ""
+
+        #values = (
+        #    data['capacidadtotal'], data['capacidadactual'],data['idparqueadero']
+        #)
+        # Execute the query
+        #cur.execute(sql_query, values)
+        #conn.commit()
+        ntarjeta = data['numtarjeta']
+        print(ntarjeta)
+        
+        respuesta = process_payment(data['nombre'], ntarjeta, data['f_expiracion'], data['security_code'], data['email'])
+        print(respuesta)
+
+        return respuesta, 201
+    except Exception as e:
+        #cur.close()
+        #conn.close()
+        return jsonify({"error": str(e)}), 400
+
 
 @app.route("/api/get_usuario/<idusuario>", methods=["GET"])
 def get_usuario(idusuario):
@@ -405,29 +483,36 @@ def get_parqueaderos_tipo(idtipoparqueadero):
                 cursor.close()
                 return jsonify({"error": f"Parqueaderos no encontrados."}), 404
 
-@app.route("/api/send_passw/<idusuario>", methods=["GET"])
-def send_passw(idusuario):
+@app.route("/api/cambiar_contrasenia", methods=["PUT"])
+def cambiar_contrasenia():
     try:
         conn = psycopg2.connect(url)
         cur = conn.cursor()
-        sql_query = "SELECT correoelectronico  FROM usuario WHERE idusuario = %s"
-        cur.execute(sql_query, (idusuario,))
-        correoUser = cur.fetchone()
-        print(correoUser[0]);
-        if correoUser:
-            msg = Message("Hello",
-                    sender=os.getenv("MAIL_USERNAME"),
-                    recipients=[correoUser[0]])
-            msg.body = 'Este es un correo de prueba'
-            mail.send(msg)
-            return jsonify(correoUser), 200
-        else:
-            return jsonify({"Error": "Correo no disponible"}), 404
+        data = request.get_json()
+        correo = data['correoelectronico']
+        contrasenia = data['contrasenia']
+
+        print(correo, contrasenia)
+
+        # Hashear la nueva contraseña y ponerla en la base de datos
+        new_password_hash = hashlib.sha1(contrasenia.encode()).hexdigest()
+
+
+        sql_query = "UPDATE usuario SET contrasenia = %s WHERE correoelectronico = %s"
+        cur.execute(sql_query, (new_password_hash,correo,))
+        conn.commit();
+
+        # Solucionado el problema de CORS usando Access-Control-Allow-Origin
+        return jsonify({"success": f"Contraseña cambiada correctamente"}), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
         cur.close()
         conn.close()
+
+
+
 
 
 

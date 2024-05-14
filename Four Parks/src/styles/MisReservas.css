@@ -1,0 +1,29 @@
+.MisReservas{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.misReservas{
+    display: flex;
+    flex-direction: column;
+}
+
+.Page{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+h1{
+    text-align: center;
+}
+
+h1 span{
+    font-weight: bolder;
+    display: block;
+}

@@ -11,10 +11,7 @@ const ParkingProvider = ({ children }) => {
     const fetchParqueaderos = async (tipo) => {
         setisLoading(true);
         try {
-            console.log(`${import.meta.env.VITE_FLASK_SERVER_URL}/api/get_parqueaderos/${tipo}`);
             const response = await axios.get(`${import.meta.env.VITE_FLASK_SERVER_URL}/api/get_parqueaderos/${tipo}`);
-      
-            console.log('Respuesta del servidor:', response);
             if(response.status == 200){
                 setParqueaderos(response.data);
                 setisLoading(false);
