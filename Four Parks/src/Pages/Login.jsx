@@ -76,6 +76,7 @@ const Login = () => {
                         onChange={onChangeCode}
                         className="inputForm"  
                         placeholder="Código 6 digitos"
+                        maxLength={6}
                     />
                     <button id="submitButton" type="submit" onClick={handleSubmit}>Verificar</button>
                 </div>

@@ -6,6 +6,8 @@ import Register from './Pages/Register'
 import AuthProvider from './Context/AuthProvider';
 import ParkingProvider from './Context/ParkingsProvider';
 import Reserva from './Pages/Reserva';
+import CreditRegister from './Pages/CreditRegister'
+import MisReservas from './Pages/MisReservas';
 
 function App() {
 
@@ -18,6 +20,8 @@ function App() {
             <Route path='/login' element={<Login/>} />
             <Route path='/register' element={<Register/>} />
             <Route path='/reserva' element={<Reserva />} />
+            <Route path='/mis_reservas' element={<MisReservas />} />
+            <Route path='/crear_tarjeta' element={<CreditRegister />}></Route>
           </Routes>
         </AuthProvider>
       </ParkingProvider>

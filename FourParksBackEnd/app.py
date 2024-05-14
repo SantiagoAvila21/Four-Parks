@@ -197,7 +197,6 @@ def verify():
         cur.execute("SELECT codigo, nombreusuario, first_login FROM usuario WHERE correoelectronico = %s", (email,))
         stored_verification_code = cur.fetchone()
 
-<<<<<<< HEAD
         if stored_verification_code and stored_verification_code[0] == verification_code:
             # Actualizar el campo first_login en la base de datos
             first_log = stored_verification_code[2] 
@@ -207,10 +206,6 @@ def verify():
                 conn.commit()
 
             return {"primerLog": first_log, "usuario": stored_verification_code[1] , 'message': 'Código de verificación correcto.'}, 200
-=======
-        if int(stored_verification_code[0]) == int(verification_code):
-            return {"usuario": stored_verification_code[1], 'message': 'Código de verificación correcto.'}, 200
->>>>>>> BackendDev
         else:
             return {'error': 'Código de verificación incorrecto.'}, 400
     except Exception as e:
@@ -513,12 +508,9 @@ def cambiar_contrasenia():
         conn.close()
 
 
-<<<<<<< HEAD
-=======
 
 
 
 
->>>>>>> BackendDev
 if __name__ == "__main__":
     app.run(host='localhost', port=5000, debug=True)
