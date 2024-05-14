@@ -153,7 +153,7 @@ def login():
         # Revisamos si la contraseña hasheada es la misma que esta en la Base de Datos
         if password_hash == user_password[0]:
             # Actualizar el campo first_login en la base de datos
-            cur.execute("UPDATE usuario SET first_ login = %s WHERE correoelectronico = %s", (False, email))
+            cur.execute("UPDATE usuario SET first_login = %s WHERE correoelectronico = %s", (False, email))
             conn.commit()
 
             # Generacion del codigo de verificacion
