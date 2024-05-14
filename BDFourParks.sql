@@ -323,6 +323,22 @@ create table VEHICULO (
 );
 
 /*==============================================================*/
+/* Table: TARJETACREDITO                                              */
+/*==============================================================*/
+CREATE TABLE TARJETACREDITO (
+   IDTARJETA            SERIAL               NOT NULL,
+   IDUSUARIO            VARCHAR(5)           NOT NULL,
+   NUMTARJETA           VARCHAR(16)          NOT NULL,
+   FECHAVENCIMIENTO     VARCHAR(5)           NOT NULL,
+   CODIGOSEGURIDAD      VARCHAR(5)           NOT NULL,
+   CONSTRAINT PK_TARJETACREDITO PRIMARY KEY (IDTARJETA),
+   CONSTRAINT FK_TARJETACREDITO_USUARIO FOREIGN KEY (IDUSUARIO)
+      REFERENCES USUARIO (IDUSUARIO)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE
+);
+
+/*==============================================================*/
 /* Index: VEHICULO_PK                                           */
 /*==============================================================*/
 create unique index VEHICULO_PK on VEHICULO (
@@ -449,7 +465,3 @@ INSERT INTO TIPODESCUENTO VALUES (2,'Fidelizacion',1000);
 /* Insercion usuario de prueba */
 INSERT INTO usuario (idusuario, idtipousuario, idtipodocumento, nombreusuario, numdocumento, contrasenia, puntosacumulados, correoelectronico)
             VALUES (1, 3, 1, 'usuarioTest', '1000834814', 'admintest', 0, 'test@gmail.com') 
-
-
-
-
