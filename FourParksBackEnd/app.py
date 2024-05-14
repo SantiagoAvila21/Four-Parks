@@ -104,11 +104,11 @@ def register():
 
         # Se realiza la query en cuestion
         sql_query ="""
-            INSERT INTO usuario (idusuario, idtipousuario, idtipodocumento, nombreusuario, numdocumento, contrasenia, puntosacumulados, correoelectronico)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO usuario (idusuario, idtipousuario, idtipodocumento, nombreusuario, numdocumento, contrasenia, puntosacumulados, correoelectronico, estado, first_login)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
         values = (nuevo_idusuario, data['idtipousuario'], data['idtipodocumento'], data['nombreusuario'], 
-                    data['numdocumento'], contraseniaHashed, data['puntosacumulados'], data['correoelectronico'])
+                    data['numdocumento'], contraseniaHashed, data['puntosacumulados'], data['correoelectronico'], 'unlocked', True)
         cursor.execute(sql_query, values)
         connection.commit()
 
@@ -143,7 +143,7 @@ def login():
         cur = conn.cursor()
 
         # Query para encontrar el usuario por correo electronico
-        cur.execute("SELECT contrasenia, nombreusuario FROM usuario WHERE correoelectronico = %s", (email,))
+        cur.execute("SELECT contrasenia FROM usuario WHERE correoelectronico = %s", (email,))
         user_password = cur.fetchone()    
         password_hash = hashlib.sha1(password.encode()).hexdigest()
 
@@ -152,6 +152,10 @@ def login():
         
         # Revisamos si la contraseña hasheada es la misma que esta en la Base de Datos
         if password_hash == user_password[0]:
+            # Actualizar el campo first_login en la base de datos
+            cur.execute("UPDATE usuario SET first_login = %s WHERE correoelectronico = %s", (False, email))
+            conn.commit()
+
             # Generacion del codigo de verificacion
             verification_code = generate_verification_code()
 
@@ -165,7 +169,7 @@ def login():
             mail.send(msg)
             
             conn.commit() 
-            return jsonify({"usuario": user_password[1], "message": "Codigo de Verificacion enviado por Correo Electronico"}), 200
+            return jsonify({"message": "Codigo de Verificacion enviado por Correo Electronico"}), 200
         else:
             return jsonify({"error": "Contraseña incorrecta"}), 401
     except Exception as e:
@@ -186,11 +190,11 @@ def verify():
         cur = conn.cursor()
 
         # Verificar si el usuario y el código coinciden
-        cur.execute("SELECT codigo FROM usuario WHERE correoelectronico = %s", (email,))
+        cur.execute("SELECT codigo, nombreusuario FROM usuario WHERE correoelectronico = %s", (email,))
         stored_verification_code = cur.fetchone()
 
         if stored_verification_code and stored_verification_code[0] == verification_code:
-            return {'message': 'Código de verificación correcto.'}, 200
+            return {"usuario": stored_verification_code[1], 'message': 'Código de verificación correcto.'}, 200
         else:
             return {'error': 'Código de verificación incorrecto.'}, 400
     except Exception as e:

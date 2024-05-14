@@ -285,6 +285,8 @@ create table USUARIO (
    CONTRASENIA          VARCHAR(40)          not null,
    PUNTOSACUMULADOS     INT4                 not null,
    CORREOELECTRONICO    VARCHAR(35)          null,
+   ESTADO               VARCHAR(25)          not null,
+   FIRST_LOGIN          BOOLEAN              not null
    constraint PK_USUARIO primary key (IDUSUARIO)
 );
 

@@ -14,9 +14,8 @@ const Login = () => {
 
     useEffect(() => {
         if(auth.state == 'registered') updateNotification({type: "info", message: "Se ha mandado la contraseña al correo proporcionado."});
-
         auth.setState("");
-    },[]);
+    },[]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -56,8 +55,12 @@ const Login = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        updateNotification({ type: 'success', message: 'Sesión iniciada correctamente!' });
-        console.log(twoFactorCode);
+        if(twoFactorCode == '' || twoFactorCode.length != 6){
+            updateNotification({ type: 'error', message: 'Ingrese el codigo enviado al correo' });
+            return;
+        }
+
+        auth.verifyCode(twoFactorCode, email);
     }
 
     return (
