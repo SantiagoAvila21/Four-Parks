@@ -110,7 +110,7 @@ IDMETODOPAGO
 CREATE TABLE PARQUEADERO (
    IDPARQUEADERO        VARCHAR(5)           NOT NULL,
    IDTIPOPARQUEADERO    INT4                 NOT NULL,
-   NOMBREPARQUEADERO    VARCHAR(20)          NOT NULL,
+   NOMBREPARQUEADERO    VARCHAR(40)          NOT NULL,
    DIRECCION            VARCHAR(40)          NOT NULL,
    CAPACIDADTOTAL       INT4                 NOT NULL,
    CAPACIDADACTUAL      INT4                 NOT NULL,
@@ -286,9 +286,19 @@ create table USUARIO (
    PUNTOSACUMULADOS     INT4                 not null,
    CORREOELECTRONICO    VARCHAR(35)          null,
    ESTADO               VARCHAR(25)          not null,
-   FIRST_LOGIN          BOOLEAN              not null
+   FIRST_LOGIN          BOOLEAN              not null,
    constraint PK_USUARIO primary key (IDUSUARIO)
 );
+
+ALTER TABLE USUARIO
+ADD COLUMN first_time_login TYPE BOOLEAN;
+
+ALTER TABLE USUARIO
+ADD COLUMN estado TYPE VARCHAR(25);
+
+ALTER TABLE USUARIO
+ADD COLUMN codigo TYPE INT4;
+
 
 /*==============================================================*/
 /* Index: USUARIO_PK                                            */
@@ -467,3 +477,26 @@ INSERT INTO TIPODESCUENTO VALUES (2,'Fidelizacion',1000);
 /* Insercion usuario de prueba */
 INSERT INTO usuario (idusuario, idtipousuario, idtipodocumento, nombreusuario, numdocumento, contrasenia, puntosacumulados, correoelectronico)
             VALUES (1, 3, 1, 'usuarioTest', '1000834814', 'admintest', 0, 'test@gmail.com') 
+
+
+
+/* Insercion parqueaderos de prueba*/
+
+INSERT INTO parqueadero (idparqueadero,	idtipoparqueadero,	nombreparqueadero,	direccion,	capacidadtotal,	capacidadactual,	numerocontacto,	latitud,	altitud)
+VALUES('BOG1',	3,	'PARQUEADERO AEROPUERTO EL DORADO',	'CLL 26 # 106 - 66',	100,	100,	3131668044,	'-74.1348896154789',	'4.693187758201357');
+
+INSERT INTO parqueadero (idparqueadero,	idtipoparqueadero,	nombreparqueadero,	direccion,	capacidadtotal,	capacidadactual,	numerocontacto,	latitud,	altitud)
+VALUES('BOG2',	1,	'PARQUEADERO PARQUE DE LA MARIPOSA',	'CRA 13 #12 - 07'	,20	,20,	3134768967,	'-74.07930625561139'	,'4.6021448287362166');
+
+INSERT INTO parqueadero (idparqueadero,	idtipoparqueadero,	nombreparqueadero,	direccion,	capacidadtotal,	capacidadactual,	numerocontacto,	latitud,	altitud)
+VALUES('BOG3'	,1,	'PARQUEADERO UNIVERSIDAD JAVERIANA'	,'CLL 40 #6-23',	60,	60,	3130453245,	'-74.06472100491534',	'4.62672965021939');
+
+INSERT INTO parqueadero (idparqueadero,	idtipoparqueadero,	nombreparqueadero,	direccion,	capacidadtotal,	capacidadactual,	numerocontacto,	latitud,	altitud)
+VALUES('BOG4',	2	,'PARQUEADERO CLÍNICA REINA SOFIA'	,'CLL 127 Bis #21-5'	,20	,20	,3134852164,	'-74.0515939976776'	,'4.707234012206489');
+
+INSERT INTO parqueadero (idparqueadero,	idtipoparqueadero,	nombreparqueadero,	direccion,	capacidadtotal,	capacidadactual,	numerocontacto,	latitud,	altitud)
+VALUES('BOG5',	3	,'PARQUEADERO PORTAL 80'	,'CRA 102 #80 - 41'	,30	,30	,3133113651,	'-74.11336810357136',	'4.712087277498989');
+
+
+
+

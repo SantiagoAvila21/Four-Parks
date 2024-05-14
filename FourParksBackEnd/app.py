@@ -9,6 +9,7 @@ import hashlib
 import string
 import secrets
 import random
+from payments import *
 
 load_dotenv()
 
@@ -105,6 +106,7 @@ def register():
 
         # Se genera la contraseña para el nuevo usuario
         nueva_contrasenia = generate_password()
+        print(nueva_contrasenia)
         # Se le hace un hash a esa misma contraseña para subirla a la base de datos
         contraseniaHashed = hashlib.sha1(nueva_contrasenia.encode()).hexdigest()
 
@@ -195,6 +197,7 @@ def verify():
         cur.execute("SELECT codigo, nombreusuario, first_login FROM usuario WHERE correoelectronico = %s", (email,))
         stored_verification_code = cur.fetchone()
 
+<<<<<<< HEAD
         if stored_verification_code and stored_verification_code[0] == verification_code:
             # Actualizar el campo first_login en la base de datos
             first_log = stored_verification_code[2] 
@@ -204,6 +207,10 @@ def verify():
                 conn.commit()
 
             return {"primerLog": first_log, "usuario": stored_verification_code[1] , 'message': 'Código de verificación correcto.'}, 200
+=======
+        if int(stored_verification_code[0]) == int(verification_code):
+            return {"usuario": stored_verification_code[1], 'message': 'Código de verificación correcto.'}, 200
+>>>>>>> BackendDev
         else:
             return {'error': 'Código de verificación incorrecto.'}, 400
     except Exception as e:
@@ -309,6 +316,69 @@ def crear_parqueadero():
         cur.close()
         conn.close()
         return jsonify({"error": str(e)}), 400
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route("/modificar_parqueadero", methods=["POST"])
+def modificar_parqueadero():
+    try:
+        # Connect to the PostgreSQL database
+        conn = psycopg2.connect(url)
+        cur = conn.cursor()
+        data = request.get_json()
+
+        # SQL query to update data into the parqueadero table
+        sql_query = "UPDATE parqueadero SET capacidadtotal = %s, capacidadactual = %s WHERE idparqueadero = %s"
+
+        values = (
+            data['capacidadtotal'], data['capacidadactual'],data['idparqueadero']
+        )
+        # Execute the query
+        cur.execute(sql_query, values)
+        conn.commit()
+        
+        cur.close()
+        conn.close()
+
+        return jsonify({"message": "Parqueadero modificado con éxito"}), 201
+    except Exception as e:
+        cur.close()
+        conn.close()
+        return jsonify({"error": str(e)}), 400
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route("/pago_tarjeta", methods=["POST"])
+def pago_tarjeta():
+    try:
+        # Connect to the PostgreSQL database
+        #conn = psycopg2.connect(url)
+        #cur = conn.cursor()
+        data = request.get_json()
+
+        # SQL query to update data into the parqueadero table
+        #sql_query = ""
+
+        #values = (
+        #    data['capacidadtotal'], data['capacidadactual'],data['idparqueadero']
+        #)
+        # Execute the query
+        #cur.execute(sql_query, values)
+        #conn.commit()
+        ntarjeta = data['numtarjeta']
+        print(ntarjeta)
+        
+        respuesta = process_payment(data['nombre'], ntarjeta, data['f_expiracion'], data['security_code'], data['email'])
+        print(respuesta)
+
+        return respuesta, 201
+    except Exception as e:
+        #cur.close()
+        #conn.close()
+        return jsonify({"error": str(e)}), 400
+
 
 @app.route("/api/get_usuario/<idusuario>", methods=["GET"])
 def get_usuario(idusuario):
@@ -443,5 +513,12 @@ def cambiar_contrasenia():
         conn.close()
 
 
+<<<<<<< HEAD
+=======
+
+
+
+
+>>>>>>> BackendDev
 if __name__ == "__main__":
     app.run(host='localhost', port=5000, debug=True)
