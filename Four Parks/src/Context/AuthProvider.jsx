@@ -16,7 +16,7 @@ const AuthProvider = ({ children }) => {
     useEffect(() => {
         const userFromLocalStorage = localStorage.getItem("userLogged");
         if (userFromLocalStorage) {
-            setUser(userFromLocalStorage); // Convertir la cadena JSON almacenada en el localStorage de nuevo a un objeto
+            setUser(JSON.parse(userFromLocalStorage)); // Convertir la cadena JSON almacenada en el localStorage de nuevo a un objeto
         }
     }, []);
 
@@ -66,10 +66,14 @@ const AuthProvider = ({ children }) => {
                 // Cerrar la notificación de carga
                 closeNoti();
                 // Establecer el usuario y almacenarlo en el almacenamiento local
-                setUser(response.data.usuario);
-                localStorage.setItem("userLogged", response.data.usuario);
+                setUser({usuario: response.data.usuario, correo: email});
+                localStorage.setItem("userLogged", JSON.stringify({usuario: response.data.usuario, correo: email}));
                 // Cambiar el estado de la aplicación a "logged"
-                setState('logged');
+                console.log(response.data.primerLog);
+                if(response.data.primerLog) {
+                    setState('first_logged');
+                    console.log("Cambio el estado a first_logged");
+                } else setState('logged');
                 // Redirigir a la página de inicio
                 navigate("/");
                 return;
@@ -115,6 +119,37 @@ const AuthProvider = ({ children }) => {
         }
     }
 
+    // Funcion para cambiar la contraseña del usuario
+    const changePassw = async (data, cb) => {
+        // Notificación de carga mientras se procesa la solicitud
+        updateNotification({type: 'loading', message: 'Cargando...'});
+        try {
+            console.log(data);
+            // Realizar la solicitud de verificación al servidor
+            const response = await axios.put(`${import.meta.env.VITE_FLASK_SERVER_URL}/api/cambiar_contrasenia`, {
+                "correoelectronico": data.email,
+                "contrasenia": data.password
+            });
+
+            console.log(response);
+            // Si la verificación es exitosa
+            if(response.status == 200){
+                // Cerrar la notificación de carga
+                closeNoti();
+                cb();
+                // Notificación de success mientras se procesa la solicitud
+                updateNotification({type: 'success', message: 'Contraseña cambiada con exito'});
+                return;
+            }
+        } catch (error) {
+            // Cerrar la notificación de carga en caso de error
+            closeNoti();
+            console.error("Error de la solicitud: ", error.response.data.error)
+            // Actualizar la notificación con el error recibido
+            updateNotification({ type: 'error', message: error.response.data.error });
+        }
+    }
+
     // Función para cerrar sesión del usuario
     const logOut = () => {
         // Eliminar la información del usuario del almacenamiento local
@@ -125,7 +160,7 @@ const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value = {{ user, loginAction, logOut, registerAction, state, setState, verifyCode }}>
+        <AuthContext.Provider value = {{ user, loginAction, logOut, registerAction, state, setState, verifyCode, changePassw }}>
             {children}
         </AuthContext.Provider>
     );

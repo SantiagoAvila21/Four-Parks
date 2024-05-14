@@ -65,7 +65,7 @@ const Login = () => {
 
     return (
         <div className="Login">
-            <Modal shouldShow={showModal} onRequestClose={() => {
+            <Modal shouldShow={showModal} close onRequestClose={() => {
                     setshowModal((prev) => !prev);
             }}>
                 <div className="twoFactor">

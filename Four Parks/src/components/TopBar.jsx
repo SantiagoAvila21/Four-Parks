@@ -21,7 +21,7 @@ const TopBar = () => {
                     <Link style={{ textDecoration: 'none' }} to="/mis_reservas" id="reservaLink">Mis Reservas</Link>
                     <>
                         <div className="account">
-                            <p>Hola, {user.split('_')[0]}</p>
+                            <p>Hola, {user.usuario.split('_')[0]}</p>
                             <p id="myAccount" onClick={() => setIsAccountVisible((prev) => !prev)}> Mi cuenta {isAccountVisible ? <IoIosArrowUp /> : <IoIosArrowDown />} </p>
                             {isAccountVisible && <Account />}
                         </div>
