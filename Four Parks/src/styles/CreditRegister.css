@@ -7,7 +7,7 @@
     justify-content: center;
 }
 
-.Form.paymentForm{
+.Form{
     width: 400px;
     height: fit-content;
     background-color: #FFBC4B;
@@ -57,4 +57,33 @@ h1 span{
 
 #submitButton:hover{
     background-color: blue;
+}
+
+
+#radioButtonDebito{
+    margin-left: 20px;
+}
+
+.radioDiv{
+	position: relative;
+	margin-bottom: 30px;
+    margin-left:25px;
+	display: block;
+}
+ 
+/* Estas reglas se aplicarán a todos las elementos i después de cualquier input*/
+.radioDiv input + i{
+ background: #f0f0f0;
+ border:2px solid rgba(11, 221, 221, 0.2);
+ position: absolute; 
+ left: 0;
+ top: 0;
+}
+ 
+/* Estas reglas se aplicarán a todos los i despues de un input de tipo radio*/
+.radioDiv input[type=radio] + i{
+ height: 30px;
+ width: 30px;
+ border-radius: 100%;
+ left: 15px;
 }

@@ -3,7 +3,6 @@ import SideLogo from "../components/SideLogo";
 import "../styles/CreditRegister.css";
 import { ToastContainer } from "react-toastify";
 import useNotification from "../Hooks/useNotification";
-import Radio from '@mui/material/Radio';
 import { FaUser, FaCreditCard, FaCcVisa, FaCcMastercard } from "react-icons/fa";
 
 const CreditRegister = () => {
@@ -11,20 +10,21 @@ const CreditRegister = () => {
     const [formData, setFormData] = useState({
         cardholderName: '',
         cardNumber: '',
-        cardType: '',
+        cardBrand: '',
+        cardType: 'credito',
         expirationDate: '',
         securityCode: '',
         email: ''
     });
 
     // Función para detectar el tipo de tarjeta
-    const detectCardType = (cardNumber) => {
+    const detectCardBrand = (cardNumber) => {
         if (/^4/.test(cardNumber)) {
-            setFormData(prevState => ({ ...prevState, cardType: 'Visa' }));
+            setFormData(prevState => ({ ...prevState, cardBrand: 'Visa' }));
         } else if (/^5[1-5]/.test(cardNumber)) {
-            setFormData(prevState => ({ ...prevState, cardType: 'Mastercard' }));
+            setFormData(prevState => ({ ...prevState, cardBrand: 'Mastercard' }));
         } else {
-            setFormData(prevState => ({ ...prevState, cardType: '' }));
+            setFormData(prevState => ({ ...prevState, cardBrand: '' }));
         }
     };
 
@@ -43,10 +43,12 @@ const CreditRegister = () => {
             [name]: value
         }));
 
+        console.log(formData);
+
         if (name === 'cardNumber') {
             const formattedInput = formatCardNumber(value);
             setFormData(prevState => ({ ...prevState, cardNumber: formattedInput }));
-            detectCardType(formattedInput);
+            detectCardBrand(formattedInput);
         }
     };
 
@@ -105,28 +107,33 @@ const CreditRegister = () => {
                         <div className="register info" style={{ position: 'relative' }}>
                             <label>NÚMERO DE TARJETA</label>
                             <input type="text" name="cardNumber" value={formData.cardNumber} onChange={handleChange} className="inputForm" style={{ paddingLeft: '30px' }} maxLength={18}/>
-                            {formData.cardType === 'Visa' && <FaCcVisa style={{ position: 'absolute', left: '5px', top: '52%', transform: 'translateY(-50%)' }} />}
-                            {formData.cardType === 'Mastercard' && <FaCcMastercard style={{ position: 'absolute', left: '5px', top: '52%', transform: 'translateY(-50%)' }} />}
-                            {!formData.cardType && <FaCreditCard style={{ position: 'absolute', left: '5px', top: '52%', transform: 'translateY(-50%)' }} />}
+                            {formData.cardBrand === 'Visa' && <FaCcVisa style={{ position: 'absolute', left: '5px', top: '52%', transform: 'translateY(-50%)' }} />}
+                            {formData.cardBrand === 'Mastercard' && <FaCcMastercard style={{ position: 'absolute', left: '5px', top: '52%', transform: 'translateY(-50%)' }} />}
+                            {!formData.cardBrand && <FaCreditCard style={{ position: 'absolute', left: '5px', top: '52%', transform: 'translateY(-50%)' }} />}
                         </div>
-                        <div>
-                            <label>TIPO DE TARJETA</label>
-                            <Radio
-                                checked={formData.cardType === 'a'}
-                                onChange={handleChange}
-                                value="a"
-                                name="radio-buttons"
-                                label="jaja"
-                                inputProps={{ 'aria-label': 'A' }}
-                            />
-                            <Radio
-                                checked={formData.cardType === 'b'}
-                                onChange={handleChange}
-                                value="b"
-                                name="radio-buttons"
-                                label="jaja2"
-                                inputProps={{ 'aria-label': 'B' }}
-                            />
+                        <div className="radioDiv">
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="cardType"
+                                    value="credito"
+                                    id="radioButtonCredito"
+                                    checked={formData.cardType === "credito"}
+                                    onChange={handleChange}
+                                /> Crédito
+                                <i/>    
+                            </label>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="cardType"
+                                    value="debito"
+                                    id="radioButtonDebito"
+                                    checked={formData.cardType === "debito"}
+                                    onChange={handleChange}
+                                /> Débito
+                                <i />
+                            </label>
                         </div>
                         <div className="register info">
                             <label>FECHA DE VENCIMIENTO</label>
