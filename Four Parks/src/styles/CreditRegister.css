@@ -59,6 +59,10 @@ h1 span{
     background-color: blue;
 }
 
+.numberCard{
+    margin-bottom: 0;
+}
+
 
 #radioButtonDebito{
     margin-left: 20px;
@@ -70,20 +74,31 @@ h1 span{
     margin-left:25px;
 	display: block;
 }
- 
-/* Estas reglas se aplicarán a todos las elementos i después de cualquier input*/
-.radioDiv input + i{
- background: #f0f0f0;
- border:2px solid rgba(11, 221, 221, 0.2);
- position: absolute; 
- left: 0;
- top: 0;
+
+.radioDiv label{
+    font-weight: bold;
 }
- 
-/* Estas reglas se aplicarán a todos los i despues de un input de tipo radio*/
-.radioDiv input[type=radio] + i{
- height: 30px;
- width: 30px;
- border-radius: 100%;
- left: 15px;
+
+.radioDiv input{
+    margin-right: 5px;
+}
+
+#fechaCodDiv{
+    display: flex;
+    flex-direction: row;
+    font-size: 14px;
+    font-weight: bold;
+    justify-content: center;
+}
+
+#fechaCodDiv .inputForm{
+    width: 167px;
+}
+
+.fechaCardinfo, .codeCardinfo{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 10px;
 }

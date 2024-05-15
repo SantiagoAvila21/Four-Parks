@@ -14,10 +14,9 @@ const CreditRegister = () => {
         cardType: 'credito',
         expirationDate: '',
         securityCode: '',
-        email: ''
     });
 
-    // Función para detectar el tipo de tarjeta
+    // Función para detectar la marca de tarjeta
     const detectCardBrand = (cardNumber) => {
         if (/^4/.test(cardNumber)) {
             setFormData(prevState => ({ ...prevState, cardBrand: 'Visa' }));
@@ -43,8 +42,6 @@ const CreditRegister = () => {
             [name]: value
         }));
 
-        console.log(formData);
-
         if (name === 'cardNumber') {
             const formattedInput = formatCardNumber(value);
             setFormData(prevState => ({ ...prevState, cardNumber: formattedInput }));
@@ -54,20 +51,11 @@ const CreditRegister = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-    
-        if (Object.values(formData).some(item => item === '')) {
-            updateNotification({ type: 'error', message: 'Todos los campos son obligatorios.' });
-            return;
-        }
 
-        const cardNumber = formData.cardNumber.replace(/\s+/g, ''); // Elimina espacios en blanco
-        if (!cardNumber.match(/^[0-9]+$/)) {
-            updateNotification({ type: 'error', message: 'El número de tarjeta solo debe contener números.' });
-            return;
-        }
+        console.log(formData);
     
-        if (cardNumber.length !== 16) {
-            updateNotification({ type: 'error', message: 'El número de tarjeta debe tener 16 dígitos.' });
+        if (Object.values(formData).includes('')) {
+            updateNotification({ type: 'error', message: 'Todos los campos son obligatorios.' });
             return;
         }
     
@@ -104,9 +92,9 @@ const CreditRegister = () => {
                             <input type="text" name="cardholderName" value={formData.cardholderName} onChange={handleChange} className="inputForm" style={{ paddingLeft: '30px' }} />
                             <FaUser style={{ position: 'absolute', left: '5px', top: '52%', transform: 'translateY(-50%)' }} />
                         </div>
-                        <div className="register info" style={{ position: 'relative' }}>
+                        <div className="numberCard info" style={{ position: 'relative' }}>
                             <label>NÚMERO DE TARJETA</label>
-                            <input type="text" name="cardNumber" value={formData.cardNumber} onChange={handleChange} className="inputForm" style={{ paddingLeft: '30px' }} maxLength={18}/>
+                            <input type="text" placeholder="4242 4242 4242 424" name="cardNumber" value={formData.cardNumber} onChange={handleChange} className="inputForm" style={{ paddingLeft: '30px' }} maxLength={18}/>
                             {formData.cardBrand === 'Visa' && <FaCcVisa style={{ position: 'absolute', left: '5px', top: '52%', transform: 'translateY(-50%)' }} />}
                             {formData.cardBrand === 'Mastercard' && <FaCcMastercard style={{ position: 'absolute', left: '5px', top: '52%', transform: 'translateY(-50%)' }} />}
                             {!formData.cardBrand && <FaCreditCard style={{ position: 'absolute', left: '5px', top: '52%', transform: 'translateY(-50%)' }} />}
@@ -121,7 +109,6 @@ const CreditRegister = () => {
                                     checked={formData.cardType === "credito"}
                                     onChange={handleChange}
                                 /> Crédito
-                                <i/>    
                             </label>
                             <label>
                                 <input
@@ -132,24 +119,21 @@ const CreditRegister = () => {
                                     checked={formData.cardType === "debito"}
                                     onChange={handleChange}
                                 /> Débito
-                                <i />
                             </label>
                         </div>
-                        <div className="register info">
-                            <label>FECHA DE VENCIMIENTO</label>
-                            <input type="text" name="expirationDate" value={formData.expirationDate} onChange={handleChange} className="inputForm"/>
+                        <div id="fechaCodDiv">
+                            <div className="fechaCardinfo">
+                                <label>FECHA DE VENCIMIENTO</label>
+                                <input type="text" name="expirationDate" placeholder="MM/YY" value={formData.expirationDate} onChange={handleChange} className="inputForm"/>
+                            </div>
+                            <div className="codeCardinfo">
+                                <label>CÓDIGO DE SEGURIDAD</label>
+                                <input type="text" name="securityCode" placeholder="CVV" value={formData.securityCode} onChange={handleChange} className="inputForm"/>
+                            </div>
                         </div>
-                        <div className="register info">
-                            <label>CÓDIGO DE SEGURIDAD</label>
-                            <input type="text" name="securityCode" value={formData.securityCode} onChange={handleChange} className="inputForm"/>
-                        </div>
-                        <div className="register info">
-                            <label>CORREO ELECTRÓNICO</label>
-                            <input type="email" name="email" value={formData.email} onChange={handleChange} className="inputForm"/>
-                        </div>
-                        <button id="submitButton" type="submit">PAGAR</button>
                     </form>
                 </div>
+                <button id="submitButton" type="submit" onClick={handleSubmit}>REGISTRAR</button>
             </div>
             <ToastContainer />
         </div>
