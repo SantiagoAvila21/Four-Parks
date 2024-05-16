@@ -160,10 +160,6 @@ def login():
         
         # Revisamos si la contraseña hasheada es la misma que esta en la Base de Datos
         if password_hash == user_password[0]:
-            # Actualizar el campo first_login en la base de datos
-            cur.execute("UPDATE usuario SET first_login = %s WHERE correoelectronico = %s", (False, email))
-            conn.commit()
-
             # Generacion del codigo de verificacion
             verification_code = generate_verification_code()
 
@@ -197,19 +193,27 @@ def verify():
 
         cur = conn.cursor()
 
-        # Verificar si el usuario y el código coinciden
-        cur.execute("SELECT codigo, nombreusuario, first_login FROM usuario WHERE correoelectronico = %s", (email,))
+        # Verificar si el usuario y el código coinciden, se devuelve al igual el rol del usuario para que se maneje sobre eso en el frontend
+        cur.execute("SELECT codigo, nombreusuario, first_login, idtipousuario FROM usuario WHERE correoelectronico = %s", (email,))
         stored_verification_code = cur.fetchone()
 
         if stored_verification_code and stored_verification_code[0] == verification_code:
             # Actualizar el campo first_login en la base de datos
             first_log = stored_verification_code[2] 
             print(first_log, "----")
-            if(first_log):
+            if first_log:
                 cur.execute("UPDATE usuario SET first_login = %s WHERE correoelectronico = %s", (False, email))
                 conn.commit()
 
-            return {"primerLog": first_log, "usuario": stored_verification_code[1] , 'message': 'Código de verificación correcto.'}, 200
+            tipo_usuario = ""
+            if stored_verification_code[3] == 1:
+                tipo_usuario = 'Administrador General'
+            elif stored_verification_code[3] == 2:
+                tipo_usuario = 'Administrador de Punto'
+            else: 
+                tipo_usuario = 'Cliente'
+
+            return {"primerLog": first_log, "usuario": stored_verification_code[1], "tipoUsuario": tipo_usuario, 'message': 'Código de verificación correcto.'}, 200
         else:
             return {'error': 'Código de verificación incorrecto.'}, 400
     except Exception as e:
@@ -397,6 +401,51 @@ def get_usuario(idusuario):
         cur.close()
         conn.close()
 
+@app.route("/api/get_usuarios/", methods=["GET"])
+def get_usuarios():
+    try:
+        conn = psycopg2.connect(url)
+        cur = conn.cursor()
+        sql_query = "SELECT nombreusuario, correoelectronico, idtipousuario, estado FROM usuario WHERE idtipousuario != 1 order by nombreusuario"
+        cur.execute(sql_query)
+        users_info = cur.fetchall()
+        if users_info:
+            return jsonify(users_info), 200
+        else:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route("/api/cambiar_tipousuario", methods=["PUT"])
+def cambiar_tipousuario():
+    try:
+        conn = psycopg2.connect(url)
+        cur = conn.cursor()
+        data = request.get_json()
+        correo = data['correoelectronico']
+        tipo_usuario = data['tipousuario']
+        idparqueadero = data['idparqueadero']
+
+        # Si se quiere convertir un Usuario en Cliente, no debe tener ningun parqueadero a cargo
+        if tipo_usuario == 3:
+            idparqueadero = None
+
+        sql_query = "UPDATE usuario SET idtipousuario = %s, idparkingmanejado = %s WHERE correoelectronico = %s"
+        cur.execute(sql_query, (tipo_usuario, idparqueadero, correo,))
+        conn.commit();
+
+        # Solucionado el problema de CORS usando Access-Control-Allow-Origin
+        return jsonify({"message": f"Rol cambiado correctamente"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
 @app.route("/api/get_reserva/<numreserva>", methods=["GET"])
 def get_reserva(numreserva):
     try:
@@ -492,8 +541,6 @@ def cambiar_contrasenia():
         correo = data['correoelectronico']
         contrasenia = data['contrasenia']
 
-        print(correo, contrasenia)
-
         # Hashear la nueva contraseña y ponerla en la base de datos
         new_password_hash = hashlib.sha1(contrasenia.encode()).hexdigest()
 
@@ -510,11 +557,6 @@ def cambiar_contrasenia():
     finally:
         cur.close()
         conn.close()
-
-
-
-
-
 
 if __name__ == "__main__":
     app.run(host='localhost', port=5000, debug=True)
