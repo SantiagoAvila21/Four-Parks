@@ -7,6 +7,7 @@ const AuthContext = createContext();
 
 /* eslint-disable react/prop-types */
 const AuthProvider = ({ children }) => {
+    const [tryCount, setTryCount] = useState(0);
     const [user, setUser] = useState(null);
     const [state, setState] = useState("");
     const navigate = useNavigate();
@@ -19,6 +20,41 @@ const AuthProvider = ({ children }) => {
             setUser(JSON.parse(userFromLocalStorage)); // Convertir la cadena JSON almacenada en el localStorage de nuevo a un objeto
         }
     }, []);
+
+    //Función para bloquear usuario en el caso de que tenga tres intentos fallidos de inicio de sesion
+    const blockAction = async (email) =>{
+        try{
+            updateNotification({type: 'error', message: 'Tu cuenta ha sido bloqueada, espera a que el administrador te desbloquee'})
+            const response = await axios.put(`${import.meta.env.VITE_FLASK_SERVER_URL}/block_usuario`, {
+                correoelectronico: email
+            });
+            console.log(response);
+            if(response.status == 200){
+                closeNoti();
+            }
+        } catch (error) {
+            console.error(error);
+            updateNotification({type: 'error', message: 'Ocurrio un error en la aplicación'});
+        }
+    }
+
+    //Función para bloquear usuario en el caso de que tenga tres intentos fallidos de inicio de sesion
+    const unlockAction = async (email) =>{
+        try{
+            updateNotification({ type: 'loading', message: 'Desbloqueando...'})
+
+            const response = await axios.put(`${import.meta.env.VITE_FLASK_SERVER_URL}/unlock_usuario`, {
+                correoelectronico: email
+            });
+            console.log(response);
+            if(response.status == 200){
+                closeNoti();
+            }
+        } catch (error) {
+            console.error(error);
+            updateNotification({type: 'error', message: 'Ocurrio un error en la aplicación'});
+        }
+    }
 
     // Función para realizar la acción de inicio de sesión
     const loginAction = async (data, cb) => {
@@ -34,6 +70,7 @@ const AuthProvider = ({ children }) => {
             console.log('Respuesta del servidor:', response);
             // Si la solicitud es exitosa
             if(response.status == 200){
+                setTryCount(0);
                 // Cerrar la notificación de carga
                 closeNoti();
                 // Llamar a la función de callback proporcionada
@@ -43,7 +80,12 @@ const AuthProvider = ({ children }) => {
         } catch (error) {
             // Cerrar la notificación de carga en caso de error
             closeNoti();
-            console.error("Error de la solicitud: ", error.response.data.error)
+            console.error("Error de la solicitud: ", error);
+            if(error.response.status == 401){
+                console.log(tryCount, "---");
+                if(tryCount == 2) blockAction(data.email);
+                setTryCount(prev => prev + 1);
+            }
             // Actualizar la notificación con el error recibido
             updateNotification({ type: 'error', message: error.response.data.error });
         }
@@ -159,7 +201,7 @@ const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value = {{ user, loginAction, logOut, registerAction, state, setState, verifyCode, changePassw }}>
+        <AuthContext.Provider value = {{ user, loginAction, logOut, registerAction, state, setState, verifyCode, changePassw, unlockAction}}>
             {children}
         </AuthContext.Provider>
     );

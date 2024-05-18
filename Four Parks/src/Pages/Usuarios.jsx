@@ -22,6 +22,7 @@ const Usuarios = () => {
 
     // Traer a todos los usuarios
     const fetchUsuarios = async () => {
+        setIsLoading(true);
         try {
             const response = await axios.get(`${import.meta.env.VITE_FLASK_SERVER_URL}/api/get_usuarios/`);
             if(response.status == 200){
@@ -54,7 +55,6 @@ const Usuarios = () => {
             if(responseAssign.status == 200){
                 closeNoti();
                 updateNotification({type: 'info', message: responseAssign.data.message});
-                setIsLoading(true);
                 fetchUsuarios();
             }
         }catch(error){
@@ -107,7 +107,7 @@ const Usuarios = () => {
                     }
                     {!isLoading && 
                         <div className="tablaUsuarios">
-                            <TablaUsuarios users={usuarios} cb = {(email, idtipousuario) => {
+                            <TablaUsuarios users={usuarios} fetchUsers = {fetchUsuarios} cb = {(email, idtipousuario) => {
                                 setSelectedRol(idtipousuario);
                                 setSelectedCorreo(email);
                                 if(idtipousuario == 3) assignDB(idtipousuario, email);

@@ -8,6 +8,7 @@ import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
 import { IoLockClosedSharp, IoLockOpenOutline } from "react-icons/io5";
 import { useState, useEffect } from 'react';
+import { useAuth } from "../Context/AuthProvider";
 
 // Función para crear filas a partir de los datos proporcionados
 function createData(nombre, apellido, email, tipousuario, estado) {
@@ -26,8 +27,9 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 
 // Componente de tabla
 /* eslint-disable react/prop-types */
-const TablaUsuarios = ({ users, cb }) => {
+const TablaUsuarios = ({ users, cb, fetchUsers }) => {
     const [usuariosFull, setUsuariosFull] = useState([]);
+    const auth = useAuth();
 
     useEffect(() => {
         let usuarios = users.map(subarray => {
@@ -72,7 +74,11 @@ const TablaUsuarios = ({ users, cb }) => {
                             <><span><u>Cliente</u></span> <span className='rolChange' onClick={() => handleChangeRol(2, usuario.email)}>Admin</span></>
                         )}
                     </TableCell>
-                    <TableCell align="left">{usuario.estado == 'unlocked' ? <IoLockOpenOutline /> : <IoLockClosedSharp /> }</TableCell>
+                    <TableCell align="left">{usuario.estado == 'unlocked' ? <IoLockOpenOutline /> : <IoLockClosedSharp className="blocked" onClick={() => {
+                        auth.unlockAction(usuario.email)
+                        fetchUsers()
+                    }} /> }
+                    </TableCell>
                 </TableRow>
             ))}
             </TableBody>

@@ -62,3 +62,7 @@ h1 span{
 .inputParqueadero:hover{
     border-radius: 8px;
 }
+
+.blocked{
+    cursor: pointer;
+}

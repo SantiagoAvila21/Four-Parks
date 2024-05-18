@@ -151,13 +151,16 @@ def login():
         cur = conn.cursor()
 
         # Query para encontrar el usuario por correo electronico
-        cur.execute("SELECT contrasenia FROM usuario WHERE correoelectronico = %s", (email,))
+        cur.execute("SELECT contrasenia, estado FROM usuario WHERE correoelectronico = %s", (email,))
         user_password = cur.fetchone()    
         password_hash = hashlib.sha1(password.encode()).hexdigest()
 
         if user_password is None:
             return jsonify({"error": "Usuario no encontrado"}), 404       
         
+        if user_password[1] == 'locked':
+            return jsonify({"error": "Usuario se encuentra bloqueado"}), 403
+
         # Revisamos si la contraseña hasheada es la misma que esta en la Base de Datos
         if password_hash == user_password[0]:
             # Generacion del codigo de verificacion
@@ -165,6 +168,7 @@ def login():
 
             # Subir el codigo de verificacion a la base de datos
             cur.execute('UPDATE usuario SET codigo = %s WHERE correoelectronico = %s', (verification_code, email))
+            conn.commit() 
 
             msg = Message('Código de verificación', 
                 sender=os.getenv("MAIL_USERNAME"), 
@@ -172,7 +176,6 @@ def login():
             msg.body = f'Su código de verificación es: {verification_code}'
             mail.send(msg)
             
-            conn.commit() 
             return jsonify({"message": "Codigo de Verificacion enviado por Correo Electronico"}), 200
         else:
             return jsonify({"error": "Contraseña incorrecta"}), 401
@@ -221,6 +224,59 @@ def verify():
     finally:
         cur.close()
         conn.close()
+
+# Ruta que bloque a un usuario en el caso que ingrese tres veces mal la contraseña
+@app.route("/block_usuario", methods=["PUT"])
+def block_usuario():
+    data = request.get_json()
+    email = data['correoelectronico']
+
+    try:
+        conn = psycopg2.connect(url)
+        cur = conn.cursor()
+
+        cur.execute("UPDATE usuario SET estado = 'locked' WHERE correoelectronico = %s", (email,))
+        conn.commit()
+
+        msg = Message('Bloqueo de usuario', 
+            sender = os.getenv("MAIL_USERNAME"), 
+            recipients=[os.getenv("MAIL_USERNAME")])
+        msg.body = f'El usuario con correo: {email} ha sido bloqueado debido a 3 intentos fallidos de inicio de sesión.'
+        mail.send(msg)
+
+        return jsonify({"message": "Usuario bloqueado"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+# Ruta que desbloquea a un usuario en el caso que el admnistrador general lo desee
+@app.route("/unlock_usuario", methods=["PUT"])
+def unlock_usuario():
+    data = request.get_json()
+    email = data['correoelectronico']
+
+    try:
+        conn = psycopg2.connect(url)
+        cur = conn.cursor()
+
+        cur.execute("UPDATE usuario SET estado = 'unlocked' WHERE correoelectronico = %s", (email,))
+        conn.commit()
+
+        msg = Message('Cuenta Desbloqueada', 
+            sender = os.getenv("MAIL_USERNAME"), 
+            recipients=[email])
+        msg.body = f'Tu cuenta de Four Parks ha sido desbloqueada, por nuestro Administrador General'
+        mail.send(msg)
+
+        return jsonify({"message": "Usuario desbloqueado"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
 
 @app.route("/crear_reserva", methods=["POST"])
 def crear_reserva():
