@@ -1,7 +1,7 @@
 import os 
 import psycopg2
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, render_template
 from flask_mail import Mail, Message
 from werkzeug.security import check_password_hash
 from flask_cors import CORS, cross_origin
@@ -10,6 +10,7 @@ import string
 import secrets
 import random
 from payments import *
+from datetime import datetime
 
 load_dotenv()
 
@@ -613,6 +614,30 @@ def cambiar_contrasenia():
     finally:
         cur.close()
         conn.close()
+
+@app.route('/factura/', methods=["GET"])
+def factura():
+    now = datetime.now()
+    fecha_generado = now.strftime("%Y-%m-%d %H:%M:%S")
+    msg = Message("Factura",
+        sender=os.getenv("MAIL_USERNAME"),
+        recipients=['santiavilag2015@gmail.com'])
+        
+    msg.html = render_template('template.html', num_Factura = '00011',
+        nombre_cliente = 'Santiago Avila Gómez',
+        direccion_factura = 'Calle 8 #40',
+        fecha_factura = fecha_generado,
+        desc_factura = 'Parqueadero La Colina',
+        precio_hora = '$2000,0',
+        cantidad = '2 horas',
+        descuento = '0',
+        total = '$4000,0',
+        subtotal = '$4000,0',
+        fechagenerado = fecha_generado)
+    mail.send(msg)
+
+
+    return jsonify({"message": "Factura mandada correctamente"}), 200
 
 if __name__ == "__main__":
     app.run(host='localhost', port=5000, debug=True)
