@@ -410,6 +410,74 @@ def modificar_parqueadero():
         cur.close()
         conn.close()
 
+@app.route("/crear_tarjeta", methods=["POST"])
+def crear_tarjeta():
+    # Extract data from POST request
+    data = request.get_json()
+    try:
+        # Connect to the PostgreSQL database
+        conn = psycopg2.connect(url)
+        
+
+        # SQL query to insert data into the TARJETA_CREDITO table
+        cur = conn.cursor()
+        sql_query = """
+        INSERT INTO TARJETA_CREDITO (IDUSUARIO, NOMBRE, NUMERO_TARJETA, FECHA_EXPIRACION, CORREO_ELECTRONICO)
+        VALUES(%s, %s, %s, %s, %s)
+        """
+        # Values to insert
+        values = (
+            data['IDUSUARIO'], data['NOMBRE'], data['NUMERO_TARJETA'],
+            data['FECHA_EXPIRACION'], data['CORREO_ELECTRONICO']
+        )
+
+        # Execute the query
+        cur.execute(sql_query, values)
+        conn.commit()
+
+        # Close the connection
+        cur.close()
+        conn.close()
+
+        return jsonify({"message": "Tarjeta de credito creada con éxito"}), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@app.route("/obtener_tarjeta/<idusuario>", methods=["GET"])
+def obtener_tarjeta(idusuario):
+    try:
+        # Conectar a la base de datos PostgreSQL
+        conn = psycopg2.connect(url)
+        cur = conn.cursor()
+
+        # Consulta SQL para obtener la información de la tarjeta de crédito de un usuario específico
+        sql_query = "SELECT IDUSUARIO, NOMBRE, NUMERO_TARJETA, FECHA_EXPIRACION, CORREO_ELECTRONICO FROM TARJETA_CREDITO WHERE IDUSUARIO = %s"
+        #hola
+        # Ejecutar la consulta
+        cur.execute(sql_query, (idusuario,))
+        tarjeta_info = cur.fetchone()
+
+        # Verificar si se encontró la tarjeta
+        if tarjeta_info:
+            tarjeta_data = {
+                "IDUSUARIO": tarjeta_info[0],
+                "NOMBRE": tarjeta_info[1],
+                "NUMERO_TARJETA": tarjeta_info[2],
+                "FECHA_EXPIRACION": tarjeta_info[3],
+                "CORREO_ELECTRONICO": tarjeta_info[4]
+            }
+            return jsonify(tarjeta_data), 200
+        else:
+            return jsonify({"error": "Tarjeta no encontrada para el usuario dado"}), 404
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cur.close()
+        conn.close()
+
 @app.route("/pago_tarjeta", methods=["POST"])
 def pago_tarjeta():
     try:
@@ -438,7 +506,6 @@ def pago_tarjeta():
         #cur.close()
         #conn.close()
         return jsonify({"error": str(e)}), 400
-
 
 @app.route("/api/get_usuario/<idusuario>", methods=["GET"])
 def get_usuario(idusuario):
