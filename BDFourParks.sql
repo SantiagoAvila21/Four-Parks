@@ -158,24 +158,10 @@ NUMRESERVA
 );
 
 /*==============================================================*/
-/* Index: VEHICULORESERVA_FK                                    */
-/*==============================================================*/
-create  index VEHICULORESERVA_FK on RESERVA (
-IDVEHICULO
-);
-
-/*==============================================================*/
 /* Index: RESERVAPARQUEADERO_FK                                 */
 /*==============================================================*/
 create  index RESERVAPARQUEADERO_FK on RESERVA (
 IDPARQUEADERO
-);
-
-/*==============================================================*/
-/* Index: PAGORESERVA_FK                                        */
-/*==============================================================*/
-create  index PAGORESERVA_FK on RESERVA (
-IDMETODOPAGO
 );
 
 /*==============================================================*/
@@ -338,9 +324,9 @@ create table VEHICULO (
 /* Table: TARJETACREDITO                                              */
 /*==============================================================*/
 CREATE TABLE TARJETACREDITO (
-   IDTARJETA            SERIAL               NOT NULL,
+   IDTARJETA            VARCHAR(5)           NOT NULL,
    IDUSUARIO            VARCHAR(5)           NOT NULL,
-   NUMTARJETA           VARCHAR(16)          NOT NULL,
+   NUMTARJETA           VARCHAR(20)          NOT NULL,
    FECHAVENCIMIENTO     VARCHAR(5)           NOT NULL,
    CODIGOSEGURIDAD      VARCHAR(5)           NOT NULL,
    CONSTRAINT PK_TARJETACREDITO PRIMARY KEY (IDTARJETA),
@@ -391,16 +377,6 @@ alter table PARQUEADERO
       on delete restrict on update restrict;
 
 alter table RESERVA
-   add constraint FK_RESERVA_DESCUENTO_TIPODESC foreign key (IDTIPODESCUENTO)
-      references TIPODESCUENTO (IDTIPODESCUENTO)
-      on delete restrict on update restrict;
-
-alter table RESERVA
-   add constraint FK_RESERVA_PAGORESER_METODO_P foreign key (IDMETODOPAGO)
-      references METODO_PAGO (IDMETODOPAGO)
-      on delete restrict on update restrict;
-
-alter table RESERVA
    add constraint FK_RESERVA_RESERVAPA_PARQUEAD foreign key (IDPARQUEADERO)
       references PARQUEADERO (IDPARQUEADERO)
       on delete restrict on update restrict;
@@ -408,11 +384,6 @@ alter table RESERVA
 alter table RESERVA
    add constraint FK_RESERVA_RESERVAUS_USUARIO foreign key (IDUSUARIO)
       references USUARIO (IDUSUARIO)
-      on delete restrict on update restrict;
-
-alter table RESERVA
-   add constraint FK_RESERVA_VEHICULOR_VEHICULO foreign key (IDVEHICULO)
-      references VEHICULO (IDVEHICULO)
       on delete restrict on update restrict;
 
 alter table USUARIO
@@ -439,22 +410,6 @@ alter table VEHICULO
    add constraint FK_VEHICULO_VEHICULOT_TIPO_VEH foreign key (IDTIPOVEHICULO)
       references TIPO_VEHICULO (IDTIPOVEHICULO)
       on delete restrict on update restrict;
-
--- Crear la tabla TARJETA_CREDITO
-CREATE TABLE TARJETA_CREDITO (
-    IDTARJETA SERIAL PRIMARY KEY,
-    IDUSUARIO VARCHAR(5) NOT NULL,
-    NOMBRE VARCHAR(35) NOT NULL,
-    NUMERO_TARJETA VARCHAR(20) NOT NULL,
-    FECHA_EXPIRACION VARCHAR(5) NOT NULL,
-    CORREO_ELECTRONICO VARCHAR(35) NOT NULL,
-    FOREIGN KEY (IDUSUARIO) REFERENCES USUARIO(IDUSUARIO)
-);
-
--- Crear índice en la tabla TARJETA_CREDITO para la columna IDUSUARIO
-CREATE INDEX IDX_TARJETA_CREDITO_USUARIO ON TARJETA_CREDITO (IDUSUARIO)
-
-
 
 
 /* Inserciones Necesarias */

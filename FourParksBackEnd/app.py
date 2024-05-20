@@ -291,7 +291,7 @@ def crear_reserva():
         # SQL query to insert data into the reserva table
         cur = conn.cursor()
         sql_query = """
-        INSERT INTO reserva (numreserva, idvehiculo, idmetodopago, idusuario, idparqueadero, idtipodescuento, montototal, duracionestadia, fechareserva)
+        INSERT INTO reserva (numreserva, idusuario, idparqueadero, montototal, fechareservaentrada, fechareservasalida)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         # Values to insert
@@ -417,18 +417,34 @@ def crear_tarjeta():
     try:
         # Connect to the PostgreSQL database
         conn = psycopg2.connect(url)
-        
+        email = data['correoelectronico']
 
         # SQL query to insert data into the TARJETA_CREDITO table
         cur = conn.cursor()
+
+        # Obtener el número total de usuarios en la tabla usuario
+        cur.execute("SELECT COUNT(idtarjeta) FROM tarjetacredito")
+        total_tarjetas = cur.fetchone()[0]
+
+        # Calcular el nuevo idtarjeta
+        nuevo_idtarjeta = 'T' + str(total_tarjetas + 1)
+
+        cur.execute("SELECT idusuario FROM usuario WHERE correoelectronico =  %s", (email, ));
+        idusuario = cur.fetchone()[0];
+
+        respuesta = registrar_tarjeta(data['numero_tarjeta'], data['fecha_expiracion'], data['codigoseguridad'])
+
+        if(respuesta.get('error')):
+            return respuesta, 403
+
         sql_query = """
-        INSERT INTO TARJETA_CREDITO (IDUSUARIO, NOMBRE, NUMERO_TARJETA, FECHA_EXPIRACION, CORREO_ELECTRONICO)
-        VALUES(%s, %s, %s, %s, %s)
+        INSERT INTO TARJETACREDITO (IDTARJETA, IDUSUARIO, NUMTARJETA, FECHAVENCIMIENTO, CODIGOSEGURIDAD, NOMBREPROPIETARIO)
+        VALUES(%s, %s, %s, %s, %s, %s)
         """
         # Values to insert
         values = (
-            data['IDUSUARIO'], data['NOMBRE'], data['NUMERO_TARJETA'],
-            data['FECHA_EXPIRACION'], data['CORREO_ELECTRONICO']
+            nuevo_idtarjeta, idusuario, data['numero_tarjeta'],
+            data['fecha_expiracion'], data['codigoseguridad'], data['nombrepropietario']
         )
 
         # Execute the query
@@ -444,28 +460,28 @@ def crear_tarjeta():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-@app.route("/obtener_tarjeta/<idusuario>", methods=["GET"])
-def obtener_tarjeta(idusuario):
+@app.route("/obtener_tarjeta/<correo>", methods=["GET"])
+def obtener_tarjeta(correo):
     try:
         # Conectar a la base de datos PostgreSQL
         conn = psycopg2.connect(url)
         cur = conn.cursor()
 
+
         # Consulta SQL para obtener la información de la tarjeta de crédito de un usuario específico
-        sql_query = "SELECT IDUSUARIO, NOMBRE, NUMERO_TARJETA, FECHA_EXPIRACION, CORREO_ELECTRONICO FROM TARJETA_CREDITO WHERE IDUSUARIO = %s"
-        #hola
+        sql_query = "SELECT T.NOMBREPROPIETARIO, T.NUMTARJETA, T.FECHAVENCIMIENTO, T.CODIGOSEGURIDAD FROM TARJETACREDITO T, USUARIO U WHERE U.CORREOELECTRONICO = %s AND T.IDUSUARIO = U.IDUSUARIO"
+
         # Ejecutar la consulta
-        cur.execute(sql_query, (idusuario,))
+        cur.execute(sql_query, (correo,))
         tarjeta_info = cur.fetchone()
 
         # Verificar si se encontró la tarjeta
         if tarjeta_info:
             tarjeta_data = {
-                "IDUSUARIO": tarjeta_info[0],
-                "NOMBRE": tarjeta_info[1],
-                "NUMERO_TARJETA": tarjeta_info[2],
-                "FECHA_EXPIRACION": tarjeta_info[3],
-                "CORREO_ELECTRONICO": tarjeta_info[4]
+                "NOMBREPROPIETARIO": tarjeta_info[0],
+                "NUMTARJETA": tarjeta_info[1],
+                "FECHAVENCIMIENTO": tarjeta_info[2],
+                "CODIGOSEGURIDAD": tarjeta_info[3]
             }
             return jsonify(tarjeta_data), 200
         else:

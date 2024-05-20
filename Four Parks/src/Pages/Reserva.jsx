@@ -11,7 +11,8 @@ import useNotification from "../Hooks/useNotification";
 
 const Reserva = () => {
     const location = useLocation();
-    const [fecha, setFecha] = useState(dayjs());
+    const [fechaEntrada, setFechaEntrada] = useState(dayjs());
+    const [fechaSalida, setFechaSalida] = useState(dayjs());
     const { updateNotification } = useNotification();
 
     const [infoReserva, setInfoReserva] = useState({
@@ -28,30 +29,65 @@ const Reserva = () => {
         }));
     };
 
-    const handleDateChange = (date) => {
-        setFecha(date);
+    const handleDateChange = (date, isEntrada) => {
+        if (isValidDate(date, isEntrada)) {
+            if(isEntrada) setFechaEntrada(date);
+            else setFechaSalida(date);
+        } else {
+            updateNotification({ type: 'error', message: 'La fecha seleccionada no es válida.' });
+        }
     };
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        const fechaFormateada = dayjs(fecha).format('YYYY-MM-DD HH:mm:ss');
-
         
-        console.log(infoReserva);
-        console.log(fechaFormateada);
+        // MANEJO DE ERRORES EN LAS FECHAS INGRESADAS ------
+        if (!fechaEntrada.isValid() || fechaEntrada.minute() !== 0) {
+            updateNotification({ type: 'error', message: 'Por favor, seleccione una hora fija para la fecha de entrada.' });
+            return;
+        }
+
+        if (!fechaSalida.isValid() || fechaSalida.minute() !== 0) {
+            updateNotification({ type: 'error', message: 'Por favor, seleccione una hora fija para la fecha de salida.' });
+            return;
+        }
+
+        if(fechaSalida.isBefore(fechaEntrada, 'hour')){
+            updateNotification({ type: 'error', message: 'Por favor, seleccione una hora de salida posterior a la de entrada.' });
+            return;
+        }
+
+        const fechaEntradaFormateada = dayjs(fechaEntrada).format('YYYY-MM-DD HH:mm:ss');
+        const fechaSalidaFormateada = dayjs(fechaEntrada).format('YYYY-MM-DD HH:mm:ss');
+
         if(Object.values(infoReserva).includes('')){
             updateNotification({ type: 'error', message: 'Hay al menos un espacio en blanco' });
             return;
         }
         
-        // Revisar El Regex del correo Electronico
-        const placaRegex = /^[A-Z]{3}-?\d{3}$/;
-        if(!placaRegex.test(infoReserva.placa)){
-            updateNotification({ type: 'error', message: 'Porfavor ingrese una placa válida' });
+        console.log(fechaEntradaFormateada, fechaSalidaFormateada);
+
+        // MANEJO DE ERRORES DE PLACAS INGRESADAS -----
+        const placaRegexCarro = /^[A-Z]{3}-?\d{3}$/;
+        const placaRegexMoto = /^[A-Z]{3}-?\d{2}[A-Z]$/;
+
+        let placaRegex;
+        if (infoReserva.tipoVehiculo === '1') placaRegex = placaRegexCarro;
+        else if (infoReserva.tipoVehiculo === '2') placaRegex = placaRegexMoto;
+        else placaRegex = null;
+
+        if (placaRegex && !placaRegex.test(infoReserva.placa)) {
+            updateNotification({ type: 'error', message: 'Por favor, ingrese una placa válida para el tipo de vehiculo.' });
             return;
         }
 
-        updateNotification({ type: 'success', message: 'Se realiza la reserva con éxito'});
+        // MANEJO DE ERRORES GENERAL -----
+        if(Object.values(infoReserva).includes('')){
+            updateNotification({ type: 'error', message: 'Hay al menos un espacio en blanco' });
+            return;
+        }
+
+        
     }
 
     // Función para manejar el cambio de placa según el tipo de vehículo
@@ -59,7 +95,7 @@ const Reserva = () => {
         const { value } = event.target;
         let nuevaPlaca = value.toUpperCase();
         
-        if (infoReserva.tipoVehiculo === '2') {
+        if (infoReserva.tipoVehiculo === '1' || infoReserva.tipoVehiculo === '2') {
             nuevaPlaca = nuevaPlaca.replace(/[^A-Z\d]/g, '');
             if (nuevaPlaca.length > 3) {
                 nuevaPlaca = nuevaPlaca.slice(0, 3) + '-' + nuevaPlaca.slice(3);
@@ -67,10 +103,8 @@ const Reserva = () => {
         } else if (infoReserva.tipoVehiculo === '3') {
             nuevaPlaca = nuevaPlaca.replace(/[^A-Z\d]/g, ''); 
             nuevaPlaca = nuevaPlaca.slice(0, 12); 
-        } else {
-            nuevaPlaca = nuevaPlaca.replace(/[^A-Z\d-]/g, '');
         }
-
+    
         setInfoReserva(prevState => ({
             ...prevState,
             placa: nuevaPlaca
@@ -88,7 +122,7 @@ const Reserva = () => {
         }
     };
 
-    // Función para validar la fecha seleccionada
+    // Función que valida los datos de la fecha
     const isValidDate = (date) => {
         const today = dayjs().startOf('day');
         const eightDaysLater = today.add(8, 'days');
@@ -130,7 +164,7 @@ const Reserva = () => {
                                     type="text" 
                                     name="placa"
                                     value={infoReserva.placa}
-                                    maxLength={infoReserva.tipoVehiculo === '2' ? 7 : 12}
+                                    maxLength={infoReserva.tipoVehiculo === '2' || infoReserva.tipoVehiculo === '1' ? 7 : 12}
                                     placeholder={getPlacaPlaceholder()}
                                     onChange={handleChangePlaca} 
                                     className="inputForm"
@@ -138,14 +172,29 @@ const Reserva = () => {
                             </div>
                         }
                         <div className="reserva info">
-                            <label>FECHA</label>
+                            <label>FECHA ENTRADA</label>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DateTimePicker
-                                    value={fecha}
+                                    value={fechaEntrada}
                                     name="fecha"
-                                    onChange={handleDateChange}
+                                    onChange={date => handleDateChange(date, true)}
                                     disablePast={true} // No permitir fechas anteriores al día de hoy
-                                    shouldDisableDate={(date) => !isValidDate(date)} // Deshabilitar fechas mayores a 8 días
+                                    shouldDisableDate={date => !isValidDate(date)} // Deshabilitar fechas mayores a 8 días
+                                    disableTimeValidation={true} // Deshabilitar validación de hora
+                                    minutesStep={60}
+                                    allowSameDateSelection={true} // Permitir selección de la misma fecha
+                                />  
+                            </LocalizationProvider>
+                        </div>
+                        <div className="reserva info">
+                            <label>FECHA SALIDA</label>
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <DateTimePicker
+                                    value={fechaSalida}
+                                    name="fecha"
+                                    onChange={date => handleDateChange(date, false)}
+                                    disablePast={true} // No permitir fechas anteriores al día de hoy
+                                    shouldDisableDate={date => !isValidDate(date)} // Deshabilitar fechas mayores a 8 días
                                     disableTimeValidation={true} // Deshabilitar validación de hora
                                     minutesStep={60}
                                     allowSameDateSelection={true} // Permitir selección de la misma fecha

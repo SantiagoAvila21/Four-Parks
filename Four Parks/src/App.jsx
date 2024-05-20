@@ -10,6 +10,8 @@ import MisReservas from './Pages/MisReservas';
 import Usuarios from './Pages/Usuarios';
 import { useAuth } from './Context/AuthProvider';
 import { Navigate } from 'react-router-dom';
+import CardProvider from './Context/CardProvider';
+import PagoTarjeta from './Pages/PagoTarjeta';
 
 /* eslint-disable react/prop-types */
 const RequireAuth = ({ children, adminGeneral }) => {
@@ -25,17 +27,20 @@ const RequireAuth = ({ children, adminGeneral }) => {
 function App() {
   return (
     <div className='App'>
-      <ParkingProvider>
-          <Routes>
-            <Route path='/' element={<Home/>} />
-            <Route path='/login' element={<Login/>} />
-            <Route path='/register' element={<Register/>} />
-            <Route path='/users' element={<RequireAuth adminGeneral> <Usuarios/> </RequireAuth>} />
-            <Route path='/reserva' element={<RequireAuth><Reserva /></RequireAuth>} />
-            <Route path='/mis_reservas' element={<RequireAuth><MisReservas /></RequireAuth>} />
-            <Route path='/crear_tarjeta' element={<RequireAuth><CreditRegister /></RequireAuth>} />
-          </Routes>
-      </ParkingProvider>
+      <CardProvider>
+        <ParkingProvider>
+            <Routes>
+              <Route path='/' element={<Home/>} />
+              <Route path='/login' element={<Login/>} />
+              <Route path='/register' element={<Register/>} />
+              <Route path='/users' element={<RequireAuth adminGeneral> <Usuarios/> </RequireAuth>} />
+              <Route path='/reserva' element={<RequireAuth><Reserva /></RequireAuth>} />
+              <Route path='/mis_reservas' element={<RequireAuth><MisReservas /></RequireAuth>} />
+              <Route path='/crear_tarjeta' element={<CreditRegister />} />
+              <Route path='/pago_tarjeta' element={<RequireAuth><PagoTarjeta /></RequireAuth>} />
+            </Routes>
+        </ParkingProvider>
+      </CardProvider>
     </div>
   )
 }

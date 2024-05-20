@@ -149,7 +149,7 @@ const AuthProvider = ({ children }) => {
                 // Cambiar el estado de la aplicación a "registered"
                 setState('registered');
                 // Redirigir a la página de inicio de sesión
-                navigate("/login");
+                navigate("/crear_tarjeta", { state: { correoelectronico: data.email } });
             }
         }catch(error){
             // Cerrar la notificación de carga en caso de error
