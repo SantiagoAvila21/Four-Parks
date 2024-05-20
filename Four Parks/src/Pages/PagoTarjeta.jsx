@@ -15,7 +15,7 @@ const PagoTarjeta = () => {
     const auth = useAuth();
 
     const [formData, setFormData] = useState({
-        cardholderName: 'Juanito Alimaña',
+        cardholderName: '',
         cardNumber: '',
         cardBrand: '',
         cardType: 'credito',
@@ -37,7 +37,6 @@ const PagoTarjeta = () => {
                         cardNumber: responseCard.data.NUMTARJETA,
                         cardholderName: responseCard.data.NOMBREPROPIETARIO,
                         expirationDate: responseCard.data.FECHAVENCIMIENTO,
-                        securityCode: responseCard.data.CODIGOSEGURIDAD,
                         correoelectronico: userFromLocalStorage.correo
                     }));
                 }

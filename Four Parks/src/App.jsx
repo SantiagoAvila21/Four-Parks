@@ -12,6 +12,7 @@ import { useAuth } from './Context/AuthProvider';
 import { Navigate } from 'react-router-dom';
 import CardProvider from './Context/CardProvider';
 import PagoTarjeta from './Pages/PagoTarjeta';
+import ReservaProvider from './Context/ReservaProvider';
 
 /* eslint-disable react/prop-types */
 const RequireAuth = ({ children, adminGeneral }) => {
@@ -29,6 +30,7 @@ function App() {
     <div className='App'>
       <CardProvider>
         <ParkingProvider>
+          <ReservaProvider>
             <Routes>
               <Route path='/' element={<Home/>} />
               <Route path='/login' element={<Login/>} />
@@ -39,6 +41,7 @@ function App() {
               <Route path='/crear_tarjeta' element={<CreditRegister />} />
               <Route path='/pago_tarjeta' element={<RequireAuth><PagoTarjeta /></RequireAuth>} />
             </Routes>
+          </ReservaProvider>
         </ParkingProvider>
       </CardProvider>
     </div>

@@ -1,5 +1,5 @@
 import SideLogo from "../components/SideLogo";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../styles/Reserva.css";
 import { ToastContainer } from "react-toastify";
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -8,12 +8,36 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { useLocation } from 'react-router-dom';
 import dayjs from "dayjs";
 import useNotification from "../Hooks/useNotification";
+import { useParking } from "../Context/ParkingsProvider";
+import { useReserva } from "../Context/ReservaProvider";
 
 const Reserva = () => {
     const location = useLocation();
     const [fechaEntrada, setFechaEntrada] = useState(dayjs());
     const [fechaSalida, setFechaSalida] = useState(dayjs());
     const { updateNotification } = useNotification();
+    const parking = useParking();
+    const { createReserva } = useReserva();
+    const [idParqueadero, setIdParqueadero] = useState('');
+    const [tarifas, setTarifas] = useState({
+        'tarifacarro': '',
+        'tarifamoto': '',
+        'tarifabici': ''
+    });
+    
+    useEffect(() => {
+        const infoParqueadero = parking.parqueaderos.filter(parqueadero => parqueadero[2] === location.state.nombreParqueadero)[0];
+        if(infoParqueadero){
+            setIdParqueadero(infoParqueadero[0]);
+            setTarifas({
+                'tarifacarro': infoParqueadero[9],
+                'tarifamoto': infoParqueadero[10],
+                'tarifabici': infoParqueadero[11]
+            });
+        }
+    }, [parking.parqueaderos, location.state.nombreParqueadero]);
+
+
 
     const [infoReserva, setInfoReserva] = useState({
         parqueadero: location.state.nombreParqueadero,
@@ -40,7 +64,7 @@ const Reserva = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        
+
         // MANEJO DE ERRORES EN LAS FECHAS INGRESADAS ------
         if (!fechaEntrada.isValid() || fechaEntrada.minute() !== 0) {
             updateNotification({ type: 'error', message: 'Por favor, seleccione una hora fija para la fecha de entrada.' });
@@ -87,7 +111,17 @@ const Reserva = () => {
             return;
         }
 
-        
+        let tarifa = 0;
+        if(infoReserva.tipoVehiculo === '1') tarifa = tarifas.tarifacarro;
+        else if(infoReserva.tipoVehiculo === '2') tarifa = tarifas.tarifamoto;
+        else if(infoReserva.tipoVehiculo === '3') tarifa = tarifas.tarifabici;
+
+        createReserva({
+            idParqueadero,
+            monto: tarifa * (fechaEntrada.diff(fechaSalida, 'hour')),
+            fechaEntradaFormateada,
+            fechaSalidaFormateada
+        });
     }
 
     // Función para manejar el cambio de placa según el tipo de vehículo
@@ -151,14 +185,17 @@ const Reserva = () => {
                         <div className="reserva info">
                             <label>TIPO VEHICULO</label>
                             <select name="tipoVehiculo" onChange={handleChangeForm} className="inputForm">
-                                <option value={""}>Seleccione un tipo de documento</option>
+                                <option value={""}>Seleccione un tipo de vehiculo</option>
                                 <option value={"1"}>Carro</option>
                                 <option value={"2"}>Moto</option>
                                 <option value={"3"}>Bicicleta</option>
                             </select>
+                            {infoReserva.tipoVehiculo === '1' && <p> <strong> Tarifa: </strong> $ {tarifas.tarifacarro} COP / hora</p>}
+                            {infoReserva.tipoVehiculo === '2' && <p> <strong> Tarifa: </strong> $ {tarifas.tarifamoto} COP / hora</p>}
+                            {infoReserva.tipoVehiculo === '3' && <p> <strong> Tarifa: </strong> $ {tarifas.tarifabici} COP / hora</p>}
                         </div>
                         {infoReserva.tipoVehiculo && 
-                            <div className="reserva info">
+                            <div className="reserva info" id="placa">
                                 <label>{infoReserva.tipoVehiculo === '3' ? 'Marco' : 'PLACA'}</label>
                                 <input 
                                     type="text" 
@@ -171,7 +208,7 @@ const Reserva = () => {
                                 />
                             </div>
                         }
-                        <div className="reserva info">
+                        <div className="reserva info fechaEntrada">
                             <label>FECHA ENTRADA</label>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DateTimePicker

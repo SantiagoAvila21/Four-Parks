@@ -286,30 +286,49 @@ def crear_reserva():
     try:
         # Connect to the PostgreSQL database
         conn = psycopg2.connect(url)
-        
+        email = data['correoelectronico']
 
         # SQL query to insert data into the reserva table
         cur = conn.cursor()
+
+        # Obtener el número total de usuarios en la tabla usuario
+        cur.execute("SELECT COUNT(numreserva) FROM RESERVA")
+        total_reservas = cur.fetchone()[0]
+
+        # Calcular el nuevo idtarjeta
+        nuevo_idreserva = 'R' + str(total_reservas + 1)
+
+        cur.execute("SELECT idusuario FROM usuario WHERE correoelectronico =  %s", (email, ));
+        idusuario = cur.fetchone()[0];
+
+
         sql_query = """
-        INSERT INTO reserva (numreserva, idusuario, idparqueadero, montototal, fechareservaentrada, fechareservasalida)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO reserva (numreserva, idusuario, idparqueadero, montototal, fechareservaentrada, fechareservasalida)
+            VALUES (%s, %s, %s, %s, %s, %s)
         """
+        
         # Values to insert
         values = (
-            data['numreserva'], data['idvehiculo'], data['idmetodopago'],
-            data['idusuario'], data['idparqueadero'], data['idtipodescuento'],
-            data['montototal'], data['duracionestadia'], data['fechareserva']
+            nuevo_idreserva, idusuario, data['idparqueadero'], data['montototal'], data['fechareservaentrada'], data['fechareservasalida']
         )
 
         # Execute the query
         cur.execute(sql_query, values)
+        reserva = {
+            "numreserva": nuevo_idreserva,
+            "idusuario": idusuario,
+            "idparqueadero": data['idparqueadero'],
+            "montototal": data['montototal'],
+            "fechareservaentrada": data['fechareservaentrada'],
+            "fechareservasalida": data['fechareservasalida'],
+        }
         conn.commit()
 
         # Close the connection
         cur.close()
         conn.close()
 
-        return jsonify({"message": "Reserva creada con éxito"}), 201
+        return jsonify({"message": "Reserva creada con éxito", "reserva": reserva}), 201
 
     except Exception as e:
         return jsonify({"error": str(e)}), 400
