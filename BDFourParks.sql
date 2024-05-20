@@ -424,6 +424,22 @@ alter table VEHICULO
       references TIPO_VEHICULO (IDTIPOVEHICULO)
       on delete restrict on update restrict;
 
+-- Crear la tabla TARJETA_CREDITO
+CREATE TABLE TARJETA_CREDITO (
+    IDTARJETA SERIAL PRIMARY KEY,
+    IDUSUARIO VARCHAR(5) NOT NULL,
+    NOMBRE VARCHAR(35) NOT NULL,
+    NUMERO_TARJETA VARCHAR(20) NOT NULL,
+    FECHA_EXPIRACION VARCHAR(5) NOT NULL,
+    CORREO_ELECTRONICO VARCHAR(35) NOT NULL,
+    FOREIGN KEY (IDUSUARIO) REFERENCES USUARIO(IDUSUARIO)
+);
+
+-- Crear índice en la tabla TARJETA_CREDITO para la columna IDUSUARIO
+CREATE INDEX IDX_TARJETA_CREDITO_USUARIO ON TARJETA_CREDITO (IDUSUARIO)
+
+
+
 
 /* Inserciones Necesarias */
 /* TIPO USUARIO */
@@ -457,6 +473,11 @@ INSERT INTO METODO_PAGO VALUES (2,'PSE');
 
 INSERT INTO TIPODESCUENTO VALUES (1,'Comun',0);
 INSERT INTO TIPODESCUENTO VALUES (2,'Fidelizacion',1000);
+
+
+
+
+
 
 /* Insercion usuario de prueba */
 INSERT INTO usuario (idusuario, idtipousuario, idtipodocumento, nombreusuario, numdocumento, contrasenia, puntosacumulados, correoelectronico)
