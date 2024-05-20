@@ -379,7 +379,7 @@ def obtener_tarjeta(idusuario):
 
         # Consulta SQL para obtener la información de la tarjeta de crédito de un usuario específico
         sql_query = "SELECT IDUSUARIO, NOMBRE, NUMERO_TARJETA, FECHA_EXPIRACION, CORREO_ELECTRONICO FROM TARJETA_CREDITO WHERE IDUSUARIO = %s"
-        
+        #hola
         # Ejecutar la consulta
         cur.execute(sql_query, (idusuario,))
         tarjeta_info = cur.fetchone()
