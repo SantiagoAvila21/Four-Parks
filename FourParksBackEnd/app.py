@@ -671,21 +671,17 @@ def buscar_reservas():
         idusuario = usuario_result[0]
 
         # Consulta SQL para obtener las reservas del usuario
-        sql_reserva_query = "SELECT numreserva, idvehiculo, idmetodopago, idparqueadero, idtipodescuento, montototal, duracionestadia, fechareserva FROM reserva WHERE idusuario = %s"
+        sql_reserva_query = "SELECT P.nombreparqueadero, R.fechareservaentrada, R.montototal FROM reserva R, parqueadero P WHERE R.idusuario = %s and P.idparqueadero = R.idparqueadero"
         cur.execute(sql_reserva_query, (idusuario,))
         reservas = cur.fetchall()
 
         reservas_data = []
         for reserva in reservas:
             reservas_data.append({
-                "numreserva": reserva[0],
-                "idvehiculo": reserva[1],
-                "idmetodopago": reserva[2],
-                "idparqueadero": reserva[3],
-                "idtipodescuento": reserva[4],
-                "montototal": reserva[5],
-                "duracionestadia": reserva[6],
-                "fechareserva": reserva[7]
+                "nombreparqueadero": reserva[0],
+                "fechareserva": reserva[1],
+                "costo": reserva[2],
+                "puntos": int(math.floor(reserva[2] / 4000))
             })
 
         return jsonify(reservas_data), 200
@@ -802,14 +798,7 @@ def factura():
         sender=os.getenv("MAIL_USERNAME"),
         recipients=[data['correoelectronico']])
 
-    def generar_numero_factura():
-        letras = ''.join(random.choices(string.ascii_uppercase, k=3))
-        numeros = ''.join(random.choices(string.digits, k=7))
-        return letras + numeros
-    
-
-
-    msg.html = render_template('template.html', num_Factura = generar_numero_factura(),
+    msg.html = render_template('template.html', num_Factura = data['numfactura'],
         nombre_cliente = data['nombre_cliente'],
         fecha_factura = fecha_generado,
         desc_factura = f"Reserva en {data['parqueadero']}",

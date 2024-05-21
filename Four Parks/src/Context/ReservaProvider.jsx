@@ -1,6 +1,5 @@
 import axios from "axios";
 import { useContext, createContext, useState } from "react";
-import { useNavigate } from 'react-router-dom';
 import useNotification from "../Hooks/useNotification";
 import { useAuth } from "./AuthProvider";
 
@@ -8,8 +7,6 @@ const ReservaContext = createContext();
 
 /* eslint-disable react/prop-types */
 const ReservaProvider = ({ children }) => {
-
-    const navigate = useNavigate();
     const { setUser } = useAuth();
     const [reserva, setReserva] = useState({});
     const [parqueaderoSelected, setParqueaderoSelected] = useState([]);
@@ -26,13 +23,17 @@ const ReservaProvider = ({ children }) => {
                 fechareservasalida: data.fechaSalidaFormateada
             });
             
-            console.log(responseReserva);
-            setUser((prev) => ({
-                ...prev,
-                puntos: prev.puntos + responseReserva.data.reserva.puntos
-            }));
+            setUser((prev) => {
+                const updatedUser = {
+                    ...prev,
+                    puntos: prev.puntos + responseReserva.data.reserva.puntos
+                };
+                // Guardar el usuario actualizado en localStorage
+                localStorage.setItem('userLogged', JSON.stringify(updatedUser));
+                return updatedUser;
+            });
 
-            if(responseReserva.status == 201) navigate('/pago_tarjeta');
+            if(responseReserva.status == 201) updateNotification({type: "success", message: "Pago realizado y factura enviada"});
             
         }catch (error){
             console.error();
@@ -53,8 +54,18 @@ const ReservaProvider = ({ children }) => {
             });
 
             if(responseReserva.status == 201){
-                updateNotification({type: "success", message: "Pago realizado y factura enviada"});
+                // Si logro el pago exitosamente se crea la reserva
+                createReserva({
+                    idParqueadero: reserva.parqueaderoSelected[0],
+                    monto: reserva.monto,
+                    fechaEntradaFormateada: reserva.fechaEntradaFormateada,
+                    fechaSalidaFormateada: reserva.fechaSalidaFormateada
+                });
+
+                console.log(reserva.numfactura);
+
                 await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/factura`, {
+                    numfactura: reserva.numfactura,
                     correoelectronico: data.correoelectronico,
                     nombre_cliente: JSON.parse(localStorage.getItem('userLogged')).usuario.replace('_', ' '),
                     parqueadero: parqueaderoSelected[2],
@@ -72,7 +83,7 @@ const ReservaProvider = ({ children }) => {
     }
 
     return (
-        <ReservaContext.Provider value={{ createReserva, setReserva, reserva, pagarReserva, setParqueaderoSelected, parqueaderoSelected }} >
+        <ReservaContext.Provider value={{ setReserva, reserva, pagarReserva, setParqueaderoSelected, parqueaderoSelected }} >
             {children}
         </ReservaContext.Provider>
     );

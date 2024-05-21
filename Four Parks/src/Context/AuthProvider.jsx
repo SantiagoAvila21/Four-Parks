@@ -109,7 +109,7 @@ const AuthProvider = ({ children }) => {
                 closeNoti();
                 // Establecer el usuario y almacenarlo en el almacenamiento local
                 setUser({ usuario: response.data.usuario, correo: email, tipoUsuario: response.data.tipoUsuario, puntos: response.data.puntos });
-                localStorage.setItem("userLogged", JSON.stringify({ usuario: response.data.usuario, correo: email, tipoUsuario: response.data.tipoUsuario }));
+                localStorage.setItem("userLogged", JSON.stringify({ usuario: response.data.usuario, correo: email, tipoUsuario: response.data.tipoUsuario, puntos: response.data.puntos }));
                 // Cambiar el estado de la aplicación a "logged"
                 if(response.data.primerLog) {
                     setState('first_logged');

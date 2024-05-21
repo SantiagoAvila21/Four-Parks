@@ -5,7 +5,7 @@ import { ToastContainer } from "react-toastify";
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import dayjs from "dayjs";
 import useNotification from "../Hooks/useNotification";
 import { useParking } from "../Context/ParkingsProvider";
@@ -17,8 +17,8 @@ const Reserva = () => {
     const [fechaSalida, setFechaSalida] = useState(dayjs());
     const { updateNotification } = useNotification();
     const parking = useParking();
-    const { createReserva, setReserva, setParqueaderoSelected, parqueaderoSelected } = useReserva();
-    const [idParqueadero, setIdParqueadero] = useState('');
+    const navigate = useNavigate();
+    const { setReserva, setParqueaderoSelected, parqueaderoSelected } = useReserva();
 
     const [tarifas, setTarifas] = useState({
         'tarifacarro': '',
@@ -30,7 +30,6 @@ const Reserva = () => {
         const infoParqueadero = parking.parqueaderos.filter(parqueadero => parqueadero[2] === location.state.nombreParqueadero)[0];
         if(infoParqueadero){
             setParqueaderoSelected(infoParqueadero);
-            setIdParqueadero(infoParqueadero[0]);
             setTarifas({
                 'tarifacarro': infoParqueadero[9],
                 'tarifamoto': infoParqueadero[10],
@@ -124,6 +123,12 @@ const Reserva = () => {
 
         let cantidadhoras = fechaEntrada.diff(fechaSalida, 'hour');
 
+        const generarNumeroFactura = () => {
+            const letras = Array.from({ length: 3 }, () => String.fromCharCode(65 + Math.floor(Math.random() * 26))).join('');
+            const numeros = Array.from({ length: 7 }, () => Math.floor(Math.random() * 10)).join('');
+            return letras + numeros;
+        }
+
         setReserva({
             parqueaderoSelected,
             monto: Math.abs(tarifa * cantidadhoras),
@@ -132,15 +137,11 @@ const Reserva = () => {
             cantidadhoras,
             tarifa,
             placa: infoReserva.placa,
-            tipoVehiculo: tipoV
+            tipoVehiculo: tipoV,
+            numfactura: generarNumeroFactura(),
         });
 
-        createReserva({
-            idParqueadero,
-            monto: tarifa * (fechaEntrada.diff(fechaSalida, 'hour')),
-            fechaEntradaFormateada,
-            fechaSalidaFormateada
-        });
+        navigate("/pago_tarjeta");
     }
 
     // Función para manejar el cambio de placa según el tipo de vehículo

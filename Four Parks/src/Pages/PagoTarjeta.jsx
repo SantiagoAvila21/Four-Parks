@@ -103,8 +103,8 @@ const PagoTarjeta = () => {
                 <div className="reservaRealizada">
                     <h1>RESERVA REALIZADA</h1>
                     <div className="reservaInfo">
-                        <h5>NÚMERO DE RESERVA</h5>
-                        <p>#A4859</p>
+                        <h5>NÚMERO DE FACTURA</h5>
+                        <p>{reserva.numfactura}</p>
                         <h5>NOMBRE</h5>
                         <p>{JSON.parse(localStorage.getItem('userLogged')).usuario.replace('_', ' ')}</p>
                         <h5>PLACA</h5>

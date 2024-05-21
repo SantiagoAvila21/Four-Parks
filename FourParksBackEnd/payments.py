@@ -1,4 +1,5 @@
 import datetime
+from flask import Flask, request, jsonify
 
 def verify_card_type(card_number):
     """
@@ -85,24 +86,21 @@ def registrar_tarjeta(card_number, expiry_date, security_code):
     Procesa el pago simulando una transacción de tarjeta de crédito.
     
     Args:
-    cardholder_name (str): Nombre del titular de la tarjeta.
     card_number (str): Número de la tarjeta de crédito.
     expiry_date (str): Fecha de vencimiento de la tarjeta.
     security_code (str): Código de seguridad de la tarjeta.
-    email (str): Correo electrónico del titular.
     
     Returns:
     dict: Resultado del intento de registro de tarjeta.
     """
     if not is_valid_card_number(card_number):
-        return jsonify({"error": True, "message": "Número de tarjeta inválido."})
+        return {"error": True, "message": "Número de tarjeta inválido."}
     
     if not is_valid_expiry_date(expiry_date):
-        return jsonify({"error": True, "message": "La tarjeta ha expirado."})
+        return {"error": True, "message": "La tarjeta ha expirado."}
     
     card_type = verify_card_type(card_number)
     if card_type == "Desconocido":
-        return jsonify({"error": True, "message": "Tipo de tarjeta no soportado."})
+        return {"error": True, "message": "Tipo de tarjeta no soportado."}
 
-    return {"success": True, "message": f"Tarjeta registrada correctamente"}
-
+    return {"success": True, "message": "Tarjeta registrada correctamente"}
