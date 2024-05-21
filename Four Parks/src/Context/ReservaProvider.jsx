@@ -2,6 +2,7 @@ import axios from "axios";
 import { useContext, createContext, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import useNotification from "../Hooks/useNotification";
+import { useAuth } from "./AuthProvider";
 
 const ReservaContext = createContext();
 
@@ -9,9 +10,9 @@ const ReservaContext = createContext();
 const ReservaProvider = ({ children }) => {
 
     const navigate = useNavigate();
-
+    const { setUser } = useAuth();
     const [reserva, setReserva] = useState({});
-    const [parqueaderoSelected, setParqueaderoSelected] = useState({});
+    const [parqueaderoSelected, setParqueaderoSelected] = useState([]);
     const { updateNotification, closeNoti } = useNotification();
 
     const createReserva = async (data) => {
@@ -24,6 +25,12 @@ const ReservaProvider = ({ children }) => {
                 fechareservaentrada: data.fechaEntradaFormateada,
                 fechareservasalida: data.fechaSalidaFormateada
             });
+            
+            console.log(responseReserva);
+            setUser((prev) => ({
+                ...prev,
+                puntos: prev.puntos + responseReserva.data.reserva.puntos
+            }));
 
             if(responseReserva.status == 201) navigate('/pago_tarjeta');
             
@@ -65,7 +72,7 @@ const ReservaProvider = ({ children }) => {
     }
 
     return (
-        <ReservaContext.Provider value={{ createReserva, setReserva, pagarReserva, setParqueaderoSelected }} >
+        <ReservaContext.Provider value={{ createReserva, setReserva, reserva, pagarReserva, setParqueaderoSelected, parqueaderoSelected }} >
             {children}
         </ReservaContext.Provider>
     );

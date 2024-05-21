@@ -17,7 +17,7 @@ const Reserva = () => {
     const [fechaSalida, setFechaSalida] = useState(dayjs());
     const { updateNotification } = useNotification();
     const parking = useParking();
-    const { createReserva, setReserva, setParqueaderoSelected } = useReserva();
+    const { createReserva, setReserva, setParqueaderoSelected, parqueaderoSelected } = useReserva();
     const [idParqueadero, setIdParqueadero] = useState('');
 
     const [tarifas, setTarifas] = useState({
@@ -88,8 +88,6 @@ const Reserva = () => {
             updateNotification({ type: 'error', message: 'Hay al menos un espacio en blanco' });
             return;
         }
-        
-        console.log(fechaEntradaFormateada, fechaSalidaFormateada);
 
         // MANEJO DE ERRORES DE PLACAS INGRESADAS -----
         const placaRegexCarro = /^[A-Z]{3}-?\d{3}$/;
@@ -112,20 +110,29 @@ const Reserva = () => {
         }
 
         let tarifa = 0;
-        if(infoReserva.tipoVehiculo === '1') tarifa = tarifas.tarifacarro;
-        else if(infoReserva.tipoVehiculo === '2') tarifa = tarifas.tarifamoto;
-        else if(infoReserva.tipoVehiculo === '3') tarifa = tarifas.tarifabici;
+        let tipoV = "";
+        if(infoReserva.tipoVehiculo === '1'){
+            tarifa = tarifas.tarifacarro;
+            tipoV = "CARRO";  
+        } else if(infoReserva.tipoVehiculo === '2'){
+            tarifa = tarifas.tarifamoto;
+            tipoV = "MOTO";
+        } else if(infoReserva.tipoVehiculo === '3'){
+            tarifa = tarifas.tarifabici;
+            tipoV = "BICI";
+        } 
 
         let cantidadhoras = fechaEntrada.diff(fechaSalida, 'hour');
 
         setReserva({
-            idParqueadero,
-            monto: tarifa * cantidadhoras,
+            parqueaderoSelected,
+            monto: Math.abs(tarifa * cantidadhoras),
             fechaEntradaFormateada,
             fechaSalidaFormateada,
             cantidadhoras,
             tarifa,
-            placa: infoReserva.placa
+            placa: infoReserva.placa,
+            tipoVehiculo: tipoV
         });
 
         createReserva({

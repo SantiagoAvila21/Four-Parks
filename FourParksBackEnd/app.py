@@ -8,6 +8,7 @@ from flask_cors import CORS, cross_origin
 import hashlib
 import string
 import secrets
+import math 
 import random
 from payments import *
 from datetime import datetime
@@ -198,7 +199,7 @@ def verify():
         cur = conn.cursor()
 
         # Verificar si el usuario y el código coinciden, se devuelve al igual el rol del usuario para que se maneje sobre eso en el frontend
-        cur.execute("SELECT codigo, nombreusuario, first_login, idtipousuario FROM usuario WHERE correoelectronico = %s", (email,))
+        cur.execute("SELECT codigo, nombreusuario, first_login, idtipousuario, puntosacumulados FROM usuario WHERE correoelectronico = %s", (email,))
         stored_verification_code = cur.fetchone()
 
         if stored_verification_code and stored_verification_code[0] == verification_code:
@@ -217,7 +218,7 @@ def verify():
             else: 
                 tipo_usuario = 'Cliente'
 
-            return {"primerLog": first_log, "usuario": stored_verification_code[1], "tipoUsuario": tipo_usuario, 'message': 'Código de verificación correcto.'}, 200
+            return {"primerLog": first_log, "usuario": stored_verification_code[1], "tipoUsuario": tipo_usuario, "puntos": stored_verification_code[4], 'message': 'Código de verificación correcto.'}, 200
         else:
             return {'error': 'Código de verificación incorrecto.'}, 400
     except Exception as e:
@@ -281,27 +282,34 @@ def unlock_usuario():
 
 @app.route("/crear_reserva", methods=["POST"])
 def crear_reserva():
-    # Extract data from POST request
     data = request.get_json()
+    conn = None
+    cur = None
     try:
         # Connect to the PostgreSQL database
         conn = psycopg2.connect(url)
-        email = data['correoelectronico']
-
-        # SQL query to insert data into the reserva table
+        conn.autocommit = False  # Ensure autocommit is disabled
         cur = conn.cursor()
 
-        # Obtener el número total de usuarios en la tabla usuario
-        cur.execute("SELECT COUNT(numreserva) FROM RESERVA")
+        email = data['correoelectronico']
+
+        # Obtener el número total de reservas en la tabla reserva
+        cur.execute("SELECT COUNT(numreserva) FROM reserva")
         total_reservas = cur.fetchone()[0]
 
-        # Calcular el nuevo idtarjeta
+        # Calcular el nuevo idreserva
         nuevo_idreserva = 'R' + str(total_reservas + 1)
 
-        cur.execute("SELECT idusuario FROM usuario WHERE correoelectronico =  %s", (email, ));
-        idusuario = cur.fetchone()[0];
+        # Obtener idusuario
+        cur.execute("SELECT idusuario FROM usuario WHERE correoelectronico = %s", (email,))
+        idusuario = cur.fetchone()
 
+        if not idusuario:
+            raise Exception("Usuario no encontrado")
 
+        idusuario = idusuario[0]
+
+        # SQL query to insert data into the reserva table
         sql_query = """
             INSERT INTO reserva (numreserva, idusuario, idparqueadero, montototal, fechareservaentrada, fechareservasalida)
             VALUES (%s, %s, %s, %s, %s, %s)
@@ -314,6 +322,18 @@ def crear_reserva():
 
         # Execute the query
         cur.execute(sql_query, values)
+
+        # Update parqueadero capacity
+        cur.execute("UPDATE parqueadero SET capacidadactual = capacidadactual - 1 WHERE idparqueadero = %s", (data['idparqueadero'],))
+
+        # Update User points
+        puntosUsuario = int(math.floor(data['montototal'] / 4000))
+        cur.execute("UPDATE usuario SET puntosacumulados = puntosacumulados + %s WHERE correoelectronico = %s", (puntosUsuario, email))
+
+        # Commit the transaction
+        conn.commit()
+
+        # Create response data
         reserva = {
             "numreserva": nuevo_idreserva,
             "idusuario": idusuario,
@@ -321,17 +341,23 @@ def crear_reserva():
             "montototal": data['montototal'],
             "fechareservaentrada": data['fechareservaentrada'],
             "fechareservasalida": data['fechareservasalida'],
+            "puntos": puntosUsuario
         }
-        conn.commit()
-
-        # Close the connection
-        cur.close()
-        conn.close()
 
         return jsonify({"message": "Reserva creada con éxito", "reserva": reserva}), 201
 
     except Exception as e:
+        if conn:
+            conn.rollback()  # Rollback the transaction on error
+        print(e)
         return jsonify({"error": str(e)}), 400
+
+    finally:
+        # Ensure the cursor and connection are closed
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
 
 @app.route("/agregar_vehiculo", methods=["POST"])
 def agregar_vehiculo():

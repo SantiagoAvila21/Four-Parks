@@ -108,12 +108,11 @@ const AuthProvider = ({ children }) => {
                 // Cerrar la notificación de carga
                 closeNoti();
                 // Establecer el usuario y almacenarlo en el almacenamiento local
-                setUser({ usuario: response.data.usuario, correo: email, tipoUsuario: response.data.tipoUsuario });
+                setUser({ usuario: response.data.usuario, correo: email, tipoUsuario: response.data.tipoUsuario, puntos: response.data.puntos });
                 localStorage.setItem("userLogged", JSON.stringify({ usuario: response.data.usuario, correo: email, tipoUsuario: response.data.tipoUsuario }));
                 // Cambiar el estado de la aplicación a "logged"
                 if(response.data.primerLog) {
                     setState('first_logged');
-                    console.log("Cambio el estado a first_logged");
                 } else setState('logged');
                 // Redirigir a la página de inicio
                 navigate("/");
@@ -201,7 +200,7 @@ const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value = {{ user, loginAction, logOut, registerAction, state, setState, verifyCode, changePassw, unlockAction}}>
+        <AuthContext.Provider value = {{ user, setUser, loginAction, logOut, registerAction, state, setState, verifyCode, changePassw, unlockAction}}>
             {children}
         </AuthContext.Provider>
     );

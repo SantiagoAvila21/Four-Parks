@@ -10,7 +10,6 @@ const Sidebar = () => {
   const parking = useParking();
 
   const handleChange = (event) => {
-    console.log(event.target.value);
     parking.fetchParqueaderos(event.target.value);
   }
 

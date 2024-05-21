@@ -15,7 +15,7 @@ const PagoTarjeta = () => {
 
     const [showModal, setshowModal] = useState(false);
     const [isLoadingCard, setIsLoadingCard] = useState(true);
-    const { pagarReserva } = useReserva();
+    const { pagarReserva, reserva } = useReserva();
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
@@ -65,6 +65,8 @@ const PagoTarjeta = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
+
+        console.log(reserva.parqueaderoSelected);
     
         if (Object.values(formData).includes('')) {
             updateNotification({ type: 'error', message: 'Todos los campos son obligatorios.' });
@@ -97,28 +99,26 @@ const PagoTarjeta = () => {
 
     return (
         <div className="Register">
-            <Modal shouldShow={showModal} green="green" onRequestClose={() => {
-                    setshowModal((prev) => !prev);
-            }}>
+            <Modal shouldShow={showModal} green="green">
                 <div className="reservaRealizada">
                     <h1>RESERVA REALIZADA</h1>
                     <div className="reservaInfo">
                         <h5>NÚMERO DE RESERVA</h5>
                         <p>#A4859</p>
                         <h5>NOMBRE</h5>
-                        <p>Santiago Hernandez</p>
+                        <p>{JSON.parse(localStorage.getItem('userLogged')).usuario.replace('_', ' ')}</p>
                         <h5>PLACA</h5>
-                        <p>HCP-486</p>
+                        <p>{reserva.placa}</p>
                         <h5>PARQUEADERO</h5>
-                        <p>PARQUEADERO LA COLINA</p>
+                        <p>{reserva.parqueaderoSelected[2]}</p>
                         <h5>TIPO DE VEHICULO</h5>
-                        <p>MOTO</p>
+                        <p>{reserva.tipoVehiculo}</p>
                         <h5>FECHA LLEGADA</h5>
-                        <p>10/05/2024 2:00 PM</p>
+                        <p>{reserva.fechaEntradaFormateada}</p>
                         <h5>FECHA SALIDA</h5>
-                        <p>10/05/2024 6:00 PM</p>
+                        <p>{reserva.fechaSalidaFormateada}</p>
                         <h5>COSTO</h5>
-                        <p>$4000,0</p>
+                        <p>${reserva.monto},0</p>
                     </div>
                     <button id="submitButton" type="submit" onClick={() => navigate("/")}>VOLVER A PAGINA PRINCIPAL</button>
                 </div>

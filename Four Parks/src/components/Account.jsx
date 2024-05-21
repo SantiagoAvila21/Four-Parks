@@ -23,7 +23,7 @@ const Account = () => {
           {auth.user.tipoUsuario == 'Administrador General' && opcionesAdminGeneral}
           {auth.user.tipoUsuario == 'Administrador de Punto' && opcionesAdminPunto}
 
-          <p> Puntos Fidelizacion: {'25 puntos'}</p>
+          <p> Puntos Fidelizacion: {auth.user.puntos}</p>
           <h4 onClick={() => auth.logOut()}> Cerrar cuenta </h4>
       </div>
     )
