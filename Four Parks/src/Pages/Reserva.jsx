@@ -28,6 +28,7 @@ const Reserva = () => {
     useEffect(() => {
         const infoParqueadero = parking.parqueaderos.filter(parqueadero => parqueadero[2] === location.state.nombreParqueadero)[0];
         if(infoParqueadero){
+            parking.setParqueaderoSelected(infoParqueadero);
             setIdParqueadero(infoParqueadero[0]);
             setTarifas({
                 'tarifacarro': infoParqueadero[9],
@@ -36,8 +37,6 @@ const Reserva = () => {
             });
         }
     }, [parking.parqueaderos, location.state.nombreParqueadero]);
-
-
 
     const [infoReserva, setInfoReserva] = useState({
         parqueadero: location.state.nombreParqueadero,
@@ -82,7 +81,7 @@ const Reserva = () => {
         }
 
         const fechaEntradaFormateada = dayjs(fechaEntrada).format('YYYY-MM-DD HH:mm:ss');
-        const fechaSalidaFormateada = dayjs(fechaEntrada).format('YYYY-MM-DD HH:mm:ss');
+        const fechaSalidaFormateada = dayjs(fechaSalida).format('YYYY-MM-DD HH:mm:ss');
 
         if(Object.values(infoReserva).includes('')){
             updateNotification({ type: 'error', message: 'Hay al menos un espacio en blanco' });
@@ -160,7 +159,6 @@ const Reserva = () => {
     const isValidDate = (date) => {
         const today = dayjs().startOf('day');
         const eightDaysLater = today.add(8, 'days');
-
         return date.isBetween(today, eightDaysLater, null, '[]');
     };
 

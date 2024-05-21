@@ -1,5 +1,6 @@
 import "../styles/CreditRegister.css";
 import { FaUser, FaCreditCard, FaCcVisa, FaCcMastercard } from "react-icons/fa";
+import { useEffect } from "react";
 
 /* eslint-disable react/prop-types */
 const CardForm = ({ formData, setFormData, pago }) => {
@@ -35,6 +36,10 @@ const CardForm = ({ formData, setFormData, pago }) => {
             detectCardBrand(formattedInput);
         }
     };
+
+    useEffect(() => {
+        detectCardBrand(formData.cardNumber);
+    }, [formData.cardNumber]);
 
     return (
         <div className="register Form">

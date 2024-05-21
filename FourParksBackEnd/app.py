@@ -531,9 +531,8 @@ def pago_tarjeta():
         #cur.execute(sql_query, values)
         #conn.commit()
         ntarjeta = data['numtarjeta']
-        print(ntarjeta)
         
-        respuesta = process_payment(data['nombre'], ntarjeta, data['f_expiracion'], data['security_code'], data['email'])
+        respuesta = process_payment(data['nombre'], ntarjeta, data['f_expiracion'], data['security_code'], data['correoelectronico'])
         print(respuesta)
 
         return respuesta, 201
@@ -717,24 +716,31 @@ def cambiar_contrasenia():
         cur.close()
         conn.close()
 
-@app.route('/factura/', methods=["GET"])
+@app.route('/factura', methods=["POST"])
 def factura():
     now = datetime.now()
     fecha_generado = now.strftime("%Y-%m-%d %H:%M:%S")
-    msg = Message("Factura",
+    data = request.get_json()
+
+    msg = Message("Factura Reserva",
         sender=os.getenv("MAIL_USERNAME"),
-        recipients=['santiavilag2015@gmail.com'])
-        
-    msg.html = render_template('template.html', num_Factura = '00011',
-        nombre_cliente = 'Santiago Avila Gómez',
-        direccion_factura = 'Calle 8 #40',
+        recipients=[data['correoelectronico']])
+
+    def generar_numero_factura():
+        letras = ''.join(random.choices(string.ascii_uppercase, k=3))
+        numeros = ''.join(random.choices(string.digits, k=7))
+        return letras + numeros
+    
+
+
+    msg.html = render_template('template.html', num_Factura = generar_numero_factura(),
+        nombre_cliente = data['nombre'],
         fecha_factura = fecha_generado,
-        desc_factura = 'Parqueadero La Colina',
-        precio_hora = '$2000,0',
-        cantidad = '2 horas',
-        descuento = '0',
-        total = '$4000,0',
-        subtotal = '$4000,0',
+        desc_factura = f"Reserva en {data['parqueadero']}",
+        precio_hora = f"${data['tarifa']},0",
+        cantidad = f"{data['cantidadhoras']} horas",
+        total = f"${data['montototal']},0",
+        subtotal = f"${data['montototal']},0",
         fechagenerado = fecha_generado)
     mail.send(msg)
 

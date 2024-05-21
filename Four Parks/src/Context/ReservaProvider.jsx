@@ -11,6 +11,7 @@ const ReservaProvider = ({ children }) => {
     const navigate = useNavigate();
 
     const [reserva, setReserva] = useState({});
+    const [parqueaderoSelected, setParqueaderoSelected] = useState({});
     const { updateNotification, closeNoti } = useNotification();
 
     const createReserva = async (data) => {
@@ -36,8 +37,36 @@ const ReservaProvider = ({ children }) => {
         }
     }
 
+    const pagarReserva = async (data) => {
+        updateNotification({type: "loading", message: "Cargando..."});
+        try{
+            const responseReserva = await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/pago_tarjeta`, {
+                correoelectronico: JSON.parse(localStorage.getItem('userLogged')).correo,
+                security_code: data.security_code,
+                f_expiracion: data.f_expiracion, 
+                numtarjeta: data.numtarjeta.replace(/\s+/g, ''),
+                nombre: data.nombre
+            });
+
+            if(responseReserva.status == 201){
+                updateNotification({type: "success", message: "Pago realizado y factura enviada"});
+                await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/factura`, {
+                    correoelectronico: data.correoelectronico,
+                    nombre_cliente: JSON.parse(localStorage.getItem('userLogged')).usuario.replace('_', ' '),
+                    parqueadero: parqueaderoSelected,
+                                        
+
+                });
+            }
+        }catch (error){
+            console.error();
+        }finally{
+            closeNoti();
+        }
+    }
+
     return (
-        <ReservaContext.Provider value={{ createReserva, reserva }} >
+        <ReservaContext.Provider value={{ createReserva, reserva, pagarReserva, setParqueaderoSelected }} >
             {children}
         </ReservaContext.Provider>
     );
