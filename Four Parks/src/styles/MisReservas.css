@@ -27,3 +27,7 @@ h1 span{
     font-weight: bolder;
     display: block;
 }
+
+.cancelarButton{
+    cursor: pointer;
+}

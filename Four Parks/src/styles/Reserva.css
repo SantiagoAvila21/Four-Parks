@@ -70,3 +70,11 @@ h1{
 .info{
     margin: 20px;
 }
+
+#placa{
+    margin-bottom: 0;
+}
+
+.fechaEntrada{
+    margin-top: 0;
+}

@@ -102,3 +102,26 @@ h1 span{
     justify-content: center;
     margin: 10px;
 }
+
+.reservaRealizada p{
+    color: #5D5D5D;
+}
+
+.reservaRealizada{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.reservaInfo{
+    width: 50%;
+    height: 60%;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    padding: 10px;
+}

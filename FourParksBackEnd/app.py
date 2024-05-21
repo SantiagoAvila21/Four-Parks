@@ -1,15 +1,17 @@
 import os 
 import psycopg2
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, render_template
 from flask_mail import Mail, Message
 from werkzeug.security import check_password_hash
 from flask_cors import CORS, cross_origin
 import hashlib
 import string
 import secrets
+import math 
 import random
 from payments import *
+from datetime import datetime
 
 load_dotenv()
 
@@ -151,24 +153,24 @@ def login():
         cur = conn.cursor()
 
         # Query para encontrar el usuario por correo electronico
-        cur.execute("SELECT contrasenia FROM usuario WHERE correoelectronico = %s", (email,))
+        cur.execute("SELECT contrasenia, estado FROM usuario WHERE correoelectronico = %s", (email,))
         user_password = cur.fetchone()    
         password_hash = hashlib.sha1(password.encode()).hexdigest()
 
         if user_password is None:
             return jsonify({"error": "Usuario no encontrado"}), 404       
         
+        if user_password[1] == 'locked':
+            return jsonify({"error": "Usuario se encuentra bloqueado"}), 403
+
         # Revisamos si la contraseña hasheada es la misma que esta en la Base de Datos
         if password_hash == user_password[0]:
-            # Actualizar el campo first_login en la base de datos
-            cur.execute("UPDATE usuario SET first_login = %s WHERE correoelectronico = %s", (False, email))
-            conn.commit()
-
             # Generacion del codigo de verificacion
             verification_code = generate_verification_code()
 
             # Subir el codigo de verificacion a la base de datos
             cur.execute('UPDATE usuario SET codigo = %s WHERE correoelectronico = %s', (verification_code, email))
+            conn.commit() 
 
             msg = Message('Código de verificación', 
                 sender=os.getenv("MAIL_USERNAME"), 
@@ -176,7 +178,6 @@ def login():
             msg.body = f'Su código de verificación es: {verification_code}'
             mail.send(msg)
             
-            conn.commit() 
             return jsonify({"message": "Codigo de Verificacion enviado por Correo Electronico"}), 200
         else:
             return jsonify({"error": "Contraseña incorrecta"}), 401
@@ -197,19 +198,27 @@ def verify():
 
         cur = conn.cursor()
 
-        # Verificar si el usuario y el código coinciden
-        cur.execute("SELECT codigo, nombreusuario, first_login FROM usuario WHERE correoelectronico = %s", (email,))
+        # Verificar si el usuario y el código coinciden, se devuelve al igual el rol del usuario para que se maneje sobre eso en el frontend
+        cur.execute("SELECT codigo, nombreusuario, first_login, idtipousuario, puntosacumulados FROM usuario WHERE correoelectronico = %s", (email,))
         stored_verification_code = cur.fetchone()
 
         if stored_verification_code and stored_verification_code[0] == verification_code:
             # Actualizar el campo first_login en la base de datos
             first_log = stored_verification_code[2] 
             print(first_log, "----")
-            if(first_log):
+            if first_log:
                 cur.execute("UPDATE usuario SET first_login = %s WHERE correoelectronico = %s", (False, email))
                 conn.commit()
 
-            return {"primerLog": first_log, "usuario": stored_verification_code[1] , 'message': 'Código de verificación correcto.'}, 200
+            tipo_usuario = ""
+            if stored_verification_code[3] == 1:
+                tipo_usuario = 'Administrador General'
+            elif stored_verification_code[3] == 2:
+                tipo_usuario = 'Administrador de Punto'
+            else: 
+                tipo_usuario = 'Cliente'
+
+            return {"primerLog": first_log, "usuario": stored_verification_code[1], "tipoUsuario": tipo_usuario, "puntos": stored_verification_code[4], 'message': 'Código de verificación correcto.'}, 200
         else:
             return {'error': 'Código de verificación incorrecto.'}, 400
     except Exception as e:
@@ -218,40 +227,137 @@ def verify():
         cur.close()
         conn.close()
 
+# Ruta que bloque a un usuario en el caso que ingrese tres veces mal la contraseña
+@app.route("/block_usuario", methods=["PUT"])
+def block_usuario():
+    data = request.get_json()
+    email = data['correoelectronico']
+
+    try:
+        conn = psycopg2.connect(url)
+        cur = conn.cursor()
+
+        cur.execute("UPDATE usuario SET estado = 'locked' WHERE correoelectronico = %s", (email,))
+        conn.commit()
+
+        msg = Message('Bloqueo de usuario', 
+            sender = os.getenv("MAIL_USERNAME"), 
+            recipients=[os.getenv("MAIL_USERNAME")])
+        msg.body = f'El usuario con correo: {email} ha sido bloqueado debido a 3 intentos fallidos de inicio de sesión.'
+        mail.send(msg)
+
+        return jsonify({"message": "Usuario bloqueado"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+# Ruta que desbloquea a un usuario en el caso que el admnistrador general lo desee
+@app.route("/unlock_usuario", methods=["PUT"])
+def unlock_usuario():
+    data = request.get_json()
+    email = data['correoelectronico']
+
+    try:
+        conn = psycopg2.connect(url)
+        cur = conn.cursor()
+
+        cur.execute("UPDATE usuario SET estado = 'unlocked' WHERE correoelectronico = %s", (email,))
+        conn.commit()
+
+        msg = Message('Cuenta Desbloqueada', 
+            sender = os.getenv("MAIL_USERNAME"), 
+            recipients=[email])
+        msg.body = f'Tu cuenta de Four Parks ha sido desbloqueada, por nuestro Administrador General'
+        mail.send(msg)
+
+        return jsonify({"message": "Usuario desbloqueado"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+
 @app.route("/crear_reserva", methods=["POST"])
 def crear_reserva():
-    # Extract data from POST request
     data = request.get_json()
+    conn = None
+    cur = None
     try:
         # Connect to the PostgreSQL database
         conn = psycopg2.connect(url)
-        
+        conn.autocommit = False  # Ensure autocommit is disabled
+        cur = conn.cursor()
+
+        email = data['correoelectronico']
+
+        # Obtener el número total de reservas en la tabla reserva
+        cur.execute("SELECT COUNT(numreserva) FROM reserva")
+        total_reservas = cur.fetchone()[0]
+
+        # Calcular el nuevo idreserva
+        nuevo_idreserva = 'R' + str(total_reservas + 1)
+
+        # Obtener idusuario
+        cur.execute("SELECT idusuario FROM usuario WHERE correoelectronico = %s", (email,))
+        idusuario = cur.fetchone()
+
+        if not idusuario:
+            raise Exception("Usuario no encontrado")
+
+        idusuario = idusuario[0]
 
         # SQL query to insert data into the reserva table
-        cur = conn.cursor()
         sql_query = """
-        INSERT INTO reserva (numreserva, idvehiculo, idmetodopago, idusuario, idparqueadero, idtipodescuento, montototal, duracionestadia, fechareserva)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO reserva (numreserva, idusuario, idparqueadero, montototal, fechareservaentrada, fechareservasalida)
+            VALUES (%s, %s, %s, %s, %s, %s)
         """
+        
         # Values to insert
         values = (
-            data['numreserva'], data['idvehiculo'], data['idmetodopago'],
-            data['idusuario'], data['idparqueadero'], data['idtipodescuento'],
-            data['montototal'], data['duracionestadia'], data['fechareserva']
+            nuevo_idreserva, idusuario, data['idparqueadero'], data['montototal'], data['fechareservaentrada'], data['fechareservasalida']
         )
 
         # Execute the query
         cur.execute(sql_query, values)
+
+        # Update parqueadero capacity
+        cur.execute("UPDATE parqueadero SET capacidadactual = capacidadactual - 1 WHERE idparqueadero = %s", (data['idparqueadero'],))
+
+        # Update User points
+        puntosUsuario = int(math.floor(data['montototal'] / 4000))
+        cur.execute("UPDATE usuario SET puntosacumulados = puntosacumulados + %s WHERE correoelectronico = %s", (puntosUsuario, email))
+
+        # Commit the transaction
         conn.commit()
 
-        # Close the connection
-        cur.close()
-        conn.close()
+        # Create response data
+        reserva = {
+            "numreserva": nuevo_idreserva,
+            "idusuario": idusuario,
+            "idparqueadero": data['idparqueadero'],
+            "montototal": data['montototal'],
+            "fechareservaentrada": data['fechareservaentrada'],
+            "fechareservasalida": data['fechareservasalida'],
+            "puntos": puntosUsuario
+        }
 
-        return jsonify({"message": "Reserva creada con éxito"}), 201
+        return jsonify({"message": "Reserva creada con éxito", "reserva": reserva}), 201
 
     except Exception as e:
+        if conn:
+            conn.rollback()  # Rollback the transaction on error
+        print(e)
         return jsonify({"error": str(e)}), 400
+
+    finally:
+        # Ensure the cursor and connection are closed
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
 
 @app.route("/agregar_vehiculo", methods=["POST"])
 def agregar_vehiculo():
@@ -349,6 +455,90 @@ def modificar_parqueadero():
         cur.close()
         conn.close()
 
+@app.route("/crear_tarjeta", methods=["POST"])
+def crear_tarjeta():
+    # Extract data from POST request
+    data = request.get_json()
+    try:
+        # Connect to the PostgreSQL database
+        conn = psycopg2.connect(url)
+        email = data['correoelectronico']
+
+        # SQL query to insert data into the TARJETA_CREDITO table
+        cur = conn.cursor()
+
+        # Obtener el número total de usuarios en la tabla usuario
+        cur.execute("SELECT COUNT(idtarjeta) FROM tarjetacredito")
+        total_tarjetas = cur.fetchone()[0]
+
+        # Calcular el nuevo idtarjeta
+        nuevo_idtarjeta = 'T' + str(total_tarjetas + 1)
+
+        cur.execute("SELECT idusuario FROM usuario WHERE correoelectronico =  %s", (email, ));
+        idusuario = cur.fetchone()[0];
+
+        respuesta = registrar_tarjeta(data['numero_tarjeta'], data['fecha_expiracion'], data['codigoseguridad'])
+
+        if(respuesta.get('error')):
+            return respuesta, 403
+
+        sql_query = """
+        INSERT INTO TARJETACREDITO (IDTARJETA, IDUSUARIO, NUMTARJETA, FECHAVENCIMIENTO, CODIGOSEGURIDAD, NOMBREPROPIETARIO)
+        VALUES(%s, %s, %s, %s, %s, %s)
+        """
+        # Values to insert
+        values = (
+            nuevo_idtarjeta, idusuario, data['numero_tarjeta'],
+            data['fecha_expiracion'], data['codigoseguridad'], data['nombrepropietario']
+        )
+
+        # Execute the query
+        cur.execute(sql_query, values)
+        conn.commit()
+
+        # Close the connection
+        cur.close()
+        conn.close()
+
+        return jsonify({"message": "Tarjeta de credito creada con éxito"}), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@app.route("/obtener_tarjeta/<correo>", methods=["GET"])
+def obtener_tarjeta(correo):
+    try:
+        # Conectar a la base de datos PostgreSQL
+        conn = psycopg2.connect(url)
+        cur = conn.cursor()
+
+
+        # Consulta SQL para obtener la información de la tarjeta de crédito de un usuario específico
+        sql_query = "SELECT T.NOMBREPROPIETARIO, T.NUMTARJETA, T.FECHAVENCIMIENTO, T.CODIGOSEGURIDAD FROM TARJETACREDITO T, USUARIO U WHERE U.CORREOELECTRONICO = %s AND T.IDUSUARIO = U.IDUSUARIO"
+
+        # Ejecutar la consulta
+        cur.execute(sql_query, (correo,))
+        tarjeta_info = cur.fetchone()
+
+        # Verificar si se encontró la tarjeta
+        if tarjeta_info:
+            tarjeta_data = {
+                "NOMBREPROPIETARIO": tarjeta_info[0],
+                "NUMTARJETA": tarjeta_info[1],
+                "FECHAVENCIMIENTO": tarjeta_info[2],
+                "CODIGOSEGURIDAD": tarjeta_info[3]
+            }
+            return jsonify(tarjeta_data), 200
+        else:
+            return jsonify({"error": "Tarjeta no encontrada para el usuario dado"}), 404
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cur.close()
+        conn.close()
+
 @app.route("/pago_tarjeta", methods=["POST"])
 def pago_tarjeta():
     try:
@@ -367,9 +557,8 @@ def pago_tarjeta():
         #cur.execute(sql_query, values)
         #conn.commit()
         ntarjeta = data['numtarjeta']
-        print(ntarjeta)
         
-        respuesta = process_payment(data['nombre'], ntarjeta, data['f_expiracion'], data['security_code'], data['email'])
+        respuesta = process_payment(data['nombre'], ntarjeta, data['f_expiracion'], data['security_code'], data['correoelectronico'])
         print(respuesta)
 
         return respuesta, 201
@@ -377,7 +566,6 @@ def pago_tarjeta():
         #cur.close()
         #conn.close()
         return jsonify({"error": str(e)}), 400
-
 
 @app.route("/api/get_usuario/<idusuario>", methods=["GET"])
 def get_usuario(idusuario):
@@ -391,6 +579,51 @@ def get_usuario(idusuario):
             return jsonify(user_info), 200
         else:
             return jsonify({"error": "Usuario no encontrado"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route("/api/get_usuarios/", methods=["GET"])
+def get_usuarios():
+    try:
+        conn = psycopg2.connect(url)
+        cur = conn.cursor()
+        sql_query = "SELECT nombreusuario, correoelectronico, idtipousuario, estado FROM usuario WHERE idtipousuario != 1 order by nombreusuario"
+        cur.execute(sql_query)
+        users_info = cur.fetchall()
+        if users_info:
+            return jsonify(users_info), 200
+        else:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route("/api/cambiar_tipousuario", methods=["PUT"])
+def cambiar_tipousuario():
+    try:
+        conn = psycopg2.connect(url)
+        cur = conn.cursor()
+        data = request.get_json()
+        correo = data['correoelectronico']
+        tipo_usuario = data['tipousuario']
+        idparqueadero = data['idparqueadero']
+
+        # Si se quiere convertir un Usuario en Cliente, no debe tener ningun parqueadero a cargo
+        if tipo_usuario == 3:
+            idparqueadero = None
+
+        sql_query = "UPDATE usuario SET idtipousuario = %s, idparkingmanejado = %s WHERE correoelectronico = %s"
+        cur.execute(sql_query, (tipo_usuario, idparqueadero, correo,))
+        conn.commit();
+
+        # Solucionado el problema de CORS usando Access-Control-Allow-Origin
+        return jsonify({"message": f"Rol cambiado correctamente"}), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
@@ -414,6 +647,52 @@ def get_reserva(numreserva):
     finally:
         cur.close()
         conn.close()
+
+@app.route("/buscar_reservas", methods=["GET"])
+def buscar_reservas():
+    correo_electronico = request.args.get('correo_electronico')
+    
+    if not correo_electronico:
+        return jsonify({"error": "El correo electrónico es requerido"}), 400
+    
+    try:
+        # Conectar a la base de datos PostgreSQL
+        conn = psycopg2.connect(url)
+        cur = conn.cursor()
+
+        # Consulta SQL para obtener el IDUSUARIO a partir del correo electrónico
+        sql_usuario_query = "SELECT idusuario FROM usuario WHERE correoelectronico = %s"
+        cur.execute(sql_usuario_query, (correo_electronico,))
+        usuario_result = cur.fetchone()
+
+        if not usuario_result:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+        
+        idusuario = usuario_result[0]
+
+        # Consulta SQL para obtener las reservas del usuario
+        sql_reserva_query = "SELECT P.nombreparqueadero, R.fechareservaentrada, R.montototal FROM reserva R, parqueadero P WHERE R.idusuario = %s and P.idparqueadero = R.idparqueadero"
+        cur.execute(sql_reserva_query, (idusuario,))
+        reservas = cur.fetchall()
+
+        reservas_data = []
+        for reserva in reservas:
+            reservas_data.append({
+                "nombreparqueadero": reserva[0],
+                "fechareserva": reserva[1],
+                "costo": reserva[2],
+                "puntos": int(math.floor(reserva[2] / 4000))
+            })
+
+        return jsonify(reservas_data), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cur.close()
+        conn.close()
+
 
 @app.route("/api/get_vehiculo/<idvehiculo>", methods=["GET"])
 def get_vehiculo(idvehiculo):
@@ -492,8 +771,6 @@ def cambiar_contrasenia():
         correo = data['correoelectronico']
         contrasenia = data['contrasenia']
 
-        print(correo, contrasenia)
-
         # Hashear la nueva contraseña y ponerla en la base de datos
         new_password_hash = hashlib.sha1(contrasenia.encode()).hexdigest()
 
@@ -511,10 +788,29 @@ def cambiar_contrasenia():
         cur.close()
         conn.close()
 
+@app.route('/factura', methods=["POST"])
+def factura():
+    now = datetime.now()
+    fecha_generado = now.strftime("%Y-%m-%d %H:%M:%S")
+    data = request.get_json()
+
+    msg = Message("Factura Reserva",
+        sender=os.getenv("MAIL_USERNAME"),
+        recipients=[data['correoelectronico']])
+
+    msg.html = render_template('template.html', num_Factura = data['numfactura'],
+        nombre_cliente = data['nombre_cliente'],
+        fecha_factura = fecha_generado,
+        desc_factura = f"Reserva en {data['parqueadero']}",
+        precio_hora = f"${data['tarifa']},0",
+        cantidad = f"{data['cantidadhoras']} horas",
+        total = f"${data['montototal']},0",
+        subtotal = f"${data['montototal']},0",
+        fechagenerado = fecha_generado)
+    mail.send(msg)
 
 
-
-
+    return jsonify({"message": "Factura mandada correctamente"}), 200
 
 if __name__ == "__main__":
     app.run(host='localhost', port=5000, debug=True)

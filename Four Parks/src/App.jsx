@@ -3,28 +3,47 @@ import './App.css'
 import { Route, Routes } from 'react-router-dom';
 import Login from './Pages/Login';
 import Register from './Pages/Register'
-import AuthProvider from './Context/AuthProvider';
 import ParkingProvider from './Context/ParkingsProvider';
 import Reserva from './Pages/Reserva';
 import CreditRegister from './Pages/CreditRegister'
 import MisReservas from './Pages/MisReservas';
+import Usuarios from './Pages/Usuarios';
+import { useAuth } from './Context/AuthProvider';
+import { Navigate } from 'react-router-dom';
+import CardProvider from './Context/CardProvider';
+import PagoTarjeta from './Pages/PagoTarjeta';
+import ReservaProvider from './Context/ReservaProvider';
+
+/* eslint-disable react/prop-types */
+const RequireAuth = ({ children, adminGeneral }) => {
+  const auth = useAuth();
+  const userFromLocalStorage = localStorage.getItem("userLogged");
+  const userJSON = JSON.parse(userFromLocalStorage);
+  if(adminGeneral && userJSON.tipoUsuario != 'Administrador General') return <Navigate to="/" />;
+  if (!auth.user && !userFromLocalStorage) return <Navigate to="/login" />;
+  return children;
+}
+
 
 function App() {
-
   return (
     <div className='App'>
-      <ParkingProvider>
-        <AuthProvider>
-          <Routes>
-            <Route path='/' element={<Home/>} />
-            <Route path='/login' element={<Login/>} />
-            <Route path='/register' element={<Register/>} />
-            <Route path='/reserva' element={<Reserva />} />
-            <Route path='/mis_reservas' element={<MisReservas />} />
-            <Route path='/crear_tarjeta' element={<CreditRegister />}></Route>
-          </Routes>
-        </AuthProvider>
-      </ParkingProvider>
+      <CardProvider>
+        <ParkingProvider>
+          <ReservaProvider>
+            <Routes>
+              <Route path='/' element={<Home/>} />
+              <Route path='/login' element={<Login/>} />
+              <Route path='/register' element={<Register/>} />
+              <Route path='/users' element={<RequireAuth adminGeneral> <Usuarios/> </RequireAuth>} />
+              <Route path='/reserva' element={<RequireAuth><Reserva /></RequireAuth>} />
+              <Route path='/mis_reservas' element={<RequireAuth><MisReservas /></RequireAuth>} />
+              <Route path='/crear_tarjeta' element={<CreditRegister />} />
+              <Route path='/pago_tarjeta' element={<RequireAuth><PagoTarjeta /></RequireAuth>} />
+            </Routes>
+          </ReservaProvider>
+        </ParkingProvider>
+      </CardProvider>
     </div>
   )
 }

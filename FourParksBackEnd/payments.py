@@ -1,4 +1,5 @@
 import datetime
+from flask import Flask, request, jsonify
 
 def verify_card_type(card_number):
     """
@@ -67,15 +68,39 @@ def process_payment(cardholder_name, card_number, expiry_date, security_code, em
     dict: Resultado del intento de procesamiento del pago.
     """
     if not is_valid_card_number(card_number):
-        return {"success": False, "message": "Número de tarjeta inválido."}
+        return jsonify({"error": True, "message": "Número de tarjeta inválido."})
     
     if not is_valid_expiry_date(expiry_date):
-        return {"success": False, "message": "La tarjeta ha expirado."}
+        return jsonify({"error": True, "message": "La tarjeta ha expirado."})
     
     card_type = verify_card_type(card_number)
     if card_type == "Desconocido":
-        return {"success": False, "message": "Tipo de tarjeta no soportado."}
+        return jsonify({"error": True, "message": "Tipo de tarjeta no soportado."})
 
     # Simulación de procesamiento de pago
     print(f"Procesando pago para {cardholder_name} con tarjeta {card_type}")
     return {"success": True, "message": f"Pago procesado correctamente con {card_type}, recibo enviado a {email}"}
+
+def registrar_tarjeta(card_number, expiry_date, security_code):
+    """
+    Procesa el pago simulando una transacción de tarjeta de crédito.
+    
+    Args:
+    card_number (str): Número de la tarjeta de crédito.
+    expiry_date (str): Fecha de vencimiento de la tarjeta.
+    security_code (str): Código de seguridad de la tarjeta.
+    
+    Returns:
+    dict: Resultado del intento de registro de tarjeta.
+    """
+    if not is_valid_card_number(card_number):
+        return {"error": True, "message": "Número de tarjeta inválido."}
+    
+    if not is_valid_expiry_date(expiry_date):
+        return {"error": True, "message": "La tarjeta ha expirado."}
+    
+    card_type = verify_card_type(card_number)
+    if card_type == "Desconocido":
+        return {"error": True, "message": "Tipo de tarjeta no soportado."}
+
+    return {"success": True, "message": "Tarjeta registrada correctamente"}

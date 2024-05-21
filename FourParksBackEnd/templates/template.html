@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factura</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.5;
+            color: #333333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        td, th {
+            padding: 8px;
+            text-align: center;
+        }
+        h1, h2, h4 {
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <p>&nbsp;</p>
+    <table border="0">
+        <tbody>
+            <tr>
+                <td style="width: 20.45%;">
+                    <img src="https://i.postimg.cc/nV5Vgqss/Logo-FP.png" alt="Logo" width="200" height="200" />
+                </td>
+                <td style="width: 56.58%;">
+                    <h1>FOUR PARKS</h1>
+                    <h4>NIT 901523513</h4>
+                    <h4>Carrera 8 # 40 - 62, Bogotá, Colombia</h4>
+                    <h4>grupobfourparks@gmail.com</h4>
+                </td>
+                <td style="width: 22.97%;">
+                    <h2>Factura No.</h2>
+                    <h2 id="Numero_Factura">#{{ num_Factura }}</h2>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <p>&nbsp;</p>
+    <table border="0">
+        <tbody>
+            <tr>
+                <td style="width: 71.43%;">
+                    <p id="Nombre_Cliente">{{ nombre_cliente }}</p>
+                </td>
+                <td style="width: 28.57%; text-align: center;">
+                    Fecha del documento
+                    <p id="Fecha_Factura">{{ fecha_factura }}</p>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <p>&nbsp;</p>
+    <table border="1">
+        <thead>
+            <tr>
+                <th style="width: 20%;">Descripción</th>
+                <th style="width: 20%;">Precio (tarifa)</th>
+                <th style="width: 20%;">Cantidad</th>
+                <th style="width: 20%;">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td id="Descripcion" style="height: 52px;">{{ desc_factura }}</td>
+                <td id="Precio_hora" style="height: 52px;">{{ precio_hora }}</td>
+                <td id="Cantidad" style="height: 52px;">{{ cantidad }}</td>
+                <td id="Total" style="height: 52px;">{{ total }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <table border="0">
+        <tbody>
+            <tr>
+                <td style="width: 60.01%;">&nbsp;</td>
+                <td style="width: 19.95%;"><strong>Subtotal</strong></td>
+                <td id="Subtotal" style="width: 20.03%;">{{ subtotal }}</td>
+            </tr>
+            <tr>
+                <td style="width: 60.01%;">&nbsp;</td>
+                <td style="width: 19.95%;"><strong>Total</strong></td>
+                <td id="Total" style="width: 20.03%;">{{ total }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <p>&nbsp;</p>
+    <table border="0">
+        <tbody>
+            <tr>
+                <td style="width: 8.08%;">
+                    <img src="https://i.postimg.cc/kGtCqhV2/QR.png" alt="QR" width="100" height="100" />
+                </td>
+                <td style="width: 60%;">
+                    <p>Moneda: COP</p>
+                    <p>Generado: {{ fechagenerado }}</p>
+                    <p>Validación DIAN: 2024-04-08 08:55:58-05:00</p>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+    <p style="text-align: center;">
+        Autorización de numeración de facturación N°123456 de 2023-10-24 Modalidad Factura Electrónica Desde N° 1 hasta 200 con<br>
+        vigencia hasta 2024-10-25
+    </p>
+    <p style="text-align: center;">&nbsp;</p>
+    <p style="text-align: center;">
+        <strong>Representación gráfica de factura de venta electrónica</strong>
+    </p>
+</body>
+
+</html>
