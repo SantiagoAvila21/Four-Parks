@@ -622,6 +622,56 @@ def get_reserva(numreserva):
         cur.close()
         conn.close()
 
+@app.route("/buscar_reservas", methods=["GET"])
+def buscar_reservas():
+    correo_electronico = request.args.get('correo_electronico')
+    
+    if not correo_electronico:
+        return jsonify({"error": "El correo electrónico es requerido"}), 400
+    
+    try:
+        # Conectar a la base de datos PostgreSQL
+        conn = psycopg2.connect(url)
+        cur = conn.cursor()
+
+        # Consulta SQL para obtener el IDUSUARIO a partir del correo electrónico
+        sql_usuario_query = "SELECT idusuario FROM usuario WHERE correoelectronico = %s"
+        cur.execute(sql_usuario_query, (correo_electronico,))
+        usuario_result = cur.fetchone()
+
+        if not usuario_result:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+        
+        idusuario = usuario_result[0]
+
+        # Consulta SQL para obtener las reservas del usuario
+        sql_reserva_query = "SELECT numreserva, idvehiculo, idmetodopago, idparqueadero, idtipodescuento, montototal, duracionestadia, fechareserva FROM reserva WHERE idusuario = %s"
+        cur.execute(sql_reserva_query, (idusuario,))
+        reservas = cur.fetchall()
+
+        reservas_data = []
+        for reserva in reservas:
+            reservas_data.append({
+                "numreserva": reserva[0],
+                "idvehiculo": reserva[1],
+                "idmetodopago": reserva[2],
+                "idparqueadero": reserva[3],
+                "idtipodescuento": reserva[4],
+                "montototal": reserva[5],
+                "duracionestadia": reserva[6],
+                "fechareserva": reserva[7]
+            })
+
+        return jsonify(reservas_data), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cur.close()
+        conn.close()
+
+
 @app.route("/api/get_vehiculo/<idvehiculo>", methods=["GET"])
 def get_vehiculo(idvehiculo):
     try:
