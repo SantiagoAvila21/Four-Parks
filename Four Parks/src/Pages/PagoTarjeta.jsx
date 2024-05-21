@@ -7,12 +7,16 @@ import CardForm from "../components/CardForm";
 import axios from 'axios'
 import { CircularProgress } from "@mui/material";
 import { useReserva } from "../Context/ReservaProvider";
+import Modal from "../components/Modal";
+import { useNavigate } from "react-router";
 
 const PagoTarjeta = () => {
     const { updateNotification } = useNotification();
 
+    const [showModal, setshowModal] = useState(false);
     const [isLoadingCard, setIsLoadingCard] = useState(true);
     const { pagarReserva } = useReserva();
+    const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
         cardholderName: '',
@@ -87,12 +91,38 @@ const PagoTarjeta = () => {
             f_expiracion: formData.expirationDate,
             numtarjeta: formData.cardNumber,
             nombre: formData.cardholderName
-        });
+        }, () => {setshowModal((prev) => !prev)});
     };
 
 
     return (
         <div className="Register">
+            <Modal shouldShow={showModal} green="green" onRequestClose={() => {
+                    setshowModal((prev) => !prev);
+            }}>
+                <div className="reservaRealizada">
+                    <h1>RESERVA REALIZADA</h1>
+                    <div className="reservaInfo">
+                        <h5>NÚMERO DE RESERVA</h5>
+                        <p>#A4859</p>
+                        <h5>NOMBRE</h5>
+                        <p>Santiago Hernandez</p>
+                        <h5>PLACA</h5>
+                        <p>HCP-486</p>
+                        <h5>PARQUEADERO</h5>
+                        <p>PARQUEADERO LA COLINA</p>
+                        <h5>TIPO DE VEHICULO</h5>
+                        <p>MOTO</p>
+                        <h5>FECHA LLEGADA</h5>
+                        <p>10/05/2024 2:00 PM</p>
+                        <h5>FECHA SALIDA</h5>
+                        <p>10/05/2024 6:00 PM</p>
+                        <h5>COSTO</h5>
+                        <p>$4000,0</p>
+                    </div>
+                    <button id="submitButton" type="submit" onClick={() => navigate("/")}>VOLVER A PAGINA PRINCIPAL</button>
+                </div>
+            </Modal>
             <SideLogo />
             <div className="register Page">
                 <h1>

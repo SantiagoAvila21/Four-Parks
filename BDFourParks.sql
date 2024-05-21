@@ -411,6 +411,9 @@ alter table VEHICULO
       references TIPO_VEHICULO (IDTIPOVEHICULO)
       on delete restrict on update restrict;
 
+ALTER TABLE parqueadero
+ADD COLUMN tarifamulta INTEGER;
+
 
 /* Inserciones Necesarias */
 /* TIPO USUARIO */

@@ -24,12 +24,9 @@ const ReservaProvider = ({ children }) => {
                 fechareservaentrada: data.fechaEntradaFormateada,
                 fechareservasalida: data.fechaSalidaFormateada
             });
-            console.log(responseReserva);
 
-            if(responseReserva.status == 201){
-                setReserva(responseReserva.data.reserva);
-                navigate('/pago_tarjeta');
-            }
+            if(responseReserva.status == 201) navigate('/pago_tarjeta');
+            
         }catch (error){
             console.error();
         }finally{
@@ -37,7 +34,7 @@ const ReservaProvider = ({ children }) => {
         }
     }
 
-    const pagarReserva = async (data) => {
+    const pagarReserva = async (data, cb) => {
         updateNotification({type: "loading", message: "Cargando..."});
         try{
             const responseReserva = await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/pago_tarjeta`, {
@@ -53,10 +50,12 @@ const ReservaProvider = ({ children }) => {
                 await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/factura`, {
                     correoelectronico: data.correoelectronico,
                     nombre_cliente: JSON.parse(localStorage.getItem('userLogged')).usuario.replace('_', ' '),
-                    parqueadero: parqueaderoSelected,
-                                        
-
+                    parqueadero: parqueaderoSelected[2],
+                    tarifa: reserva.tarifa,
+                    cantidadhoras: Math.abs(reserva.cantidadhoras),
+                    montototal: Math.abs(reserva.monto)
                 });
+                cb();
             }
         }catch (error){
             console.error();
@@ -66,7 +65,7 @@ const ReservaProvider = ({ children }) => {
     }
 
     return (
-        <ReservaContext.Provider value={{ createReserva, reserva, pagarReserva, setParqueaderoSelected }} >
+        <ReservaContext.Provider value={{ createReserva, setReserva, pagarReserva, setParqueaderoSelected }} >
             {children}
         </ReservaContext.Provider>
     );

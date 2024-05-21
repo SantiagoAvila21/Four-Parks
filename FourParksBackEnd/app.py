@@ -734,7 +734,7 @@ def factura():
 
 
     msg.html = render_template('template.html', num_Factura = generar_numero_factura(),
-        nombre_cliente = data['nombre'],
+        nombre_cliente = data['nombre_cliente'],
         fecha_factura = fecha_generado,
         desc_factura = f"Reserva en {data['parqueadero']}",
         precio_hora = f"${data['tarifa']},0",

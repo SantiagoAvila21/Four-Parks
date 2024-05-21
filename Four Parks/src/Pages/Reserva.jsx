@@ -17,8 +17,9 @@ const Reserva = () => {
     const [fechaSalida, setFechaSalida] = useState(dayjs());
     const { updateNotification } = useNotification();
     const parking = useParking();
-    const { createReserva } = useReserva();
+    const { createReserva, setReserva, setParqueaderoSelected } = useReserva();
     const [idParqueadero, setIdParqueadero] = useState('');
+
     const [tarifas, setTarifas] = useState({
         'tarifacarro': '',
         'tarifamoto': '',
@@ -28,7 +29,7 @@ const Reserva = () => {
     useEffect(() => {
         const infoParqueadero = parking.parqueaderos.filter(parqueadero => parqueadero[2] === location.state.nombreParqueadero)[0];
         if(infoParqueadero){
-            parking.setParqueaderoSelected(infoParqueadero);
+            setParqueaderoSelected(infoParqueadero);
             setIdParqueadero(infoParqueadero[0]);
             setTarifas({
                 'tarifacarro': infoParqueadero[9],
@@ -114,6 +115,18 @@ const Reserva = () => {
         if(infoReserva.tipoVehiculo === '1') tarifa = tarifas.tarifacarro;
         else if(infoReserva.tipoVehiculo === '2') tarifa = tarifas.tarifamoto;
         else if(infoReserva.tipoVehiculo === '3') tarifa = tarifas.tarifabici;
+
+        let cantidadhoras = fechaEntrada.diff(fechaSalida, 'hour');
+
+        setReserva({
+            idParqueadero,
+            monto: tarifa * cantidadhoras,
+            fechaEntradaFormateada,
+            fechaSalidaFormateada,
+            cantidadhoras,
+            tarifa,
+            placa: infoReserva.placa
+        });
 
         createReserva({
             idParqueadero,
