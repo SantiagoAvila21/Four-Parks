@@ -15,7 +15,7 @@ const ReservaProvider = ({ children }) => {
     const createReserva = async (data) => {
         updateNotification({type: "loading", message: "Cargando..."});
         try{
-            const responseReserva = await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/crear_reserva`, {
+            const responseReserva = await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/reserva/crear_reserva`, {
                 correoelectronico: JSON.parse(localStorage.getItem('userLogged')).correo,
                 idparqueadero: data.idParqueadero,
                 montototal: Math.abs(data.monto),
@@ -45,7 +45,8 @@ const ReservaProvider = ({ children }) => {
     const pagarReserva = async (data, cb) => {
         updateNotification({type: "loading", message: "Cargando..."});
         try{
-            const responseReserva = await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/pago_tarjeta`, {
+            
+            const responseReserva = await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/reserva/pago_tarjeta`, {
                 correoelectronico: JSON.parse(localStorage.getItem('userLogged')).correo,
                 security_code: data.security_code,
                 f_expiracion: data.f_expiracion, 
@@ -64,7 +65,7 @@ const ReservaProvider = ({ children }) => {
 
                 console.log(reserva.numfactura);
 
-                await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/factura`, {
+                await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/reserva/factura`, {
                     numfactura: reserva.numfactura,
                     correoelectronico: data.correoelectronico,
                     nombre_cliente: JSON.parse(localStorage.getItem('userLogged')).usuario.replace('_', ' '),

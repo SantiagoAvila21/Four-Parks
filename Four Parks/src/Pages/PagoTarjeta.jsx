@@ -40,7 +40,7 @@ const PagoTarjeta = () => {
             };
             
             try{
-                const responseCard = await axios.get(`${import.meta.env.VITE_FLASK_SERVER_URL}/obtener_tarjeta/${userFromLocalStorage.correo}`);
+                const responseCard = await axios.get(`${import.meta.env.VITE_FLASK_SERVER_URL}/user/obtener_tarjeta/${userFromLocalStorage.correo}`);
 
                 if(responseCard.status == 200){
                     setFormData(prevFormData => ({
@@ -54,7 +54,7 @@ const PagoTarjeta = () => {
 
             }catch (error){
                 console.error(error);
-                updateNotification({type: 'error', message: 'Ocurrio un error en la aplicación'});
+                updateNotification({type: 'error', message: 'Este usuario no tiene una tarjeta asociada.'});
             } finally {
                 setIsLoadingCard(false);
             }

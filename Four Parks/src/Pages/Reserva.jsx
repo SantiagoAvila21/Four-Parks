@@ -10,6 +10,7 @@ import dayjs from "dayjs";
 import useNotification from "../Hooks/useNotification";
 import { useParking } from "../Context/ParkingsProvider";
 import { useReserva } from "../Context/ReservaProvider";
+import generarNumeroFactura from '../utils/factura_util';
 
 const Reserva = () => {
     const location = useLocation();
@@ -65,16 +66,6 @@ const Reserva = () => {
         event.preventDefault();
 
         // MANEJO DE ERRORES EN LAS FECHAS INGRESADAS ------
-        if (!fechaEntrada.isValid() || fechaEntrada.minute() !== 0) {
-            updateNotification({ type: 'error', message: 'Por favor, seleccione una hora fija para la fecha de entrada.' });
-            return;
-        }
-
-        if (!fechaSalida.isValid() || fechaSalida.minute() !== 0) {
-            updateNotification({ type: 'error', message: 'Por favor, seleccione una hora fija para la fecha de salida.' });
-            return;
-        }
-
         if(fechaSalida.isBefore(fechaEntrada, 'hour')){
             updateNotification({ type: 'error', message: 'Por favor, seleccione una hora de salida posterior a la de entrada.' });
             return;
@@ -122,12 +113,6 @@ const Reserva = () => {
         } 
 
         let cantidadhoras = fechaEntrada.diff(fechaSalida, 'hour');
-
-        const generarNumeroFactura = () => {
-            const letras = Array.from({ length: 3 }, () => String.fromCharCode(65 + Math.floor(Math.random() * 26))).join('');
-            const numeros = Array.from({ length: 7 }, () => Math.floor(Math.random() * 10)).join('');
-            return letras + numeros;
-        }
 
         setReserva({
             parqueaderoSelected,
@@ -237,8 +222,8 @@ const Reserva = () => {
                                     disablePast={true} // No permitir fechas anteriores al día de hoy
                                     shouldDisableDate={date => !isValidDate(date)} // Deshabilitar fechas mayores a 8 días
                                     disableTimeValidation={true} // Deshabilitar validación de hora
-                                    minutesStep={60}
                                     allowSameDateSelection={true} // Permitir selección de la misma fecha
+                                    views={['year', 'month', 'day', 'hours']}
                                 />  
                             </LocalizationProvider>
                         </div>
@@ -252,8 +237,8 @@ const Reserva = () => {
                                     disablePast={true} // No permitir fechas anteriores al día de hoy
                                     shouldDisableDate={date => !isValidDate(date)} // Deshabilitar fechas mayores a 8 días
                                     disableTimeValidation={true} // Deshabilitar validación de hora
-                                    minutesStep={60}
                                     allowSameDateSelection={true} // Permitir selección de la misma fecha
+                                    views={['year', 'month', 'day', 'hours']}
                                 />  
                             </LocalizationProvider>
                         </div>

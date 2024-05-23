@@ -24,7 +24,7 @@ const Usuarios = () => {
     const fetchUsuarios = async () => {
         setIsLoading(true);
         try {
-            const response = await axios.get(`${import.meta.env.VITE_FLASK_SERVER_URL}/api/get_usuarios/`);
+            const response = await axios.get(`${import.meta.env.VITE_FLASK_SERVER_URL}/user/get_usuarios/`);
             if(response.status == 200){
                 setUsuarios(response.data);
                 setIsLoading(false);
@@ -45,7 +45,7 @@ const Usuarios = () => {
         try{
             updateNotification({type: 'loading', message: "Cargando..."})
 
-            const responseAssign = await axios.put(`${import.meta.env.VITE_FLASK_SERVER_URL}/api/cambiar_tipousuario`, {
+            const responseAssign = await axios.put(`${import.meta.env.VITE_FLASK_SERVER_URL}/user/cambiar_tipousuario`, {
                 correoelectronico: correo,
                 tipousuario: idtipo,
                 idparqueadero: selectedParqueadero
@@ -106,7 +106,7 @@ const Usuarios = () => {
                         </div>
                     }
                     {!isLoading && 
-                        <div className="tablaUsuarios">
+                        <div className="tablaUsuarios" style={{ maxHeight: '600px', overflowY: 'auto' }}>
                             <TablaUsuarios users={usuarios} fetchUsers = {fetchUsuarios} cb = {(email, idtipousuario) => {
                                 setSelectedRol(idtipousuario);
                                 setSelectedCorreo(email);

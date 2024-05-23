@@ -6,12 +6,11 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
-import { useEffect } from 'react';
 import { ImCross } from "react-icons/im";
 
 
 // Función para crear filas a partir de los datos proporcionados
-function createData(parqueadero, fechareserva, costo, puntos) {
+function createData(parqueadero, fechareserva, costo, puntos, numreserva, estado) {
 
     // Crear un objeto Date a partir del string
     const fecha = new Date(fechareserva);
@@ -24,7 +23,7 @@ function createData(parqueadero, fechareserva, costo, puntos) {
     // Formatear la fecha como dd/mm/yyyy
     const fechaFormateada = `${dia.toString().padStart(2, '0')}/${mes.toString().padStart(2, '0')}/${año}`;
 
-    return { parqueadero , fechaFormateada, costo, puntos };
+    return { parqueadero , fechaFormateada, costo, puntos, numreserva, estado };
 }
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -40,16 +39,8 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 // Componente de tabla
 /* eslint-disable react/prop-types */
 const TablaReservas = ({ reservas, cb }) => {
-    //c onst auth = useAuth();
 
-    useEffect(() => {
-        console.log(reservas);
-    }, []);
-
-    /* const handleChangeRol = (idtipousuario, correo) => {
-        cb(correo, idtipousuario);
-    } */
-    reservas = reservas.map(reserva => createData(reserva.nombreparqueadero, reserva.fechareserva, reserva.costo, reserva.puntos));
+    reservas = reservas.map(reserva => createData(reserva.nombreparqueadero, reserva.fechareserva, reserva.costo, reserva.puntos, reserva.numreserva, reserva.estado));
 
     //const usuarios = reservas.map(reserva => createData(...usuario));
 
@@ -67,7 +58,7 @@ const TablaReservas = ({ reservas, cb }) => {
             </TableHead>
             <TableBody>
             {reservas.map((reserva) => (
-                <TableRow key={reserva.parqueadero}>
+                <TableRow key={reserva.numreserva}>
                     <TableCell component="th" scope="row">
                         {reserva.parqueadero}
                     </TableCell>
@@ -81,7 +72,8 @@ const TablaReservas = ({ reservas, cb }) => {
                         {reserva.puntos}
                     </TableCell>
                     <TableCell align="center">
-                        <ImCross className='cancelarButton' onClick={cb}/>
+                        { reserva.estado == 'Cancelar' && <ImCross className='cancelarButton' onClick={() => cb(reserva.numreserva, reserva.parqueadero)}/> }
+                        { reserva.estado != 'Cancelar' && <p>{ reserva.estado }</p> }
                     </TableCell>
                 </TableRow>
             ))}
