@@ -2,7 +2,7 @@ from flask import Flask, Response
 from flask_mail import Mail
 from flask_cors import CORS
 from app.config import Config
-from app.utils.db_utils import get_db_connection
+#from app.utils.db_utils import get_db_connection
 from app.scheduler import scheduler
 
 

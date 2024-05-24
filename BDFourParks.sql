@@ -4,73 +4,6 @@
 /*==============================================================*/
 
 
-drop index MARCAVEHICULO_PK;
-
-drop table MARCAVEHICULO;
-
-drop index METODO_PAGO_PK;
-
-drop table METODO_PAGO;
-
-drop index PARQUEADEROTIPO_FK;
-
-drop index PARQUEADERO_PK;
-
-drop table PARQUEADERO;
-
-drop index RESERVAUSUARIO_FK;
-
-drop index DESCUENTO_FK;
-
-drop index PAGORESERVA_FK;
-
-drop index RESERVAPARQUEADERO_FK;
-
-drop index VEHICULORESERVA_FK;
-
-drop index RESERVA_PK;
-
-drop table RESERVA;
-
-drop index TIPODESCUENTO_PK;
-
-drop table TIPODESCUENTO;
-
-drop index TIPO_DOCUMENTO_PK;
-
-drop table TIPO_DOCUMENTO;
-
-drop index TIPO_PARQUEADERO_PK;
-
-drop table TIPO_PARQUEADERO;
-
-drop index TIPO_USUARIO_PK;
-
-drop table TIPO_USUARIO;
-
-drop index TIPO_VEHICULO_PK;
-
-drop table TIPO_VEHICULO;
-
-drop index USUARIODOC_FK;
-
-drop index USUARIOTIPOUSUARIO_FK;
-
-drop index USUARIO_PK;
-
-drop table USUARIO;
-
-drop index VEHICULOTIPO_FK;
-
-drop index PARQUEA_A_FK;
-
-drop index VEHICULOMARCA_FK;
-
-drop index USUARIOVEHICULO_FK;
-
-drop index VEHICULO_PK;
-
-drop table VEHICULO;
 
 /*==============================================================*/
 /* Table: MARCAVEHICULO                                         */
@@ -271,19 +204,17 @@ create table USUARIO (
    CONTRASENIA          VARCHAR(40)          not null,
    PUNTOSACUMULADOS     INT4                 not null,
    CORREOELECTRONICO    VARCHAR(35)          null,
-   ESTADO               VARCHAR(25)          not null,
-   FIRST_LOGIN          BOOLEAN              not null,
    constraint PK_USUARIO primary key (IDUSUARIO)
 );
 
 ALTER TABLE USUARIO
-ADD COLUMN first_time_login TYPE BOOLEAN;
+ADD COLUMN first_time_login BOOLEAN;
 
 ALTER TABLE USUARIO
-ADD COLUMN estado TYPE VARCHAR(25);
+ADD COLUMN estado VARCHAR(25);
 
 ALTER TABLE USUARIO
-ADD COLUMN codigo TYPE INT4;
+ADD COLUMN codigo INT4;
 
 
 /*==============================================================*/
@@ -455,7 +386,7 @@ INSERT INTO TIPODESCUENTO VALUES (2,'Fidelizacion',1000);
 
 /* Insercion usuario de prueba */
 INSERT INTO usuario (idusuario, idtipousuario, idtipodocumento, nombreusuario, numdocumento, contrasenia, puntosacumulados, correoelectronico)
-            VALUES (1, 3, 1, 'usuarioTest', '1000834814', 'admintest', 0, 'test@gmail.com') 
+            VALUES ('P1', 3, 'CC', 'usuarioTest', '1000834814', 'admintest', 0, 'test@gmail.com');
 
 
 

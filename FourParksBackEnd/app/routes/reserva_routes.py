@@ -1,11 +1,12 @@
 import os
 from flask import Blueprint, request, jsonify, render_template
-from app.utils.db_utils import get_db_connection
+#from app.utils.db_utils import get_db_connection
 from datetime import datetime, timedelta
 from app.utils.payment_utils import process_payment
 import math
 from flask_mail import Mail, Message
 from app import mail
+from app.utils.db_utils import *
 
 
 reserva_bp = Blueprint('reserva', __name__, url_prefix='/reserva')
@@ -14,37 +15,32 @@ reserva_bp = Blueprint('reserva', __name__, url_prefix='/reserva')
 def crear_reserva():
     data = request.get_json()
     try:
-        conn = get_db_connection()
-        conn.autocommit = False
-        cur = conn.cursor()
         now = datetime.now()
 
         email = data['correoelectronico']
         
         # Obtener el máximo numreserva actual
-        cur.execute("SELECT MAX(CAST(SUBSTRING(numreserva, 2) AS INTEGER)) FROM reserva")
-        max_numreserva = cur.fetchone()[0]
-        if max_numreserva is None:
-            max_numreserva = 0
+        max_numreserva_query = "SELECT MAX(CAST(SUBSTRING(numreserva, 2) AS INTEGER)) FROM reserva"
+        max_numreserva = DatabaseFacade.execute_query(max_numreserva_query)
+        max_numreserva = max_numreserva[0][0] if max_numreserva[0][0] else 0
 
         nuevo_idreserva = 'R' + str(max_numreserva + 1).zfill(3)
 
-        cur.execute("SELECT idusuario FROM usuario WHERE correoelectronico = %s", (email,))
-        idusuario = cur.fetchone()
-        if not idusuario:
+        idusuario_query = "SELECT idusuario FROM usuario WHERE correoelectronico = %s"
+        idusuario_result = DatabaseFacade.execute_query(idusuario_query, (email,))
+        if not idusuario_result:
             raise Exception("Usuario no encontrado")
-        idusuario = idusuario[0]
+        idusuario = idusuario_result[0][0]
 
         sql_query = """
             INSERT INTO reserva (numreserva, idusuario, idparqueadero, montototal, fechareservaentrada, fechareservasalida, fecharegistrada)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
         values = (nuevo_idreserva, idusuario, data['idparqueadero'], data['montototal'], data['fechareservaentrada'], data['fechareservasalida'], now)
-        cur.execute(sql_query, values)
-        cur.execute("UPDATE parqueadero SET capacidadactual = capacidadactual - 1 WHERE idparqueadero = %s", (data['idparqueadero'],))
+        DatabaseFacade.execute_query(sql_query, values)
+        DatabaseFacade.execute_query("UPDATE parqueadero SET capacidadactual = capacidadactual - 1 WHERE idparqueadero = %s", (data['idparqueadero'],))
         puntosUsuario = int(math.floor(data['montototal'] / 4000))
-        cur.execute("UPDATE usuario SET puntosacumulados = puntosacumulados + %s WHERE correoelectronico = %s", (puntosUsuario, email))
-        conn.commit()
+        DatabaseFacade.execute_query("UPDATE usuario SET puntosacumulados = puntosacumulados + %s WHERE correoelectronico = %s", (puntosUsuario, email))
 
         reserva = {"numreserva": nuevo_idreserva, "idusuario": idusuario, "idparqueadero": data['idparqueadero'],
                    "montototal": data['montototal'], "fechareservaentrada": data['fechareservaentrada'],
@@ -52,65 +48,40 @@ def crear_reserva():
                    
         return jsonify({"message": "Reserva creada con éxito", "reserva": reserva}), 201
     except Exception as e:
-        if conn:
-            conn.rollback()
         return jsonify({"error": str(e)}), 400
-    finally:
-        cur.close()
-        conn.close()
 
-
-# Add other reserva-related routes here.
 
 @reserva_bp.route("/pago_tarjeta", methods=["POST"])
 def pago_tarjeta():
     try:
-        # Connect to the PostgreSQL database
-        conn = get_db_connection()
-        cur = conn.cursor()
         data = request.get_json()
-
-        # SQL query to update data into the parqueadero table
-        #sql_query = ""
-
-        #values = (
-        #    data['capacidadtotal'], data['capacidadactual'],data['idparqueadero']
-        #)
-        # Execute the query
-        #cur.execute(sql_query, values)
-        #conn.commit()
-        ntarjeta = data['numtarjeta']
-
         correo = data['correoelectronico']
-        cur.execute("SELECT puntosacumulados FROM usuario WHERE correoelectronico = %s", (correo, ))
-        puntos = cur.fetchone()
-        
-        respuesta = process_payment(data['nombre'], ntarjeta, data['f_expiracion'], data['security_code'], data['correoelectronico'])
-        print(respuesta)
 
-        return jsonify({"puntos": puntos[0]}), 201
+        # Obtener los puntos acumulados del usuario
+        puntos_query = "SELECT puntosacumulados FROM usuario WHERE correoelectronico = %s"
+        puntos_result = DatabaseFacade.execute_query(puntos_query, (correo,))
+        puntos = puntos_result[0][0] if puntos_result else 0
+
+        # Procesar el pago
+        respuesta = process_payment(data['nombre'], data['numtarjeta'], data['f_expiracion'], data['security_code'], correo)
+        if respuesta.get('error'):
+            return jsonify({"error": respuesta.get('error')}), 400
+
+        return jsonify({"puntos": puntos}), 201
     except Exception as e:
-        cur.close()
-        conn.close()
         return jsonify({"error": str(e)}), 400
 
 @reserva_bp.route("/get_reserva/<numreserva>", methods=["GET"])
 def get_reserva(numreserva):
     try:
-        conn = get_db_connection()
-        cur = conn.cursor()
         sql_query = "SELECT * FROM reserva WHERE numreserva = %s"
-        cur.execute(sql_query, (numreserva,))
-        reserva_info = cur.fetchone()
+        reserva_info = DatabaseFacade.execute_query(sql_query, (numreserva,))
         if reserva_info:
-            return jsonify(reserva_info), 200
+            return jsonify(reserva_info[0]), 200
         else:
             return jsonify({"error": "Reserva no encontrada"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    finally:
-        cur.close()
-        conn.close()
 
 @reserva_bp.route("/buscar_reservas", methods=["GET"])
 def buscar_reservas():
@@ -120,25 +91,20 @@ def buscar_reservas():
         return jsonify({"error": "El correo electrónico es requerido"}), 400
     
     try:
-        # Conectar a la base de datos PostgreSQL
-        conn = get_db_connection()
-        cur = conn.cursor()
-
-        # Consulta SQL para obtener el IDUSUARIO a partir del correo electrónico
         sql_usuario_query = "SELECT idusuario FROM usuario WHERE correoelectronico = %s"
-        cur.execute(sql_usuario_query, (correo_electronico,))
-        usuario_result = cur.fetchone()
-
+        usuario_result = DatabaseFacade.execute_query(sql_usuario_query, (correo_electronico,))
         if not usuario_result:
             return jsonify({"error": "Usuario no encontrado"}), 404
         
-        idusuario = usuario_result[0]
+        idusuario = usuario_result[0][0]
 
-        # Consulta SQL para obtener las reservas del usuario
-        sql_reserva_query = "SELECT P.nombreparqueadero, R.fechareservaentrada, R.montototal, R.fechareservasalida, R.numreserva FROM reserva R, parqueadero P WHERE R.idusuario = %s and P.idparqueadero = R.idparqueadero ORDER BY R.fechareservaentrada DESC"
-        cur.execute(sql_reserva_query, (idusuario,))
-        reservas = cur.fetchall()
-
+        sql_reserva_query = """
+        SELECT P.nombreparqueadero, R.fechareservaentrada, R.montototal, R.fechareservasalida, R.numreserva
+        FROM reserva R, parqueadero P
+        WHERE R.idusuario = %s AND P.idparqueadero = R.idparqueadero
+        ORDER BY R.fechareservaentrada DESC
+        """
+        reservas = DatabaseFacade.execute_query(sql_reserva_query, (idusuario,))
 
         reservas_data = []
         now = datetime.now()
@@ -167,10 +133,6 @@ def buscar_reservas():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-    finally:
-        cur.close()
-        conn.close()
-
 @reserva_bp.route('/factura', methods=["POST"])
 def factura():
     now = datetime.now()
@@ -181,79 +143,296 @@ def factura():
         sender=os.getenv("MAIL_USERNAME"),
         recipients=[data['correoelectronico']])
 
-    msg.html = render_template('template.html', num_Factura = data['numfactura'],
-        nombre_cliente = data['nombre_cliente'],
-        fecha_factura = fecha_generado,
-        desc_factura = f"Reserva en {data['parqueadero']}",
-        precio_hora = f"${data['tarifa']},0",
-        cantidad = f"{data['cantidadhoras']} horas",
-        total = f"${data['montototal']},0",
-        subtotal = f"${data['montototal']},0",
-        fechagenerado = fecha_generado)
+    msg.html = render_template('template.html', num_Factura=data['numfactura'],
+        nombre_cliente=data['nombre_cliente'],
+        fecha_factura=fecha_generado,
+        desc_factura=f"Reserva en {data['parqueadero']}",
+        precio_hora=f"${data['tarifa']},0",
+        cantidad=f"{data['cantidadhoras']} horas",
+        total=f"${data['montototal']},0",
+        subtotal=f"${data['montototal']},0",
+        fechagenerado=fecha_generado)
     mail.send(msg)
-    return jsonify({"message": "Factura mandada correctamente"}), 200
-
+    return jsonify({"message": "Factura enviada correctamente"}), 200
 
 @reserva_bp.route('/cancelar_reserva', methods=["DELETE"])
 def cancelar_reserva():
     now = datetime.now() + timedelta(minutes=30)
-
     data = request.get_json()
 
     try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-
-        # Obtener la fecha de reserva entrada
-        cur.execute("SELECT fechareservaentrada, idusuario FROM reserva WHERE numreserva = %s", (data['numreserva'],))
-        reserva_info = cur.fetchone()
+        sql_reserva_info = "SELECT fechareservaentrada, idusuario FROM reserva WHERE numreserva = %s"
+        reserva_info = DatabaseFacade.execute_query(sql_reserva_info, (data['numreserva'],))
         if not reserva_info:
             return jsonify({"error": "Reserva no encontrada"}), 404
         
-        fechareservaentrada = reserva_info[0]
-        idusuario = reserva_info[1]
+        fechareservaentrada = reserva_info[0][0]
+        idusuario = reserva_info[0][1]
 
-        cur.execute("SELECT tarifamulta FROM parqueadero WHERE nombreparqueadero = %s", (data['parqueadero'],))
-        tarifamulta = cur.fetchone()[0]
+        sql_tarifamulta = "SELECT tarifamulta FROM parqueadero WHERE nombreparqueadero = %s"
+        tarifamulta_result = DatabaseFacade.execute_query(sql_tarifamulta, (data['parqueadero'],))
+        tarifamulta = tarifamulta_result[0][0]
 
-        print(now, fechareservaentrada)
-        
         # Verificar si la fecha actual es anterior en 30 minutos a la fecha de reserva entrada
         if now > fechareservaentrada - timedelta(minutes=30):
-            # send_email(correo_usuario, "Cancelación de Reserva", "Su reserva ha sido cancelada con éxito.")
             fecha_generado = now.strftime("%Y-%m-%d %H:%M:%S")
             msg = Message("Factura Multa",
             sender=os.getenv("MAIL_USERNAME"),
             recipients=[data['correoelectronico']])
 
-            msg.html = render_template('template.html', num_Factura = data['numfactura'],
-                nombre_cliente = data['nombre_cliente'],
-                fecha_factura = fecha_generado,
-                desc_factura = f"Multa por cancelacion de reserva en {data['parqueadero']}",
-                precio_hora = f"${tarifamulta},0",
-                cantidad = f"1",
-                total = f"${tarifamulta},0",
-                subtotal = f"${tarifamulta},0",
-                fechagenerado = fecha_generado)
+            msg.html = render_template('template.html', num_Factura=data['numfactura'],
+                nombre_cliente=data['nombre_cliente'],
+                fecha_factura=fecha_generado,
+                desc_factura=f"Multa por cancelación de reserva en {data['parqueadero']}",
+                precio_hora=f"${tarifamulta},0",
+                cantidad="1",
+                total=f"${tarifamulta},0",
+                subtotal=f"${tarifamulta},0",
+                fechagenerado=fecha_generado)
             mail.send(msg)
         
         # Eliminar la reserva
-        sql_query = "DELETE FROM reserva WHERE numreserva = %s"
-        cur.execute(sql_query, (data['numreserva'],))
+        sql_delete_reserva = "DELETE FROM reserva WHERE numreserva = %s"
+        DatabaseFacade.execute_query(sql_delete_reserva, (data['numreserva'],))
 
         # Actualizar la capacidad del parqueadero
-        cur.execute("UPDATE parqueadero SET capacidadactual = capacidadactual + 1 WHERE nombreparqueadero = %s", (data['parqueadero'],))
+        sql_update_capacidad = "UPDATE parqueadero SET capacidadactual = capacidadactual + 1 WHERE nombreparqueadero = %s"
+        DatabaseFacade.execute_query(sql_update_capacidad, (data['parqueadero'],))
 
-        conn.commit()
-        
         return jsonify({"message": "Reserva cancelada con éxito"}), 200
     except Exception as e:
-        if conn:
-            conn.rollback()
         return jsonify({"error": str(e)}), 500
-    finally:
-        cur.close()
-        conn.close()
+
+# Add other reserva-related routes here.
+
+#Grafica de barras
+
+@app.route("/reservas_hoy/<idparqueadero>", methods=["GET"])
+def reservas_hoy(idparqueadero):
+    try:
+        sql_query = """
+        SELECT COUNT(*) AS cantidad_reservas
+        FROM reserva
+        WHERE fecharegistrada::date = CURRENT_DATE AND
+              idparqueadero = %s;
+        """
+        result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
+        return jsonify({"cantidad_reservas": result[0][0]}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/reservas_ayer/<idparqueadero>", methods=["GET"])
+def reservas_ayer(idparqueadero):
+    try:
+        sql_query = """
+        SELECT COUNT(*) AS cantidad_reservas
+        FROM reserva
+        WHERE fecharegistrada::date = CURRENT_DATE - INTERVAL '1 day' AND
+              idparqueadero = %s;
+        """
+        result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
+        return jsonify({"cantidad_reservas": result[0][0]}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/reservas_mes/<idparqueadero>", methods=["GET"])
+def reservas_mes(idparqueadero):
+    try:
+        sql_query = """
+        SELECT fecharegistrada::date AS fecha, COUNT(*) AS cantidad_reservas
+        FROM reserva
+        WHERE fecharegistrada >= CURRENT_DATE - INTERVAL '1 month' AND
+              idparqueadero = %s
+        GROUP BY fecharegistrada::date
+        ORDER BY fecharegistrada::date;
+        """
+        result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
+        reservas = [{"fecha": row[0], "cantidad_reservas": row[1]} for row in result]
+        return jsonify(reservas), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/reservas_tres_meses/<idparqueadero>", methods=["GET"])
+def reservas_tres_meses(idparqueadero):
+    try:
+        sql_query = """
+        SELECT fecharegistrada::date AS fecha, COUNT(*) AS cantidad_reservas
+        FROM reserva
+        WHERE fecharegistrada >= CURRENT_DATE - INTERVAL '3 months' AND
+              idparqueadero = %s
+        GROUP BY fecharegistrada::date
+        ORDER BY fecharegistrada::date;
+        """
+        result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
+        reservas = [{"fecha": row[0], "cantidad_reservas": row[1]} for row in result]
+        return jsonify(reservas), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+#Grafica dispersion
+
+@app.route("/duracion_reservas_hoy/<idparqueadero>", methods=["GET"])
+def duracion_reservas_hoy(idparqueadero):
+    try:
+        sql_query = """
+        SELECT EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada))/3600 AS duracion_horas
+        FROM reserva
+        WHERE fecharegistrada::date = CURRENT_DATE AND
+              idparqueadero = %s;
+        """
+        result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
+        duraciones = [row[0] for row in result]
+        return jsonify(duraciones), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/duracion_reservas_ayer/<idparqueadero>", methods=["GET"])
+def duracion_reservas_ayer(idparqueadero):
+    try:
+        sql_query = """
+        SELECT EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada))/3600 AS duracion_horas
+        FROM reserva
+        WHERE fecharegistrada::date = CURRENT_DATE - INTERVAL '1 day' AND
+              idparqueadero = %s;
+        """
+        result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
+        duraciones = [row[0] for row in result]
+        return jsonify(duraciones), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/duracion_reservas_mes/<idparqueadero>", methods=["GET"])
+def duracion_reservas_mes(idparqueadero):
+    try:
+        sql_query = """
+        SELECT EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada))/3600 AS duracion_horas
+        FROM reserva
+        WHERE fecharegistrada >= CURRENT_DATE - INTERVAL '1 month' AND
+              idparqueadero = %s;
+        """
+        result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
+        duraciones = [row[0] for row in result]
+        return jsonify(duraciones), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/duracion_reservas_tres_meses/<idparqueadero>", methods=["GET"])
+def duracion_reservas_tres_meses(idparqueadero):
+    try:
+        sql_query = """
+        SELECT EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada))/3600 AS duracion_horas
+        FROM reserva
+        WHERE fecharegistrada >= CURRENT_DATE - INTERVAL '3 months' AND
+              idparqueadero = %s;
+        """
+        result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
+        duraciones = [row[0] for row in result]
+        return jsonify(duraciones), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+#Grafica torta
+
+@app.route("/proporcion_reservas_hoy/<idparqueadero>", methods=["GET"])
+def proporcion_reservas_hoy(idparqueadero):
+    try:
+        sql_query = """
+        SELECT 
+            CASE 
+                WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 < 1 THEN 'Menos de 1 hora'
+                WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 1 AND 2 THEN 'Entre 1 y 2 horas'
+                WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 2 AND 4 THEN 'Entre 2 y 4 horas'
+                ELSE 'Más de 4 horas'
+            END AS duracion_reserva,
+            COUNT(*) AS cantidad_reservas
+        FROM reserva
+        WHERE fecharegistrada::date = CURRENT_DATE AND
+              idparqueadero = %s
+        GROUP BY duracion_reserva
+        ORDER BY cantidad_reservas DESC;
+        """
+        result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
+        proporciones = [{"duracion_reserva": row[0], "cantidad_reservas": row[1]} for row in result]
+        return jsonify(proporciones), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/proporcion_reservas_ayer/<idparqueadero>", methods=["GET"])
+def proporcion_reservas_ayer(idparqueadero):
+    try:
+        sql_query = """
+        SELECT 
+            CASE 
+                WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 < 1 THEN 'Menos de 1 hora'
+                WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 1 AND 2 THEN 'Entre 1 y 2 horas'
+                WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 2 AND 4 THEN 'Entre 2 y 4 horas'
+                ELSE 'Más de 4 horas'
+            END AS duracion_reserva,
+            COUNT(*) AS cantidad_reservas
+        FROM reserva
+        WHERE fecharegistrada::date = CURRENT_DATE - INTERVAL '1 day' AND
+              idparqueadero = %s
+        GROUP BY duracion_reserva
+        ORDER BY cantidad_reservas DESC;
+        """
+        result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
+        proporciones = [{"duracion_reserva": row[0], "cantidad_reservas": row[1]} for row in result]
+        return jsonify(proporciones), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/proporcion_reservas_mes/<idparqueadero>", methods=["GET"])
+def proporcion_reservas_mes(idparqueadero):
+    try:
+        sql_query = """
+        SELECT 
+            CASE 
+                WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 < 1 THEN 'Menos de 1 hora'
+                WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 1 AND 2 THEN 'Entre 1 y 2 horas'
+                WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 2 AND 4 THEN 'Entre 2 y 4 horas'
+                ELSE 'Más de 4 horas'
+            END AS duracion_reserva,
+            COUNT(*) AS cantidad_reservas
+        FROM reserva
+        WHERE fecharegistrada >= CURRENT_DATE - INTERVAL '1 month' AND
+              idparqueadero = %s
+        GROUP BY duracion_reserva
+        ORDER BY cantidad_reservas DESC;
+        """
+        result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
+        proporciones = [{"duracion_reserva": row[0], "cantidad_reservas": row[1]} for row in result]
+        return jsonify(proporciones), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/proporcion_reservas_tres_meses/<idparqueadero>", methods=["GET"])
+def proporcion_reservas_tres_meses(idparqueadero):
+    try:
+        sql_query = """
+        SELECT 
+            CASE 
+                WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 < 1 THEN 'Menos de 1 hora'
+                WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 1 AND 2 THEN 'Entre 1 y 2 horas'
+                WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 2 AND 4 THEN 'Entre 2 y 4 horas'
+                ELSE 'Más de 4 horas'
+            END AS duracion_reserva,
+            COUNT(*) AS cantidad_reservas
+        FROM reserva
+        WHERE fecharegistrada >= CURRENT_DATE - INTERVAL '3 months' AND
+              idparqueadero = %s
+        GROUP BY duracion_reserva
+        ORDER BY cantidad_reservas DESC;
+        """
+        result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
+        proporciones = [{"duracion_reserva": row[0], "cantidad_reservas": row[1]} for row in result]
+        return jsonify(proporciones), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
 
 
 """
@@ -283,6 +462,9 @@ Posibles consultas para las estadisticas Grafica de Barras (donde X es la fecha,
             GROUP BY fecharegistrada::date
             ORDER BY fecharegistrada::date;
 
+            
+
+
 Posibles consultas para las estadisticas Grafica de Dispersion (donde X es la reserva, Y la duracion de la reserva):
     --- Duracion de las reservas hechas en el dia de hoy:
             SELECT EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada))/3600 AS duracion_horas
@@ -304,6 +486,9 @@ Posibles consultas para las estadisticas Grafica de Dispersion (donde X es la re
             FROM reserva
             WHERE fecharegistrada >= CURRENT_DATE - INTERVAL '3 months' AND
                 idparqueadero = %s;
+
+                
+
 
 Posibles consultas para las estadisticas Grafica de Torta (Donde cada color representaria la proporción de reservas por duración):
     --- Proporción de reservas por duración (hoy):
