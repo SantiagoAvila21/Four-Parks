@@ -17,6 +17,7 @@ def crear_reserva():
         conn = get_db_connection()
         conn.autocommit = False
         cur = conn.cursor()
+        now = datetime.now()
 
         email = data['correoelectronico']
         
@@ -35,10 +36,10 @@ def crear_reserva():
         idusuario = idusuario[0]
 
         sql_query = """
-            INSERT INTO reserva (numreserva, idusuario, idparqueadero, montototal, fechareservaentrada, fechareservasalida)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO reserva (numreserva, idusuario, idparqueadero, montototal, fechareservaentrada, fechareservasalida, fecharegistrada)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
-        values = (nuevo_idreserva, idusuario, data['idparqueadero'], data['montototal'], data['fechareservaentrada'], data['fechareservasalida'])
+        values = (nuevo_idreserva, idusuario, data['idparqueadero'], data['montototal'], data['fechareservaentrada'], data['fechareservasalida'], now)
         cur.execute(sql_query, values)
         cur.execute("UPDATE parqueadero SET capacidadactual = capacidadactual - 1 WHERE idparqueadero = %s", (data['idparqueadero'],))
         puntosUsuario = int(math.floor(data['montototal'] / 4000))
@@ -253,3 +254,112 @@ def cancelar_reserva():
     finally:
         cur.close()
         conn.close()
+
+
+"""
+Posibles consultas para las estadisticas Grafica de Barras (donde X es la fecha, Y la cantidad de reservas):
+    --- Cantidad de reservas hechas en el dia de hoy: 
+            SELECT COUNT(*) AS cantidad_reservas
+            FROM reserva
+            WHERE fecharegistrada::date = CURRENT_DATE AND
+                idparqueadero = %s;
+    --- Cantidad de reservas hechas en el dia de ayer: 
+            SELECT COUNT(*) AS cantidad_reservas
+            FROM reserva
+            WHERE fecharegistrada::date = CURRENT_DATE - INTERVAL '1 day' AND
+                idparqueadero = %s;
+    --- Cantidad de reservas hechas en este mes ordenadas por fechas:
+            SELECT fecharegistrada::date AS fecha, COUNT(*) AS cantidad_reservas
+            FROM reserva
+            WHERE fecharegistrada >= CURRENT_DATE - INTERVAL '1 month' AND
+                idparqueadero = %s
+            GROUP BY fecharegistrada::date
+            ORDER BY fecharegistrada::date;
+    --- Cantidad de reservas hechas en los ultimos tres meses ordenadas por fechas:
+            SELECT fecharegistrada::date AS fecha, COUNT(*) AS cantidad_reservas
+            FROM reserva
+            WHERE fecharegistrada >= CURRENT_DATE - INTERVAL '3 months' AND
+                idparqueadero = %s
+            GROUP BY fecharegistrada::date
+            ORDER BY fecharegistrada::date;
+
+Posibles consultas para las estadisticas Grafica de Dispersion (donde X es la reserva, Y la duracion de la reserva):
+    --- Duracion de las reservas hechas en el dia de hoy:
+            SELECT EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada))/3600 AS duracion_horas
+            FROM reserva
+            WHERE fecharegistrada::date = CURRENT_DATE AND
+                idparqueadero = %s;
+    --- Duracion de las reservas hechas en el dia de ayer:
+            SELECT EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada))/3600 AS duracion_horas
+            FROM reserva
+            WHERE fecharegistrada::date = CURRENT_DATE - INTERVAL '1 day' AND
+                idparqueadero = %s;
+    --- Duracion de las reservas hechas en este mes:
+            SELECT EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada))/3600 AS duracion_horas
+            FROM reserva
+            WHERE fecharegistrada >= CURRENT_DATE - INTERVAL '1 month' AND
+                idparqueadero = %s;
+    --- Duracion de las reservas hechas en los ultimos tres meses:
+            SELECT EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada))/3600 AS duracion_horas
+            FROM reserva
+            WHERE fecharegistrada >= CURRENT_DATE - INTERVAL '3 months' AND
+                idparqueadero = %s;
+
+Posibles consultas para las estadisticas Grafica de Torta (Donde cada color representaria la proporción de reservas por duración):
+    --- Proporción de reservas por duración (hoy):
+            SELECT 
+                CASE 
+                    WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 < 1 THEN 'Menos de 1 hora'
+                    WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 1 AND 2 THEN 'Entre 1 y 2 horas'
+                    WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 2 AND 4 THEN 'Entre 2 y 4 horas'
+                    ELSE 'Más de 4 horas'
+                END AS duracion_reserva,
+                COUNT(*) AS cantidad_reservas
+            FROM reserva
+            WHERE fecharegistrada::date = CURRENT_DATE AND
+                idparqueadero = %s
+            GROUP BY duracion_reserva
+            ORDER BY cantidad_reservas DESC;
+    --- Proporción de reservas por duración (ayer):
+            SELECT 
+                CASE 
+                    WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 < 1 THEN 'Menos de 1 hora'
+                    WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 1 AND 2 THEN 'Entre 1 y 2 horas'
+                    WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 2 AND 4 THEN 'Entre 2 y 4 horas'
+                    ELSE 'Más de 4 horas'
+                END AS duracion_reserva,
+                COUNT(*) AS cantidad_reservas
+            FROM reserva
+            WHERE fecharegistrada::date = CURRENT_DATE - INTERVAL '1 day' AND
+                idparqueadero = %s
+            GROUP BY duracion_reserva
+            ORDER BY cantidad_reservas DESC;
+    --- Proporción de reservas por duración (último mes):
+            SELECT 
+                CASE 
+                    WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 < 1 THEN 'Menos de 1 hora'
+                    WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 1 AND 2 THEN 'Entre 1 y 2 horas'
+                    WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 2 AND 4 THEN 'Entre 2 y 4 horas'
+                    ELSE 'Más de 4 horas'
+                END AS duracion_reserva,
+                COUNT(*) AS cantidad_reservas
+            FROM reserva
+            WHERE fecharegistrada >= CURRENT_DATE - INTERVAL '1 month' AND
+                idparqueadero = %s
+            GROUP BY duracion_reserva
+            ORDER BY cantidad_reservas DESC;
+    --- Proporción de reservas por duración (últimos tres meses):
+            SELECT 
+                CASE 
+                    WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 < 1 THEN 'Menos de 1 hora'
+                    WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 1 AND 2 THEN 'Entre 1 y 2 horas'
+                    WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 2 AND 4 THEN 'Entre 2 y 4 horas'
+                    ELSE 'Más de 4 horas'
+                END AS duracion_reserva,
+                COUNT(*) AS cantidad_reservas
+            FROM reserva
+            WHERE fecharegistrada >= CURRENT_DATE - INTERVAL '3 months' AND
+                idparqueadero = %s
+            GROUP BY duracion_reserva
+            ORDER BY cantidad_reservas DESC;
+"""

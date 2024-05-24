@@ -5,10 +5,11 @@ import { ToastContainer } from "react-toastify";
 import useNotification from "../Hooks/useNotification";
 import { useParking } from "../Context/ParkingsProvider";
 import { FaDollarSign } from "react-icons/fa";
+import axios from "axios";
 
 
 const CaracteristicasPunto = () => {
-    const { updateNotification } = useNotification();
+    const { updateNotification, closeNoti } = useNotification();
     const [selectedParqueadero, setSelectedParqueadero] = useState('');
     const [caracteristicaCambiar, setCaracteristicaCambiar] = useState('');
     const [valorTarifa, setValorTarifa] = useState('');
@@ -19,13 +20,55 @@ const CaracteristicasPunto = () => {
     const handleCaracteristicaChange = (event) => setCaracteristicaCambiar(event.target.value);
     const handleTarifaChange = (event) => setValorTarifa(event.target.value);
 
+    const asignarTarifa = async () => {
+        try {
+            updateNotification({type: "loading", message: "Cargando..."});
+            let tarifa = '';
+            if(caracteristicaCambiar == "Multas") tarifa = 'tarifamulta';
+            else{
+                if(tipoVehiculoRef.current.value == '1') tarifa = "tarifacarro";
+                if(tipoVehiculoRef.current.value == '2') tarifa = "tarifamoto";
+                if(tipoVehiculoRef.current.value == '3') tarifa = "tarifabici";
+            }
+
+            console.log({
+                tarifa,
+                valor: valorTarifa,
+                idparqueadero: selectedParqueadero
+            });
+
+            const responseTarifa = await axios.put(`${import.meta.env.VITE_FLASK_SERVER_URL}/parqueadero/cambiar_tarifa_parqueadero`, {
+                tarifa,
+                valor: valorTarifa,
+                idparqueadero: selectedParqueadero
+            })
+            
+            if (responseTarifa.status === 200) {
+                updateNotification({type: "info", message: responseTarifa.data.message});
+            }
+        } catch (error) {
+            console.error(error);
+            updateNotification({type: 'error', message: 'Ocurrió un error en la aplicación.'})
+        } finally {
+            closeNoti();
+        }
+    };
+
     const handleSubmit = (event) => {
         event.preventDefault();
         if (!selectedParqueadero || !caracteristicaCambiar || (caracteristicaCambiar === 'Tarifas' && !tipoVehiculoRef.current.value) || !valorTarifa) {
             updateNotification({ type: 'error', message: 'Todos los campos son obligatorios' });
             return;
         }
+        if(!(valorTarifa > 1000 )){
+            updateNotification({ type: 'error', message: 'Ingresa valores mayores a $1000 COP' });
+            return;
+        }
+
+        asignarTarifa();
     }
+
+    
 
     return (
         <div className="Reserva">
@@ -47,7 +90,7 @@ const CaracteristicasPunto = () => {
                         </div>
                         <div className="reserva info">
                             <label>CARACTERÍSTICA A CAMBIAR</label>
-                            <select name="tipoVehiculo" onChange={handleCaracteristicaChange} className="inputForm">
+                            <select name="caracteristica" onChange={handleCaracteristicaChange} className="inputForm">
                                 <option value={""}>Elegir</option>
                                 <option value={"Tarifas"}>Tarifas</option>
                                 <option value={"Multas"}>Multas</option>
