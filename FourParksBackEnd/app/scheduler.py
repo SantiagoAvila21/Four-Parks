@@ -1,6 +1,6 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
-from app.utils.db_utils import get_db_connection 
+#from app.utils.db_utils import get_db_connection 
 import atexit
 
 def revisar_reservas():

@@ -4,8 +4,9 @@ from flask import Blueprint, request, jsonify
 from app.utils.email_utils import send_email
 from flask_mail import Mail, Message
 from app import mail
-from app.utils.db_utils import get_db_connection
+#from app.utils.db_utils import get_db_connection
 from app.utils.password_utils import generate_password, generate_verification_code
+from app.utils.db_utils import *
 import hashlib
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
@@ -13,18 +14,18 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 @auth_bp.route("/register", methods=["POST"])
 def register():
     try:
-        connection = get_db_connection()
         data = request.get_json()
-        cursor = connection.cursor()
 
-        cursor.execute("SELECT COUNT(*) FROM usuario WHERE correoelectronico = %s", (data['correoelectronico'],))
-        existe_usuario = cursor.fetchone()[0]
+        # Verificar si el correo electrónico ya está en uso
+        existe_usuario_query = "SELECT COUNT(*) FROM usuario WHERE correoelectronico = %s"
+        existe_usuario = DatabaseFacade.execute_query(existe_usuario_query, (data['correoelectronico'],))[0][0]
         if existe_usuario > 0:
             return jsonify({"error": "El correo electrónico ya está en uso"}), 400
 
         # Obtener el último idusuario utilizado
-        cursor.execute("SELECT MAX(idusuario) FROM usuario")
-        ultimo_id = cursor.fetchone()[0]
+        ultimo_id_query = "SELECT MAX(idusuario) FROM usuario"
+        ultimo_id_result = DatabaseFacade.execute_query(ultimo_id_query)
+        ultimo_id = ultimo_id_result[0][0]
 
         if ultimo_id:
             # Incrementar el último idusuario en uno
@@ -43,23 +44,18 @@ def register():
         """
         values = (nuevo_idusuario, data['idtipousuario'], data['idtipodocumento'], data['nombreusuario'],
                   data['numdocumento'], contraseniaHashed, data['puntosacumulados'], data['correoelectronico'], 'unlocked', True)
-        cursor.execute(sql_query, values)
-        connection.commit()
+        DatabaseFacade.execute_query(sql_query, values)
 
         send_email(data['correoelectronico'], "Nueva Contraseña para Four Parks", f'Tu nueva contraseña para el sistema Four Parks es: {nueva_contrasenia}')
 
         return jsonify({"message": "Usuario insertado con éxito"}), 201  
     except Exception as e:
         return jsonify({"error": str(e)}), 400
-    finally:
-        cursor.close()
-        connection.close()
 
 
 # Add similar routes for login, verify, block_usuario, unlock_usuario, etc.
 @auth_bp.route("/login", methods=["POST"])
 def login():
-    # Extract email and password from POST request
     data = request.get_json()
     email = data.get('correoelectronico')
     password = data.get('contrasenia')
@@ -67,19 +63,15 @@ def login():
         return jsonify({"error": "Email y contraseña requeridos"}), 400
     
     try:
-        # Connect to the PostgreSQL database
-        conn = get_db_connection()
-
-        cur = conn.cursor()
-
         # Query para encontrar el usuario por correo electronico
-        cur.execute("SELECT contrasenia, estado FROM usuario WHERE correoelectronico = %s", (email,))
-        user_password = cur.fetchone()    
+        user_query = "SELECT contrasenia, estado FROM usuario WHERE correoelectronico = %s"
+        user_password = DatabaseFacade.execute_query(user_query, (email,))
+        if not user_password:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+        
+        user_password = user_password[0]
         password_hash = hashlib.sha1(password.encode()).hexdigest()
 
-        if user_password is None:
-            return jsonify({"error": "Usuario no encontrado"}), 404       
-        
         if user_password[1] == 'locked':
             return jsonify({"error": "Usuario se encuentra bloqueado"}), 403
 
@@ -89,8 +81,8 @@ def login():
             verification_code = generate_verification_code()
 
             # Subir el codigo de verificacion a la base de datos
-            cur.execute('UPDATE usuario SET codigo = %s WHERE correoelectronico = %s', (verification_code, email))
-            conn.commit() 
+            update_code_query = 'UPDATE usuario SET codigo = %s WHERE correoelectronico = %s'
+            DatabaseFacade.execute_query(update_code_query, (verification_code, email))
 
             msg = Message('Código de verificación', 
                 sender=os.getenv("MAIL_USERNAME"), 
@@ -103,9 +95,7 @@ def login():
             return jsonify({"error": "Contraseña incorrecta"}), 401
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    finally:
-        cur.close()
-        conn.close()
+
 
 @auth_bp.route('/verify', methods=['POST'])
 def verify():
@@ -113,39 +103,37 @@ def verify():
     email = data.get('correoelectronico')
     verification_code = data.get('codigo')
     try:
-        # Connect to the PostgreSQL database
-        conn = get_db_connection()
+        # Verificar si el usuario y el código coinciden
+        verify_query = "SELECT codigo, nombreusuario, first_login, idtipousuario, puntosacumulados FROM usuario WHERE correoelectronico = %s"
+        stored_verification_code = DatabaseFacade.execute_query(verify_query, (email,))
 
-        cur = conn.cursor()
-
-        # Verificar si el usuario y el código coinciden, se devuelve al igual el rol del usuario para que se maneje sobre eso en el frontend
-        cur.execute("SELECT codigo, nombreusuario, first_login, idtipousuario, puntosacumulados FROM usuario WHERE correoelectronico = %s", (email,))
-        stored_verification_code = cur.fetchone()
-
-        if stored_verification_code and stored_verification_code[0] == verification_code:
-            # Actualizar el campo first_login en la base de datos
-            first_log = stored_verification_code[2] 
-            print(first_log, "----")
+        if stored_verification_code and stored_verification_code[0][0] == verification_code:
+            first_log = stored_verification_code[0][2]
             if first_log:
-                cur.execute("UPDATE usuario SET first_login = %s WHERE correoelectronico = %s", (False, email))
-                conn.commit()
+                update_first_login_query = "UPDATE usuario SET first_login = %s WHERE correoelectronico = %s"
+                DatabaseFacade.execute_query(update_first_login_query, (False, email))
 
             tipo_usuario = ""
-            if stored_verification_code[3] == 1:
+            if stored_verification_code[0][3] == 1:
                 tipo_usuario = 'Administrador General'
-            elif stored_verification_code[3] == 2:
+            elif stored_verification_code[0][3] == 2:
                 tipo_usuario = 'Administrador de Punto'
             else: 
                 tipo_usuario = 'Cliente'
 
-            return {"primerLog": first_log, "usuario": stored_verification_code[1], "tipoUsuario": tipo_usuario, "puntos": stored_verification_code[4], 'message': 'Código de verificación correcto.'}, 200
+            return {
+                "primerLog": first_log,
+                "usuario": stored_verification_code[0][1],
+                "tipoUsuario": tipo_usuario,
+                "puntos": stored_verification_code[0][4],
+                'message': 'Código de verificación correcto.'
+            }, 200
         else:
             return {'error': 'Código de verificación incorrecto.'}, 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    finally:
-        cur.close()
-        conn.close()
+
+
 
 # Ruta que bloque a un usuario en el caso que ingrese tres veces mal la contraseña
 @auth_bp.route("/block_usuario", methods=["PUT"])
@@ -154,14 +142,11 @@ def block_usuario():
     email = data['correoelectronico']
 
     try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-
-        cur.execute("UPDATE usuario SET estado = 'locked' WHERE correoelectronico = %s", (email,))
-        conn.commit()
+        update_estado_query = "UPDATE usuario SET estado = 'locked' WHERE correoelectronico = %s"
+        DatabaseFacade.execute_query(update_estado_query, (email,))
 
         msg = Message('Bloqueo de usuario', 
-            sender = os.getenv("MAIL_USERNAME"), 
+            sender=os.getenv("MAIL_USERNAME"), 
             recipients=[os.getenv("MAIL_USERNAME")])
         msg.body = f'El usuario con correo: {email} ha sido bloqueado debido a 3 intentos fallidos de inicio de sesión.'
         mail.send(msg)
@@ -169,9 +154,7 @@ def block_usuario():
         return jsonify({"message": "Usuario bloqueado"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    finally:
-        cur.close()
-        conn.close()
+
 
 # Ruta que desbloquea a un usuario en el caso que el admnistrador general lo desee
 @auth_bp.route("/unlock_usuario", methods=["PUT"])
@@ -180,14 +163,11 @@ def unlock_usuario():
     email = data['correoelectronico']
 
     try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-
-        cur.execute("UPDATE usuario SET estado = 'unlocked' WHERE correoelectronico = %s", (email,))
-        conn.commit()
+        update_estado_query = "UPDATE usuario SET estado = 'unlocked' WHERE correoelectronico = %s"
+        DatabaseFacade.execute_query(update_estado_query, (email,))
 
         msg = Message('Cuenta Desbloqueada', 
-            sender = os.getenv("MAIL_USERNAME"), 
+            sender=os.getenv("MAIL_USERNAME"), 
             recipients=[email])
         msg.body = f'Tu cuenta de Four Parks ha sido desbloqueada, por nuestro Administrador General'
         mail.send(msg)
@@ -195,6 +175,4 @@ def unlock_usuario():
         return jsonify({"message": "Usuario desbloqueado"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    finally:
-        cur.close()
-        conn.close()
+
