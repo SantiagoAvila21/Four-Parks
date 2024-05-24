@@ -74,11 +74,6 @@ const Reserva = () => {
         const fechaEntradaFormateada = dayjs(fechaEntrada).format('YYYY-MM-DD HH:mm:ss');
         const fechaSalidaFormateada = dayjs(fechaSalida).format('YYYY-MM-DD HH:mm:ss');
 
-        if(Object.values(infoReserva).includes('')){
-            updateNotification({ type: 'error', message: 'Hay al menos un espacio en blanco' });
-            return;
-        }
-
         // MANEJO DE ERRORES DE PLACAS INGRESADAS -----
         const placaRegexCarro = /^[A-Z]{3}-?\d{3}$/;
         const placaRegexMoto = /^[A-Z]{3}-?\d{2}[A-Z]$/;

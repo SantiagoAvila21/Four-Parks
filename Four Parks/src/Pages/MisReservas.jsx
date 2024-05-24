@@ -7,17 +7,19 @@ import { CircularProgress } from "@mui/material";
 import TablaReservas from "../components/TablaReservas";
 import axios from 'axios'
 import useNotification from "../Hooks/useNotification";
-import generarNumeroFactura from '../utils/factura_util';
+import { useReserva } from "../Context/ReservaProvider";
+
 
 const MisReservas = () => {
     const [showModal, setShowModal] = useState(false);
     const [reservas, setReservas] = useState([]);
     const [isLoading, setLoading] = useState(true);
-    const { updateNotification, closeNoti } = useNotification();
+    const { updateNotification } = useNotification();
     const [reservaCancelar, setReservaCancelar] = useState({
         numreserva: '',
         parqueadero: ''
     });
+    const { cancelarReserva } = useReserva();
 
     const fetchReservas = async () => {
         const userFromLocalStorage = JSON.parse(localStorage.getItem("userLogged"));
@@ -49,39 +51,8 @@ const MisReservas = () => {
         fetchReservas();
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const cancelarReserva = async () => {
-        const userFromLocalStorage = JSON.parse(localStorage.getItem("userLogged"));
-        try {
-            updateNotification({ type: 'loading', message: "Cargando Cancelacion..." });
-    
-            const responseCancel = await axios.delete(`${import.meta.env.VITE_FLASK_SERVER_URL}/reserva/cancelar_reserva`, {
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                data: {
-                    numreserva: reservaCancelar.numreserva,
-                    parqueadero: reservaCancelar.parqueadero,
-                    correoelectronico: userFromLocalStorage.correo,
-                    nombre_cliente: userFromLocalStorage.usuario.replace('_', ' '),
-                    numfactura: generarNumeroFactura()
-                }
-            });
-            
-            if (responseCancel.status == 200) {
-                closeNoti();
-                updateNotification({ type: 'info', message: responseCancel.data.message });
-                fetchReservas();
-            }
-        } catch (error) {
-            console.error(error.response.data);
-            closeNoti();
-            updateNotification({ type: 'error', message: error.response.data.message });
-        }
-    }
-    
-
     const handleCancel = () => {
-        cancelarReserva();
+        cancelarReserva(reservaCancelar, fetchReservas);
         setShowModal(prev => !prev);
     }
 

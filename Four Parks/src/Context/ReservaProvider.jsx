@@ -2,11 +2,14 @@ import axios from "axios";
 import { useContext, createContext, useState } from "react";
 import useNotification from "../Hooks/useNotification";
 import { useAuth } from "./AuthProvider";
+import { useParking } from "./ParkingsProvider";
+import generarNumeroFactura from '../utils/factura_util';
 
 const ReservaContext = createContext();
 
 /* eslint-disable react/prop-types */
 const ReservaProvider = ({ children }) => {
+    const { fetchparqueaderos } = useParking();
     const { setUser } = useAuth();
     const [reserva, setReserva] = useState({});
     const [parqueaderoSelected, setParqueaderoSelected] = useState([]);
@@ -74,6 +77,8 @@ const ReservaProvider = ({ children }) => {
                     cantidadhoras: Math.abs(reserva.cantidadhoras),
                     montototal: Math.abs(reserva.monto)
                 });
+
+                fetchparqueaderos();
                 cb();
             }
         }catch (error){
@@ -83,8 +88,39 @@ const ReservaProvider = ({ children }) => {
         }
     }
 
+    const cancelarReserva = async (data, cb) => {
+        const userFromLocalStorage = JSON.parse(localStorage.getItem("userLogged"));
+        try {
+            updateNotification({ type: 'loading', message: "Cargando Cancelacion..." });
+    
+            const responseCancel = await axios.delete(`${import.meta.env.VITE_FLASK_SERVER_URL}/reserva/cancelar_reserva`, {
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                data: {
+                    numreserva: data.numreserva,
+                    parqueadero: data.parqueadero,
+                    correoelectronico: userFromLocalStorage.correo,
+                    nombre_cliente: userFromLocalStorage.usuario.replace('_', ' '),
+                    numfactura: generarNumeroFactura()
+                }
+            });
+            
+            if (responseCancel.status == 200) {
+                closeNoti();
+                updateNotification({ type: 'info', message: responseCancel.data.message });
+                fetchparqueaderos();
+                cb();
+            }
+        } catch (error) {
+            console.error(error.response.data);
+            closeNoti();
+            updateNotification({ type: 'error', message: error.response.data.message });
+        }
+    }
+
     return (
-        <ReservaContext.Provider value={{ setReserva, reserva, pagarReserva, setParqueaderoSelected, parqueaderoSelected }} >
+        <ReservaContext.Provider value={{ setReserva, reserva, pagarReserva, cancelarReserva, setParqueaderoSelected, parqueaderoSelected }} >
             {children}
         </ReservaContext.Provider>
     );

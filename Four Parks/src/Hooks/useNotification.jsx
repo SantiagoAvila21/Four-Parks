@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-const useNotification = (initialNotification) => {
-    const defaultNotification = {
+const useNotification = () => {
+    /* const defaultNotification = {
         type: "",
         message: "",
         position: "top-right",
@@ -13,43 +13,52 @@ const useNotification = (initialNotification) => {
         draggable: true,
         progress: undefined,
         theme: "light"
-    };
+    }; */
 
-    const [notification, setNotification] = useState({
-        ...defaultNotification,
-        ...initialNotification
-    });
+    const [notification, setNotification] = useState(null);
 
-    const { type, message, position, autoClose, hideProgressBar, closeOnClick, pauseOnHover, draggable, progress, theme } = notification;
-
-    useEffect(() => {
-        if (type === 'error' || type === 'success' || type === 'info' || type === 'loading' ) {
-            toast[type](message, {
-                position,
-                autoClose,
-                hideProgressBar,
-                closeOnClick,
-                pauseOnHover,
-                draggable,
-                progress,
-                theme
-            });
-        }
-    }, [type, message, position, autoClose, hideProgressBar, closeOnClick, pauseOnHover, draggable, progress, theme]);
-
-    const updateNotification = (newNotification) => {
-        setNotification({
-            ...notification,
-            ...newNotification
+    const showNotification = (newNotification) => {
+        const { type, message, position, autoClose, hideProgressBar, closeOnClick, pauseOnHover, draggable, progress, theme } = newNotification;
+        const key = Date.now().toString(); // Genera un identificador único basado en la marca de tiempo
+        toast[type](message, {
+            key, // Usa el identificador como clave para forzar la creación de una nueva notificación
+            position,
+            autoClose,
+            hideProgressBar,
+            closeOnClick,
+            pauseOnHover,
+            draggable,
+            progress,
+            theme,
+            onClose: () => {
+                // Reinicia la variable de estado cuando se cierra la notificación
+                setNotification(null);
+            }
         });
     };
 
-    // Función para manejar la promesa y mostrar las notificaciones Toastify
+    const updateNotification = (newNotification) => {
+        // Si ya hay una notificación en curso, forzamos la creación de una nueva notificación
+        if (notification) {
+            const newMessage = `¡${newNotification.message}!`;
+            newNotification = { ...newNotification, message: newMessage };
+        }
+        setNotification(newNotification);
+    };
+    
+
+    useEffect(() => {
+        if (notification) {
+            showNotification(notification);
+        }
+    }, [notification]);
+
     const closeNoti = () => {
         toast.dismiss();
     };
 
     return { updateNotification, closeNoti };
 };
+
 
 export default useNotification;
