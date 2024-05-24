@@ -96,7 +96,7 @@ def obtener_tarjeta(correo):
 
 @user_bp.route("/tipodoc", methods=["GET"])
 def get_all_tipodoc():
-    connection = DatabaseConnection.get_db_connection()
+    connection = get_db_connection()
     SELECT_ALL_TIPODOC = "SELECT * FROM tipo_documento;"
     with connection:
         with connection.cursor() as cursor:
@@ -178,7 +178,7 @@ def cambiar_tipousuario():
 @user_bp.route("/cambiar_contrasenia", methods=["PUT"])
 def cambiar_contrasenia():
     try:
-        conn = DatabaseConnection.get_db_connection()
+        conn = get_db_connection()
         cur = conn.cursor()
         data = request.get_json()
         correo = data['correoelectronico']
@@ -200,3 +200,24 @@ def cambiar_contrasenia():
     finally:
         cur.close()
         con.close()
+
+@user_bp.route("/reclamar_puntos", methods=["PUT"])
+def reclamar_puntos():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        data = request.get_json()
+        correo = data['correoelectronico']
+        puntos = data['puntosreclamados']
+
+        sql_query = "UPDATE usuario SET puntosacumulados = puntosacumulados - %s WHERE correoelectronico = %s"
+        cur.execute(sql_query, (puntos, correo))
+        conn.commit()
+
+        return jsonify({"success": "Puntos reclamados satisfactoriamente"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()

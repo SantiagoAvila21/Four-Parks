@@ -48,6 +48,7 @@ def crear_reserva():
         reserva = {"numreserva": nuevo_idreserva, "idusuario": idusuario, "idparqueadero": data['idparqueadero'],
                    "montototal": data['montototal'], "fechareservaentrada": data['fechareservaentrada'],
                    "fechareservasalida": data['fechareservasalida'], "puntos": puntosUsuario}
+                   
         return jsonify({"message": "Reserva creada con éxito", "reserva": reserva}), 201
     except Exception as e:
         if conn:

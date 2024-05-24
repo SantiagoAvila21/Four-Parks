@@ -119,3 +119,34 @@ def get_parqueaderos_tipo(idtipoparqueadero):
             else:
                 cursor.close()
                 return jsonify({"error": f"Parqueaderos no encontrados."}), 404
+
+
+@parqueadero_bp.route("/cambiar_tarifa_parqueadero", methods=["PUT"])
+def cambiar_tarifa_parqueadero():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        data = request.get_json()
+
+        # Obtener los datos proporcionados en la solicitud
+        tarifa = data['tarifa']
+        valor = data['valor']
+        idparqueadero = data['idparqueadero']
+
+        # Validar que la columna proporcionada sea una de las opciones permitidas
+        tarifas_permitidas = {"tarifacarro", "tarifamoto", "tarifabici", "tarifamulta"}
+        if tarifa not in tarifas_permitidas:
+            return jsonify({"error": "Columna proporcionada no válida"}), 400
+
+        # SQL query para actualizar la columna especificada en la tabla parqueadero
+        sql_query = f"UPDATE parqueadero SET {tarifa} = %s WHERE idparqueadero = %s"
+        cur.execute(sql_query, (valor, idparqueadero,))
+        conn.commit()
+
+        # Cerrar la conexión con la base de datos
+        cur.close()
+        conn.close()
+
+        return jsonify({"message": "Parqueadero modificado con éxito"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
