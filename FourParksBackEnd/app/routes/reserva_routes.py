@@ -207,7 +207,7 @@ def cancelar_reserva():
 
 #Grafica de barras
 
-@app.route("/reservas_hoy/<idparqueadero>", methods=["GET"])
+@reserva_bp.route("/reservas_hoy/<idparqueadero>", methods=["GET"])
 def reservas_hoy(idparqueadero):
     try:
         sql_query = """
@@ -221,7 +221,7 @@ def reservas_hoy(idparqueadero):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/reservas_ayer/<idparqueadero>", methods=["GET"])
+@reserva_bp.route("/reservas_ayer/<idparqueadero>", methods=["GET"])
 def reservas_ayer(idparqueadero):
     try:
         sql_query = """
@@ -235,7 +235,7 @@ def reservas_ayer(idparqueadero):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/reservas_mes/<idparqueadero>", methods=["GET"])
+@reserva_bp.route("/reservas_mes/<idparqueadero>", methods=["GET"])
 def reservas_mes(idparqueadero):
     try:
         sql_query = """
@@ -252,7 +252,7 @@ def reservas_mes(idparqueadero):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/reservas_tres_meses/<idparqueadero>", methods=["GET"])
+@reserva_bp.route("/reservas_tres_meses/<idparqueadero>", methods=["GET"])
 def reservas_tres_meses(idparqueadero):
     try:
         sql_query = """
@@ -271,7 +271,7 @@ def reservas_tres_meses(idparqueadero):
 
 #Grafica dispersion
 
-@app.route("/duracion_reservas_hoy/<idparqueadero>", methods=["GET"])
+@reserva_bp.route("/duracion_reservas_hoy/<idparqueadero>", methods=["GET"])
 def duracion_reservas_hoy(idparqueadero):
     try:
         sql_query = """
@@ -286,7 +286,7 @@ def duracion_reservas_hoy(idparqueadero):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/duracion_reservas_ayer/<idparqueadero>", methods=["GET"])
+@reserva_bp.route("/duracion_reservas_ayer/<idparqueadero>", methods=["GET"])
 def duracion_reservas_ayer(idparqueadero):
     try:
         sql_query = """
@@ -301,7 +301,7 @@ def duracion_reservas_ayer(idparqueadero):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/duracion_reservas_mes/<idparqueadero>", methods=["GET"])
+@reserva_bp.route("/duracion_reservas_mes/<idparqueadero>", methods=["GET"])
 def duracion_reservas_mes(idparqueadero):
     try:
         sql_query = """
@@ -316,7 +316,7 @@ def duracion_reservas_mes(idparqueadero):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/duracion_reservas_tres_meses/<idparqueadero>", methods=["GET"])
+@reserva_bp.route("/duracion_reservas_tres_meses/<idparqueadero>", methods=["GET"])
 def duracion_reservas_tres_meses(idparqueadero):
     try:
         sql_query = """
@@ -333,7 +333,7 @@ def duracion_reservas_tres_meses(idparqueadero):
 
 #Grafica torta
 
-@app.route("/proporcion_reservas_hoy/<idparqueadero>", methods=["GET"])
+@reserva_bp.route("/proporcion_reservas_hoy/<idparqueadero>", methods=["GET"])
 def proporcion_reservas_hoy(idparqueadero):
     try:
         sql_query = """
@@ -357,7 +357,7 @@ def proporcion_reservas_hoy(idparqueadero):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/proporcion_reservas_ayer/<idparqueadero>", methods=["GET"])
+@reserva_bp.route("/proporcion_reservas_ayer/<idparqueadero>", methods=["GET"])
 def proporcion_reservas_ayer(idparqueadero):
     try:
         sql_query = """
@@ -382,7 +382,7 @@ def proporcion_reservas_ayer(idparqueadero):
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/proporcion_reservas_mes/<idparqueadero>", methods=["GET"])
+@reserva_bp.route("/proporcion_reservas_mes/<idparqueadero>", methods=["GET"])
 def proporcion_reservas_mes(idparqueadero):
     try:
         sql_query = """
@@ -407,7 +407,7 @@ def proporcion_reservas_mes(idparqueadero):
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/proporcion_reservas_tres_meses/<idparqueadero>", methods=["GET"])
+@reserva_bp.route("/proporcion_reservas_tres_meses/<idparqueadero>", methods=["GET"])
 def proporcion_reservas_tres_meses(idparqueadero):
     try:
         sql_query = """
