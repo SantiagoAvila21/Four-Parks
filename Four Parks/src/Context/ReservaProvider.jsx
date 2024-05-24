@@ -26,14 +26,6 @@ const ReservaProvider = ({ children }) => {
                 fechareservasalida: data.fechaSalidaFormateada
             });
 
-            setReserva((prev) => {
-                const updatedReserva = {
-                    ...prev,
-                    puntos: responseReserva.data.reserva.puntos
-                };
-                return updatedReserva;
-            });
-
             if(responseReserva.status == 201) updateNotification({type: "success", message: "Pago realizado y factura enviada"});
             
         }catch (error){
@@ -54,19 +46,21 @@ const ReservaProvider = ({ children }) => {
                 nombre: data.nombre
             });
 
-            if(responseReserva.status == 201){
-                // Si logro el pago exitosamente se crea la reserva
-                // Se asignan los puntos en la vista
-                setUser((prev) => {
-                    const updatedUser = {
-                        ...prev,
-                        puntos: prev.puntos + reserva.puntos
-                    };
-                    // Guardar el usuario actualizado en localStorage
-                    localStorage.setItem('userLogged', JSON.stringify(updatedUser));
-                    return updatedUser;
-                });
+            // Se asignan los puntos en la vista
+            setUser((prev) => {
+                console.log(responseReserva)
+                const updatedUser = {
+                    ...prev,
+                    puntos: responseReserva.data.puntos
+                };
+                console.log(updatedUser)
+                // Guardar el usuario actualizado en localStorage
+                localStorage.setItem('userLogged', JSON.stringify(updatedUser));
+                return updatedUser;
+            });
 
+            if(responseReserva.status == 201){
+                
                 // Se crea la reserva en la base de datos
                 createReserva({
                     idParqueadero: reserva.parqueaderoSelected[0],
@@ -74,13 +68,26 @@ const ReservaProvider = ({ children }) => {
                     fechaEntradaFormateada: reserva.fechaEntradaFormateada,
                     fechaSalidaFormateada: reserva.fechaSalidaFormateada
                 });
-
+                
                 // Si reclamo horas gratis, se le descuentan de la base de datos
                 if(reserva.horasGratis > 0){
-                    await axios.put(`${import.meta.env.VITE_FLASK_SERVER_URL}/user/reclamar_puntos`, {
+                    const resPuntos = await axios.put(`${import.meta.env.VITE_FLASK_SERVER_URL}/user/reclamar_puntos`, {
                         correoelectronico: data.correoelectronico,
                         puntosreclamados: reserva.horasGratis * 25
                     })
+                    
+                    // Se asignan los puntos en la vista
+                    setUser((prev) => {
+                        console.log(resPuntos)
+                        const updatedUser = {
+                            ...prev,
+                            puntos: resPuntos.data.puntos
+                        };
+                        console.log(updatedUser)
+                        // Guardar el usuario actualizado en localStorage
+                        localStorage.setItem('userLogged', JSON.stringify(updatedUser));
+                        return updatedUser;
+                    });
                 }
                 
                 console.log(reserva.numfactura);

@@ -65,8 +65,8 @@ def crear_reserva():
 def pago_tarjeta():
     try:
         # Connect to the PostgreSQL database
-        #conn = DatabaseConnection.get_db_connection()
-        #cur = conn.cursor()
+        conn = get_db_connection()
+        cur = conn.cursor()
         data = request.get_json()
 
         # SQL query to update data into the parqueadero table
@@ -79,14 +79,18 @@ def pago_tarjeta():
         #cur.execute(sql_query, values)
         #conn.commit()
         ntarjeta = data['numtarjeta']
+
+        correo = data['correoelectronico']
+        cur.execute("SELECT puntosacumulados FROM usuario WHERE correoelectronico = %s", (correo, ))
+        puntos = cur.fetchone()
         
         respuesta = process_payment(data['nombre'], ntarjeta, data['f_expiracion'], data['security_code'], data['correoelectronico'])
         print(respuesta)
 
-        return respuesta, 201
+        return jsonify({"puntos": puntos[0]}), 201
     except Exception as e:
-        #cur.close()
-        #conn.close()
+        cur.close()
+        conn.close()
         return jsonify({"error": str(e)}), 400
 
 @reserva_bp.route("/get_reserva/<numreserva>", methods=["GET"])

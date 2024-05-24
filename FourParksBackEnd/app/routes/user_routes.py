@@ -214,7 +214,10 @@ def reclamar_puntos():
         cur.execute(sql_query, (puntos, correo))
         conn.commit()
 
-        return jsonify({"success": "Puntos reclamados satisfactoriamente"}), 200
+        cur.execute("SELECT puntosacumulados FROM usuario WHERE correoelectronico = %s", (correo, ))
+        puntos = cur.fetchone()
+
+        return jsonify({"puntos": puntos[0], "success": "Puntos reclamados satisfactoriamente"}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
