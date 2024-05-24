@@ -1,6 +1,9 @@
-# app/routes/auth_routes.py
+
+import os
 from flask import Blueprint, request, jsonify
 from app.utils.email_utils import send_email
+from flask_mail import Mail, Message
+from app import mail
 from app.utils.db_utils import get_db_connection
 from app.utils.password_utils import generate_password, generate_verification_code
 import hashlib
