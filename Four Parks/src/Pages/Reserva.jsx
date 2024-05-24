@@ -149,8 +149,8 @@ const Reserva = () => {
             tarifa,
             placa: infoReserva.placa,
             tipoVehiculo: tipoV,
-            horasGratis: (freeHours == '' ? 0 : freeHours),
-            numfactura: generarNumeroFactura(),
+            horasGratis: (freeHours === '' || !usePoints) ? 0 : freeHours,
+            numfactura: generarNumeroFactura()
         });
 
         navigate("/pago_tarjeta");

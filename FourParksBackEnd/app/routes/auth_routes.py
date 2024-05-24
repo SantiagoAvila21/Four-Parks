@@ -46,7 +46,12 @@ def register():
                   data['numdocumento'], contraseniaHashed, data['puntosacumulados'], data['correoelectronico'], 'unlocked', True)
         DatabaseFacade.execute_query(sql_query, values)
 
-        send_email(data['correoelectronico'], "Nueva Contraseña para Four Parks", f'Tu nueva contraseña para el sistema Four Parks es: {nueva_contrasenia}')
+        # Se manda directamente el correo al nuevo usuario con su contraseña 
+        msg = Message("Nueva Contraseña para Four Parks",
+            sender=os.getenv("MAIL_USERNAME"),
+            recipients=[data['correoelectronico']])
+        msg.body = f'Tu nueva contraseña para el sistema Four Parks es: {nueva_contrasenia}'
+        mail.send(msg)
 
         return jsonify({"message": "Usuario insertado con éxito"}), 201  
     except Exception as e:

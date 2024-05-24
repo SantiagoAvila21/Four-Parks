@@ -5,6 +5,7 @@ from app.utils.payment_utils  import registrar_tarjeta
 from flask_mail import Mail, Message
 from app import mail
 from app.utils.db_utils import *
+import hashlib
 
 user_bp = Blueprint('user', __name__, url_prefix='/user')
 

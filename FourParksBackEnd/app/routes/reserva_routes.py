@@ -15,7 +15,7 @@ reserva_bp = Blueprint('reserva', __name__, url_prefix='/reserva')
 def crear_reserva():
     data = request.get_json()
     try:
-        now = datetime.now()
+        now = datetime.now() - timedelta(days=4)
 
         email = data['correoelectronico']
         
@@ -211,27 +211,40 @@ def cancelar_reserva():
 def reservas_hoy(idparqueadero):
     try:
         sql_query = """
-        SELECT COUNT(*) AS cantidad_reservas
+        SELECT fecharegistrada::date AS fecha, COUNT(*) AS cantidad_reservas
         FROM reserva
         WHERE fecharegistrada::date = CURRENT_DATE AND
-              idparqueadero = %s;
+              idparqueadero = %s
+        GROUP BY fecharegistrada::date
+        ORDER BY fecharegistrada::date;
         """
         result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
-        return jsonify({"cantidad_reservas": result[0][0]}), 200
+        if not result:
+            return jsonify({"error": "No se han encontrado estadísticas de este punto"}), 403
+
+        reservas = [{"fecha": row[0], "cantidad_reservas": row[1]} for row in result]
+        return jsonify(reservas), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @reserva_bp.route("/reservas_ayer/<idparqueadero>", methods=["GET"])
 def reservas_ayer(idparqueadero):
     try:
         sql_query = """
-        SELECT COUNT(*) AS cantidad_reservas
+        SELECT fecharegistrada::date AS fecha ,COUNT(*) AS cantidad_reservas
         FROM reserva
         WHERE fecharegistrada::date = CURRENT_DATE - INTERVAL '1 day' AND
-              idparqueadero = %s;
+              idparqueadero = %s
+        GROUP BY fecharegistrada::date
+        ORDER BY fecharegistrada::date;
         """
         result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
-        return jsonify({"cantidad_reservas": result[0][0]}), 200
+        if not result:
+            return jsonify({"error": "No se han encontrado estadísticas de este punto"}), 403
+
+        reservas = [{"fecha": row[0], "cantidad_reservas": row[1]} for row in result]
+        return jsonify(reservas), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -247,6 +260,9 @@ def reservas_mes(idparqueadero):
         ORDER BY fecharegistrada::date;
         """
         result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
+        if not result:
+            return jsonify({"error": "No se han encontrado estadísticas de este punto"}), 403
+        
         reservas = [{"fecha": row[0], "cantidad_reservas": row[1]} for row in result]
         return jsonify(reservas), 200
     except Exception as e:
@@ -264,6 +280,9 @@ def reservas_tres_meses(idparqueadero):
         ORDER BY fecharegistrada::date;
         """
         result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
+        if not result:
+            return jsonify({"error": "No se han encontrado estadísticas de este punto"}), 403
+
         reservas = [{"fecha": row[0], "cantidad_reservas": row[1]} for row in result]
         return jsonify(reservas), 200
     except Exception as e:
@@ -275,13 +294,16 @@ def reservas_tres_meses(idparqueadero):
 def duracion_reservas_hoy(idparqueadero):
     try:
         sql_query = """
-        SELECT EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada))/3600 AS duracion_horas
+        SELECT fechareservaentrada AS fecha, EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada))/3600 AS duracion_horas
         FROM reserva
         WHERE fecharegistrada::date = CURRENT_DATE AND
               idparqueadero = %s;
         """
         result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
-        duraciones = [row[0] for row in result]
+        if not result:
+            return jsonify({"error": "No se han encontrado estadísticas de este punto"}), 403
+
+        duraciones = [{"fechaEntradaReserva": row[0], "duracion_horas": row[1]} for row in result]
         return jsonify(duraciones), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -290,13 +312,16 @@ def duracion_reservas_hoy(idparqueadero):
 def duracion_reservas_ayer(idparqueadero):
     try:
         sql_query = """
-        SELECT EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada))/3600 AS duracion_horas
+        SELECT fechareservaentrada AS fecha, EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada))/3600 AS duracion_horas
         FROM reserva
         WHERE fecharegistrada::date = CURRENT_DATE - INTERVAL '1 day' AND
               idparqueadero = %s;
         """
         result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
-        duraciones = [row[0] for row in result]
+        if not result:
+            return jsonify({"error": "No se han encontrado estadísticas de este punto"}), 403
+
+        duraciones = [{"fechaEntradaReserva": row[0], "duracion_horas": row[1]} for row in result]
         return jsonify(duraciones), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -305,28 +330,35 @@ def duracion_reservas_ayer(idparqueadero):
 def duracion_reservas_mes(idparqueadero):
     try:
         sql_query = """
-        SELECT EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada))/3600 AS duracion_horas
+        SELECT fechareservaentrada AS fecha, EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada))/3600 AS duracion_horas
         FROM reserva
         WHERE fecharegistrada >= CURRENT_DATE - INTERVAL '1 month' AND
               idparqueadero = %s;
         """
         result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
-        duraciones = [row[0] for row in result]
+        if not result:
+            return jsonify({"error": "No se han encontrado estadísticas de este punto"}), 403
+
+        duraciones = [{"fechaEntradaReserva": row[0], "duracion_horas": row[1]} for row in result]
         return jsonify(duraciones), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @reserva_bp.route("/duracion_reservas_tres_meses/<idparqueadero>", methods=["GET"])
 def duracion_reservas_tres_meses(idparqueadero):
     try:
         sql_query = """
-        SELECT EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada))/3600 AS duracion_horas
+        SELECT fechareservaentrada AS fecha, EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada))/3600 AS duracion_horas
         FROM reserva
         WHERE fecharegistrada >= CURRENT_DATE - INTERVAL '3 months' AND
               idparqueadero = %s;
         """
         result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
-        duraciones = [row[0] for row in result]
+        if not result:
+            return jsonify({"error": "No se han encontrado estadísticas de este punto"}), 403
+
+        duraciones = [{"fechaEntradaReserva": row[0], "duracion_horas": row[1]} for row in result]
         return jsonify(duraciones), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -339,7 +371,7 @@ def proporcion_reservas_hoy(idparqueadero):
         sql_query = """
         SELECT 
             CASE 
-                WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 < 1 THEN 'Menos de 1 hora'
+                WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 = 1 THEN '1 hora'
                 WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 1 AND 2 THEN 'Entre 1 y 2 horas'
                 WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 2 AND 4 THEN 'Entre 2 y 4 horas'
                 ELSE 'Más de 4 horas'
@@ -352,6 +384,9 @@ def proporcion_reservas_hoy(idparqueadero):
         ORDER BY cantidad_reservas DESC;
         """
         result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
+        if not result:
+            return jsonify({"error": "No se han encontrado estadísticas de este punto"}), 403
+
         proporciones = [{"duracion_reserva": row[0], "cantidad_reservas": row[1]} for row in result]
         return jsonify(proporciones), 200
     except Exception as e:
@@ -363,7 +398,7 @@ def proporcion_reservas_ayer(idparqueadero):
         sql_query = """
         SELECT 
             CASE 
-                WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 < 1 THEN 'Menos de 1 hora'
+                WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 = 1 THEN '1 hora'
                 WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 1 AND 2 THEN 'Entre 1 y 2 horas'
                 WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 2 AND 4 THEN 'Entre 2 y 4 horas'
                 ELSE 'Más de 4 horas'
@@ -376,6 +411,9 @@ def proporcion_reservas_ayer(idparqueadero):
         ORDER BY cantidad_reservas DESC;
         """
         result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
+        if not result:
+            return jsonify({"error": "No se han encontrado estadísticas de este punto"}), 403
+
         proporciones = [{"duracion_reserva": row[0], "cantidad_reservas": row[1]} for row in result]
         return jsonify(proporciones), 200
     except Exception as e:
@@ -388,7 +426,7 @@ def proporcion_reservas_mes(idparqueadero):
         sql_query = """
         SELECT 
             CASE 
-                WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 < 1 THEN 'Menos de 1 hora'
+                WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 = 1 THEN '1 hora'
                 WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 1 AND 2 THEN 'Entre 1 y 2 horas'
                 WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 2 AND 4 THEN 'Entre 2 y 4 horas'
                 ELSE 'Más de 4 horas'
@@ -401,6 +439,9 @@ def proporcion_reservas_mes(idparqueadero):
         ORDER BY cantidad_reservas DESC;
         """
         result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
+        if not result:
+            return jsonify({"error": "No se han encontrado estadísticas de este punto"}), 403
+
         proporciones = [{"duracion_reserva": row[0], "cantidad_reservas": row[1]} for row in result]
         return jsonify(proporciones), 200
     except Exception as e:
@@ -413,7 +454,7 @@ def proporcion_reservas_tres_meses(idparqueadero):
         sql_query = """
         SELECT 
             CASE 
-                WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 < 1 THEN 'Menos de 1 hora'
+                WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 = 1 THEN '1 hora'
                 WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 1 AND 2 THEN 'Entre 1 y 2 horas'
                 WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 2 AND 4 THEN 'Entre 2 y 4 horas'
                 ELSE 'Más de 4 horas'
@@ -426,6 +467,9 @@ def proporcion_reservas_tres_meses(idparqueadero):
         ORDER BY cantidad_reservas DESC;
         """
         result = DatabaseFacade.execute_query(sql_query, (idparqueadero,))
+        if not result:
+            return jsonify({"error": "No se han encontrado estadísticas de este punto"}), 403
+
         proporciones = [{"duracion_reserva": row[0], "cantidad_reservas": row[1]} for row in result]
         return jsonify(proporciones), 200
     except Exception as e:

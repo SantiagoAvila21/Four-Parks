@@ -80,13 +80,16 @@ def get_parqueaderos_tipo(idtipoparqueadero):
 
 @parqueadero_bp.route("/get_parqueadero_administrador/<correoelectronico>", methods=["GET"])
 def get_parqueadero_administrador(correoelectronico):
-    connection = get_db_connection()
-    with connection:
-        with connection.cursor() as cursor:
-            sql_query = "SELECT idparqueadero, nombreparqueadero, tarifacarro, tarifamoto, tarifabici, tarifamulta FROM parqueadero P, usuario U WHERE U.idparkingmanejado = P.idparqueadero and U.correoelectronico = %s"
-            cursor.execute(sql_query, (correoelectronico,))
-            info_parqueadero = cursor.fetchall()[0]
+    try:
+        sql_query = """
+            SELECT P.idparqueadero, P.nombreparqueadero, P.tarifacarro, P.tarifamoto, P.tarifabici, P.tarifamulta
+            FROM parqueadero P, usuario U
+            WHERE U.idparkingmanejado = P.idparqueadero AND U.correoelectronico = %s
+        """
+        info_parqueadero = DatabaseFacade.execute_query(sql_query, (correoelectronico,))[0]
+        print(info_parqueadero)
 
+        if info_parqueadero:
             data = {
                 "idparqueadero": info_parqueadero[0],
                 "nombreparqueadero": info_parqueadero[1],
@@ -94,12 +97,12 @@ def get_parqueadero_administrador(correoelectronico):
                 "tarifamoto": info_parqueadero[3],
                 "tarifabici": info_parqueadero[4],
                 "tarifamulta": info_parqueadero[5]
-            }
-            if info_parqueadero:
-                return data, 200
-            else:
-                cursor.close()
-                return jsonify({"error": f"Parqueaderos no encontrados."}), 404
+             }
+            return jsonify(data), 200
+        else:
+            return jsonify({"error": "Parqueadero no encontrado."}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @parqueadero_bp.route("/cambiar_tarifa_parqueadero", methods=["PUT"])
 def cambiar_tarifa_parqueadero():
