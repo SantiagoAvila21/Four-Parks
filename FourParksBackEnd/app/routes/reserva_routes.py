@@ -309,7 +309,7 @@ Posibles consultas para las estadisticas Grafica de Torta (Donde cada color repr
     --- Proporción de reservas por duración (hoy):
             SELECT 
                 CASE 
-                    WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 < 1 THEN 'Menos de 1 hora'
+                    WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 = 1 THEN '1 hora'
                     WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 1 AND 2 THEN 'Entre 1 y 2 horas'
                     WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 2 AND 4 THEN 'Entre 2 y 4 horas'
                     ELSE 'Más de 4 horas'
@@ -323,7 +323,7 @@ Posibles consultas para las estadisticas Grafica de Torta (Donde cada color repr
     --- Proporción de reservas por duración (ayer):
             SELECT 
                 CASE 
-                    WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 < 1 THEN 'Menos de 1 hora'
+                    WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 = 1 THEN '1 hora'
                     WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 1 AND 2 THEN 'Entre 1 y 2 horas'
                     WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 2 AND 4 THEN 'Entre 2 y 4 horas'
                     ELSE 'Más de 4 horas'
@@ -337,7 +337,7 @@ Posibles consultas para las estadisticas Grafica de Torta (Donde cada color repr
     --- Proporción de reservas por duración (último mes):
             SELECT 
                 CASE 
-                    WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 < 1 THEN 'Menos de 1 hora'
+                    WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 = 1 THEN '1 hora'
                     WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 1 AND 2 THEN 'Entre 1 y 2 horas'
                     WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 2 AND 4 THEN 'Entre 2 y 4 horas'
                     ELSE 'Más de 4 horas'
@@ -351,7 +351,7 @@ Posibles consultas para las estadisticas Grafica de Torta (Donde cada color repr
     --- Proporción de reservas por duración (últimos tres meses):
             SELECT 
                 CASE 
-                    WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 < 1 THEN 'Menos de 1 hora'
+                    WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 = 1 THEN '1 hora'
                     WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 1 AND 2 THEN 'Entre 1 y 2 horas'
                     WHEN EXTRACT(EPOCH FROM (fechareservasalida - fechareservaentrada)) / 3600 BETWEEN 2 AND 4 THEN 'Entre 2 y 4 horas'
                     ELSE 'Más de 4 horas'

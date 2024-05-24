@@ -120,6 +120,28 @@ def get_parqueaderos_tipo(idtipoparqueadero):
                 cursor.close()
                 return jsonify({"error": f"Parqueaderos no encontrados."}), 404
 
+@parqueadero_bp.route("/get_parqueadero_administrador/<correoelectronico>", methods=["GET"])
+def get_parqueadero_administrador(correoelectronico):
+    connection = get_db_connection()
+    with connection:
+        with connection.cursor() as cursor:
+            sql_query = "SELECT idparqueadero, nombreparqueadero, tarifacarro, tarifamoto, tarifabici, tarifamulta FROM parqueadero P, usuario U WHERE U.idparkingmanejado = P.idparqueadero and U.correoelectronico = %s"
+            cursor.execute(sql_query, (correoelectronico,))
+            info_parqueadero = cursor.fetchall()[0]
+
+            data = {
+                "idparqueadero": info_parqueadero[0],
+                "nombreparqueadero": info_parqueadero[1],
+                "tarifacarro": info_parqueadero[2],
+                "tarifamoto": info_parqueadero[3],
+                "tarifabici": info_parqueadero[4],
+                "tarifamulta": info_parqueadero[5]
+            }
+            if info_parqueadero:
+                return data, 200
+            else:
+                cursor.close()
+                return jsonify({"error": f"Parqueaderos no encontrados."}), 404
 
 @parqueadero_bp.route("/cambiar_tarifa_parqueadero", methods=["PUT"])
 def cambiar_tarifa_parqueadero():
