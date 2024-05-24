@@ -25,15 +25,13 @@ const ReservaProvider = ({ children }) => {
                 fechareservaentrada: data.fechaEntradaFormateada,
                 fechareservasalida: data.fechaSalidaFormateada
             });
-            
-            setUser((prev) => {
-                const updatedUser = {
+
+            setReserva((prev) => {
+                const updatedReserva = {
                     ...prev,
-                    puntos: prev.puntos + responseReserva.data.reserva.puntos
+                    puntos: responseReserva.data.reserva.puntos
                 };
-                // Guardar el usuario actualizado en localStorage
-                localStorage.setItem('userLogged', JSON.stringify(updatedUser));
-                return updatedUser;
+                return updatedReserva;
             });
 
             if(responseReserva.status == 201) updateNotification({type: "success", message: "Pago realizado y factura enviada"});
@@ -46,7 +44,6 @@ const ReservaProvider = ({ children }) => {
     }
 
     const pagarReserva = async (data, cb) => {
-        updateNotification({type: "loading", message: "Cargando..."});
         try{
             
             const responseReserva = await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/reserva/pago_tarjeta`, {
@@ -59,6 +56,18 @@ const ReservaProvider = ({ children }) => {
 
             if(responseReserva.status == 201){
                 // Si logro el pago exitosamente se crea la reserva
+                // Se asignan los puntos en la vista
+                setUser((prev) => {
+                    const updatedUser = {
+                        ...prev,
+                        puntos: prev.puntos + reserva.puntos
+                    };
+                    // Guardar el usuario actualizado en localStorage
+                    localStorage.setItem('userLogged', JSON.stringify(updatedUser));
+                    return updatedUser;
+                });
+
+                // Se crea la reserva en la base de datos
                 createReserva({
                     idParqueadero: reserva.parqueaderoSelected[0],
                     monto: reserva.monto,
@@ -66,8 +75,17 @@ const ReservaProvider = ({ children }) => {
                     fechaSalidaFormateada: reserva.fechaSalidaFormateada
                 });
 
+                // Si reclamo horas gratis, se le descuentan de la base de datos
+                if(reserva.horasGratis > 0){
+                    await axios.put(`${import.meta.env.VITE_FLASK_SERVER_URL}/user/reclamar_puntos`, {
+                        correoelectronico: data.correoelectronico,
+                        puntosreclamados: reserva.horasGratis * 25
+                    })
+                }
+                
                 console.log(reserva.numfactura);
-
+                
+                // Se manda la factura al correo
                 await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/reserva/factura`, {
                     numfactura: reserva.numfactura,
                     correoelectronico: data.correoelectronico,
@@ -78,8 +96,8 @@ const ReservaProvider = ({ children }) => {
                     montototal: Math.abs(reserva.monto)
                 });
 
-                fetchparqueaderos();
                 cb();
+                fetchparqueaderos();
             }
         }catch (error){
             console.error();
@@ -105,15 +123,16 @@ const ReservaProvider = ({ children }) => {
                     numfactura: generarNumeroFactura()
                 }
             });
+
+            console.log(responseCancel);
             
             if (responseCancel.status == 200) {
                 closeNoti();
                 updateNotification({ type: 'info', message: responseCancel.data.message });
-                fetchparqueaderos();
                 cb();
             }
         } catch (error) {
-            console.error(error.response.data);
+            console.error(error.response);
             closeNoti();
             updateNotification({ type: 'error', message: error.response.data.message });
         }

@@ -7,21 +7,17 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
 import { ImCross } from "react-icons/im";
+import moment from 'moment'
 
 
 // Función para crear filas a partir de los datos proporcionados
 function createData(parqueadero, fechareserva, costo, puntos, numreserva, estado) {
 
-    // Crear un objeto Date a partir del string
-    const fecha = new Date(fechareserva);
+    // Crear un objeto Moment a partir del string y establecer la zona horaria como UTC
+    const fecha = moment.utc(fechareserva);
 
-    // Extraer el día, mes y año
-    const dia = fecha.getUTCDate();
-    const mes = fecha.getUTCMonth() + 1; // Los meses son indexados desde 0, por lo que enero es 0 y diciembre es 11
-    const año = fecha.getUTCFullYear();
-
-    // Formatear la fecha como dd/mm/yyyy
-    const fechaFormateada = `${dia.toString().padStart(2, '0')}/${mes.toString().padStart(2, '0')}/${año}`;
+    // Formatear la fecha sin alterar la hora
+    const fechaFormateada = fecha.format('DD/MM/YYYY, h a');
 
     return { parqueadero , fechaFormateada, costo, puntos, numreserva, estado };
 }

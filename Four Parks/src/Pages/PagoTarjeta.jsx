@@ -132,6 +132,7 @@ const PagoTarjeta = () => {
                 {!isLoadingCard && 
                     <>
                         <CardForm formData={formData} setFormData={setFormData} pago/>
+                        <p style={{marginTop: "10px", fontWeight: "bold", color: "green"}}>Tu pago será de: $ { reserva.monto } COP</p>
                         <button id="submitButton" type="submit" onClick={handleSubmit}>PAGAR</button>
                     </>
                 }

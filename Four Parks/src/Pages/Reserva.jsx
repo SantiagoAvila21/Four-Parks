@@ -6,6 +6,13 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { useLocation, useNavigate } from 'react-router-dom';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
 import dayjs from "dayjs";
 import useNotification from "../Hooks/useNotification";
 import { useParking } from "../Context/ParkingsProvider";
@@ -16,6 +23,8 @@ const Reserva = () => {
     const location = useLocation();
     const [fechaEntrada, setFechaEntrada] = useState(dayjs());
     const [fechaSalida, setFechaSalida] = useState(dayjs());
+    const [usePoints, setUsePoints] = useState(false);
+    const [freeHours, setFreeHours] = useState('');
     const { updateNotification } = useNotification();
     const parking = useParking();
     const navigate = useNavigate();
@@ -37,13 +46,16 @@ const Reserva = () => {
                 'tarifabici': infoParqueadero[11]
             });
         }
-    }, [parking.parqueaderos, location.state.nombreParqueadero]);
+    }, [parking.parqueaderos, location.state.nombreParqueadero, setParqueaderoSelected]);
 
     const [infoReserva, setInfoReserva] = useState({
         parqueadero: location.state.nombreParqueadero,
         tipoVehiculo: '',
         placa: '',
     });
+
+    const handleChangeUsePoints = (event) => setUsePoints(event.target.checked);
+    const handleChangeFreeHours = (event) => setFreeHours(event.target.value);
 
     const handleChangeForm = (event) => {
         const { name, value } = event.target;
@@ -66,7 +78,7 @@ const Reserva = () => {
         event.preventDefault();
 
         // MANEJO DE ERRORES EN LAS FECHAS INGRESADAS ------
-        if(fechaSalida.isBefore(fechaEntrada, 'hour')){
+        if(fechaSalida.isBefore(fechaEntrada, 'hour') || fechaSalida.isSame(fechaEntrada)){
             updateNotification({ type: 'error', message: 'Por favor, seleccione una hora de salida posterior a la de entrada.' });
             return;
         }
@@ -89,8 +101,26 @@ const Reserva = () => {
         }
 
         // MANEJO DE ERRORES GENERAL -----
+        let cantidadhoras = Math.abs(fechaEntrada.diff(fechaSalida, 'hour'));
+
         if(Object.values(infoReserva).includes('')){
             updateNotification({ type: 'error', message: 'Hay al menos un espacio en blanco' });
+            return;
+        }
+
+        const puntosUser = JSON.parse(localStorage.getItem("userLogged")).puntos; 
+        if(usePoints && ((freeHours == 1 && puntosUser < 25) || (freeHours == 2 && puntosUser < 50))){
+            updateNotification({ type: 'error', message: 'Puntos Insuficientes' });
+            return;
+        }
+
+        if(usePoints && freeHours == 0){
+            updateNotification({ type: 'error', message: 'Porfavor selecciona cuantas horas quieres reclamar' });
+            return;
+        }
+
+        if(usePoints && cantidadhoras < freeHours){
+            updateNotification({ type: 'error', message: 'Porfavor selecciona una cantidad de horas mayor o igual a las gratis' });
             return;
         }
 
@@ -106,18 +136,20 @@ const Reserva = () => {
             tarifa = tarifas.tarifabici;
             tipoV = "BICI";
         } 
-
-        let cantidadhoras = fechaEntrada.diff(fechaSalida, 'hour');
+        
+        // Se le restan la cantidad de horas en el caso que reclame sus puntos de fidelizacion
+        cantidadhoras -= freeHours;
 
         setReserva({
             parqueaderoSelected,
-            monto: Math.abs(tarifa * cantidadhoras),
+            monto: tarifa * cantidadhoras,
             fechaEntradaFormateada,
             fechaSalidaFormateada,
             cantidadhoras,
             tarifa,
             placa: infoReserva.placa,
             tipoVehiculo: tipoV,
+            horasGratis: (freeHours == '' ? 0 : freeHours),
             numfactura: generarNumeroFactura(),
         });
 
@@ -237,6 +269,29 @@ const Reserva = () => {
                                 />  
                             </LocalizationProvider>
                         </div>
+                        <div className="reserva info">
+                            <FormGroup>
+                                <FormControlLabel control={<Switch checked={usePoints} onChange={handleChangeUsePoints} />} label="Usar puntos de Fidelización" />
+                            </FormGroup>
+                        </div>
+                        {usePoints && (
+                            <div className="reserva info">
+                                <p>Tus puntos: {JSON.parse(localStorage.getItem("userLogged")).puntos}</p>
+                                <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+                                    <InputLabel id="demo-simple-select-standard-label">Horas Gratis:</InputLabel>
+                                    <Select
+                                        labelId="demo-simple-select-standard-label"
+                                        id="demo-simple-select-standard"
+                                        value={freeHours}
+                                        onChange={handleChangeFreeHours}
+                                        label="Age"
+                                    >
+                                        <MenuItem value={1}>1 Hora</MenuItem>
+                                        <MenuItem value={2}>2 Horas</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </div>
+                        )}
                     </form>
                 </div>
                 <button id="submitButton" type="submit" onClick={handleSubmit}>RESERVAR</button>
