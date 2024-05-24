@@ -1,18 +1,21 @@
 import SideLogo from "../components/SideLogo";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import "../styles/Reserva.css";
 import { ToastContainer } from "react-toastify";
 import useNotification from "../Hooks/useNotification";
 import { useParking } from "../Context/ParkingsProvider";
 import { FaDollarSign } from "react-icons/fa";
+import { CircularProgress } from "@mui/material";
 import axios from "axios";
 
 
 const CaracteristicasPunto = () => {
     const { updateNotification, closeNoti } = useNotification();
     const [selectedParqueadero, setSelectedParqueadero] = useState('');
+    const [parqueaderoAdmin, setParqueaderoAdmin] = useState({});
     const [caracteristicaCambiar, setCaracteristicaCambiar] = useState('');
     const [valorTarifa, setValorTarifa] = useState('');
+    const [loading, setLoading] = useState(true);
     const tipoVehiculoRef = useRef(null);
     const { parqueaderos } = useParking();
 
@@ -68,7 +71,27 @@ const CaracteristicasPunto = () => {
         asignarTarifa();
     }
 
-    
+    useEffect(() => {
+        const user = JSON.parse(localStorage.getItem("userLogged"));
+        const tipoUsuario = user.tipoUsuario;
+        const fetchParqueaderoManejado = async () => {
+            try{
+                const responsePAdmin = await axios.get(`${import.meta.env.VITE_FLASK_SERVER_URL}/parqueadero//get_parqueadero_administrador/${user.correo}`);
+                console.log(responsePAdmin)
+                if(responsePAdmin.status == 200){
+                    setParqueaderoAdmin(responsePAdmin.data);
+                    setSelectedParqueadero(responsePAdmin.data.idparqueadero);
+                    setLoading(false);
+                } 
+            }catch (error){
+                console.error(error);
+            }
+        }
+        if(tipoUsuario == 'Administrador de Punto'){
+            fetchParqueaderoManejado();
+
+        }
+    },[]);
 
     return (
         <div className="Reserva">
@@ -79,14 +102,30 @@ const CaracteristicasPunto = () => {
                     <form>
                         <div className="reserva info">
                             <label>PARQUEADERO</label>
-                            <select className="inputParqueadero" id="parqueadero" value={selectedParqueadero} onChange={handleParqueaderoChange}>
-                                <option value="">Selecciona un parqueadero</option>
-                                {parqueaderos.map((parqueadero, index) => (
-                                    <option key={index} value={parqueadero[0]}>
-                                        {parqueadero[2]}
-                                    </option>
-                                ))}
-                            </select>
+                            {JSON.parse(localStorage.getItem("userLogged")).tipoUsuario == 'Administrador General' && 
+                                <select className="inputParqueadero" id="parqueadero" value={selectedParqueadero} onChange={handleParqueaderoChange}>
+                                    <option value="">Selecciona un parqueadero</option>
+                                    {parqueaderos.map((parqueadero, index) => (
+                                        <option key={index} value={parqueadero[0]}>
+                                            {parqueadero[2]}
+                                        </option>
+                                    ))}
+                                </select>
+                            }
+                            {JSON.parse(localStorage.getItem("userLogged")).tipoUsuario == 'Administrador de Punto' && 
+                                <>
+                                    {loading && <CircularProgress />}
+                                    {!loading && (
+                                        <input 
+                                            type="text" 
+                                            name="parqueadero"
+                                            value={parqueaderoAdmin.nombreparqueadero}
+                                            className="inputForm"
+                                            disabled 
+                                        />
+                                    )}
+                                </>
+                            }
                         </div>
                         <div className="reserva info">
                             <label>CARACTERÍSTICA A CAMBIAR</label>
@@ -111,7 +150,7 @@ const CaracteristicasPunto = () => {
                             <div className="reserva info" id="tarifa" style={{ position: 'relative' }}>
                             <label>{caracteristicaCambiar == 'Tarifas' ? 'VALOR A INGRESAR' : 'VALOR DE LA MULTA'}</label>
                             <input 
-                                type="text" 
+                                type="number" 
                                 name="placa"
                                 value={valorTarifa}
                                 minLength = { 4 }

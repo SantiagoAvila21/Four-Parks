@@ -8,13 +8,14 @@ const Account = () => {
     const opcionesAdminGeneral = <>
       <h5>Administrador General</h5>
       <Link to='/users'>Usuarios</Link>
-      <Link to='/stats'>Estadisticas</Link>
+      <Link to='/stats'>Estadisticas Generales</Link>
       <Link to='/caracteristicas'>Caracteristicas de Punto</Link>
     </>;
 
     const opcionesAdminPunto = <>
       <h5>Administrador de Punto</h5>
-      <Link to='/stats2'>Estadisticas de Punto</Link>
+      <Link to='/stats'>Estadisticas de Punto</Link>
+      <Link to='/caracteristicas'>Caracteristicas de Punto</Link>
     </>
 
 
