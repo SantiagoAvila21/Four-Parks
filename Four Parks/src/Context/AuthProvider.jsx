@@ -115,7 +115,7 @@ const AuthProvider = ({ children }) => {
                     setState('first_logged');
                 } else setState('logged');
                 // Redirigir a la página de inicio
-                navigate("/");
+                navigate("/app");
                 return;
             }
         } catch (error) {

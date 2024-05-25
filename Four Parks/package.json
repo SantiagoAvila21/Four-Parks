@@ -26,6 +26,7 @@
     "react-router": "^6.23.0",
     "react-router-dom": "^6.23.0",
     "react-toastify": "^10.0.5",
+    "scss": "^0.2.4",
     "sha1": "^1.1.1"
   },
   "devDependencies": {
@@ -36,6 +37,7 @@
     "eslint-plugin-react": "^7.34.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
+    "sass": "^1.77.2",
     "vite": "^5.2.0"
   }
 }
