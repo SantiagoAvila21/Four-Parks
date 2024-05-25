@@ -39,7 +39,6 @@ def modificar_parqueadero():
         return jsonify({"error": str(e)}), 400
 
 
-
 @parqueadero_bp.route("/get_parqueadero/<idparqueadero>", methods=["GET"])
 def get_parqueadero(idparqueadero):
     try:
