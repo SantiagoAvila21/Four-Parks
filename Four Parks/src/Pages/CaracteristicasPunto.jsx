@@ -4,10 +4,9 @@ import "../styles/Reserva.css";
 import { ToastContainer } from "react-toastify";
 import useNotification from "../Hooks/useNotification";
 import { useParking } from "../Context/ParkingsProvider";
-import { FaDollarSign } from "react-icons/fa";
+import { FaDollarSign, FaCar, FaMotorcycle, FaBicycle } from "react-icons/fa";
 import { CircularProgress } from "@mui/material";
 import axios from "axios";
-
 
 const CaracteristicasPunto = () => {
     const { updateNotification, closeNoti } = useNotification();
@@ -140,9 +139,9 @@ const CaracteristicasPunto = () => {
                                 <label>TIPO VEHICULO</label>
                                 <select name="tipoVehiculo" className="inputForm" ref={tipoVehiculoRef}>
                                     <option value={""}>Seleccione un tipo de vehiculo</option>
-                                    <option value={"1"}>Carro</option>
-                                    <option value={"2"}>Moto</option>
-                                    <option value={"3"}>Bicicleta</option>
+                                    <option value={"1"}> <><FaCar /> Carro</> </option>
+                                    <option value={"2"}> <><FaMotorcycle /> Moto</></option>
+                                    <option value={"3"}> <><FaBicycle /> Bicicleta</></option>
                                 </select>
                             </div>
                         )}
