@@ -8,6 +8,7 @@ import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
 import { ImCross } from "react-icons/im";
 import moment from 'moment'
+import { FaCoins, FaDollarSign, FaClock, FaParking  } from "react-icons/fa";
 
 
 // Función para crear filas a partir de los datos proporcionados
@@ -56,16 +57,16 @@ const TablaReservas = ({ reservas, cb }) => {
             {reservas.map((reserva) => (
                 <TableRow key={reserva.numreserva}>
                     <TableCell component="th" scope="row">
-                        {reserva.parqueadero}
+                        <FaParking />{reserva.parqueadero}
                     </TableCell>
                     <TableCell component="th" scope="row">
-                        {reserva.fechaFormateada}
+                    <FaClock /> {reserva.fechaFormateada}
                     </TableCell>
                     <TableCell align="left">
-                        {reserva.costo}
+                        <FaDollarSign />{reserva.costo}
                     </TableCell>
                     <TableCell align="left">
-                        {reserva.puntos}
+                        {reserva.puntos} <FaCoins />
                     </TableCell>
                     <TableCell align="center">
                         { reserva.estado == 'Cancelar' && <ImCross className='cancelarButton' onClick={() => cb(reserva.numreserva, reserva.parqueadero)}/> }

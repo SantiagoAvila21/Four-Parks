@@ -4,6 +4,10 @@ import "../styles/Register.css";
 import { ToastContainer } from "react-toastify";
 import useNotification from "../Hooks/useNotification";
 import { useAuth } from "../Context/AuthProvider";
+import { MdEmail } from "react-icons/md";
+import { FaIdCard } from "react-icons/fa";
+
+
 
 const Register = () => {
 
@@ -81,7 +85,7 @@ const Register = () => {
                                 <option value={"PAS"}>Pasaporte</option>
                             </select>
                         </div>
-                        <div className="register info">
+                        <div className="register info" style={{ position: "relative" }}>
                             <label>NÚMERO DOCUMENTO</label>
                             <input 
                                 type="text" 
@@ -89,9 +93,11 @@ const Register = () => {
                                 value={formulario.numDoc} 
                                 onChange={handleChangeForm} 
                                 className="inputForm"
+                                style={{ paddingLeft: '30px' }}
                             />
+                            <FaIdCard style={{ position: 'absolute', left: '5px', top: '52%', transform: 'translateY(-50%)' }} />
                         </div>
-                        <div className="register info">
+                        <div className="register info" style={{ position: "relative" }}>
                             <label>CORREO ELECTRÓNICO</label>
                             <input 
                                 type="text" 
@@ -99,7 +105,9 @@ const Register = () => {
                                 value={formulario.email} 
                                 onChange={handleChangeForm} 
                                 className="inputForm"
+                                style={{ paddingLeft: '30px' }}
                             />
+                            <MdEmail style={{ position: 'absolute', left: '5px', top: '52%', transform: 'translateY(-50%)' }} />
                         </div>
                     </form>
                 </div>

@@ -120,7 +120,7 @@ const PagoTarjeta = () => {
                         <h5>COSTO</h5>
                         <p>${reserva.monto},0</p>
                     </div>
-                    <button id="submitButton" type="submit" onClick={() => navigate("/")}>VOLVER A PAGINA PRINCIPAL</button>
+                    <button id="submitButton" type="submit" onClick={() => navigate("/app")}>VOLVER A PAGINA PRINCIPAL</button>
                 </div>
             </Modal>
             <SideLogo />

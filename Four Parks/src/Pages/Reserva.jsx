@@ -18,6 +18,8 @@ import useNotification from "../Hooks/useNotification";
 import { useParking } from "../Context/ParkingsProvider";
 import { useReserva } from "../Context/ReservaProvider";
 import generarNumeroFactura from '../utils/factura_util';
+import { FaCar, FaCoins, FaMotorcycle, FaBicycle  } from "react-icons/fa";
+
 
 const Reserva = () => {
     const location = useLocation();
@@ -226,7 +228,7 @@ const Reserva = () => {
                             {infoReserva.tipoVehiculo === '3' && <p> <strong> Tarifa: </strong> $ {tarifas.tarifabici} COP / hora</p>}
                         </div>
                         {infoReserva.tipoVehiculo && 
-                            <div className="reserva info" id="placa">
+                            <div className="reserva info" id="placa" style={{ position: "relative" }}>
                                 <label>{infoReserva.tipoVehiculo === '3' ? 'Marco' : 'PLACA'}</label>
                                 <input 
                                     type="text" 
@@ -236,7 +238,11 @@ const Reserva = () => {
                                     placeholder={getPlacaPlaceholder()}
                                     onChange={handleChangePlaca} 
                                     className="inputForm"
+                                    style={{ paddingLeft: '30px' }}
                                 />
+                                {infoReserva.tipoVehiculo === '1' && <FaCar style={{ position: 'absolute', left: '5px', top: '52%', transform: 'translateY(-50%)' }}/>}
+                                {infoReserva.tipoVehiculo === '2' && <FaMotorcycle style={{ position: 'absolute', left: '5px', top: '52%', transform: 'translateY(-50%)' }} />}
+                                {infoReserva.tipoVehiculo === '3' && <FaBicycle style={{ position: 'absolute', left: '5px', top: '52%', transform: 'translateY(-50%)' }} />}
                             </div>
                         }
                         <div className="reserva info fechaEntrada">
@@ -276,7 +282,7 @@ const Reserva = () => {
                         </div>
                         {usePoints && (
                             <div className="reserva info">
-                                <p>Tus puntos: {JSON.parse(localStorage.getItem("userLogged")).puntos}</p>
+                                <p>Tus puntos: {JSON.parse(localStorage.getItem("userLogged")).puntos} <FaCoins /></p>
                                 <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
                                     <InputLabel id="demo-simple-select-standard-label">Horas Gratis:</InputLabel>
                                     <Select

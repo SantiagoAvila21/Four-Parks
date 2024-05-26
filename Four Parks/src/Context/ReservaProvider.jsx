@@ -26,10 +26,17 @@ const ReservaProvider = ({ children }) => {
                 fechareservasalida: data.fechaSalidaFormateada
             });
 
-            if(responseReserva.status == 201) updateNotification({type: "success", message: "Pago realizado y factura enviada"});
+            console.log(responseReserva);
+
+            if(responseReserva.status == 201) {
+                updateNotification({type: "success", message: "Reserva creada con éxito"});
+                return responseReserva;
+            }
             
         }catch (error){
-            console.error();
+            updateNotification({type: "error", message: error.response.data.error});
+            console.error(error, "MUAJAJAJA");
+            throw error;  // Lanzar el error para que el flujo se detenga
         }finally{
             closeNoti();
         }
@@ -37,8 +44,7 @@ const ReservaProvider = ({ children }) => {
 
     const pagarReserva = async (data, cb) => {
         try{
-            
-            const responseReserva = await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/reserva/pago_tarjeta`, {
+            const responsePago = await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/reserva/pago_tarjeta`, {
                 correoelectronico: JSON.parse(localStorage.getItem('userLogged')).correo,
                 security_code: data.security_code,
                 f_expiracion: data.f_expiracion, 
@@ -48,10 +54,10 @@ const ReservaProvider = ({ children }) => {
 
             // Se asignan los puntos en la vista
             setUser((prev) => {
-                console.log(responseReserva)
+                console.log(responsePago)
                 const updatedUser = {
                     ...prev,
-                    puntos: responseReserva.data.puntos
+                    puntos: responsePago.data.puntos
                 };
                 console.log(updatedUser)
                 // Guardar el usuario actualizado en localStorage
@@ -59,22 +65,21 @@ const ReservaProvider = ({ children }) => {
                 return updatedUser;
             });
 
-            if(responseReserva.status == 201){
-                
+            if(responsePago.status == 201){
                 // Se crea la reserva en la base de datos
-                createReserva({
+                await createReserva({
                     idParqueadero: reserva.parqueaderoSelected[0],
                     monto: reserva.monto,
                     fechaEntradaFormateada: reserva.fechaEntradaFormateada,
                     fechaSalidaFormateada: reserva.fechaSalidaFormateada
                 });
-                
+
                 // Si reclamo horas gratis, se le descuentan de la base de datos
                 if(reserva.horasGratis > 0){
                     const resPuntos = await axios.put(`${import.meta.env.VITE_FLASK_SERVER_URL}/user/reclamar_puntos`, {
                         correoelectronico: data.correoelectronico,
                         puntosreclamados: reserva.horasGratis * 25
-                    })
+                    });
                     
                     // Se asignan los puntos en la vista
                     setUser((prev) => {
@@ -107,7 +112,8 @@ const ReservaProvider = ({ children }) => {
                 fetchparqueaderos();
             }
         }catch (error){
-            console.error();
+            updateNotification({type: "error", message: error.response.data.error});
+            console.error(error.response.data.error);
         }finally{
             closeNoti();
         }

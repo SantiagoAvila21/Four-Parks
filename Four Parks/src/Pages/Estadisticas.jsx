@@ -18,6 +18,8 @@ import axios from "axios";
 import BarChart from "../components/BarChart";
 import LineChart from "../components/LineChart";
 import PieChart from "../components/PieChart";
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 
 const Estadisticas = () => {
@@ -97,6 +99,35 @@ const Estadisticas = () => {
         setStatPie('');
     };
 
+    // Funcion que exporta el PDF con las graficas seleccionadas
+    const handleExportPDF = () => {
+        const chartContainers = document.querySelectorAll('.chart-container');
+        const pdf = new jsPDF();
+    
+        // Itera sobre cada contenedor de gráfica
+        chartContainers.forEach((container, index) => {
+            html2canvas(container)
+                .then((canvas) => {
+                    const imageData = canvas.toDataURL('image/png');
+                    if (index !== 0) {
+                        pdf.addPage();
+                    }
+                    pdf.setFontSize(18);
+                    // Agrega un espacio entre "Estadisticas" y el nombre del parqueadero
+                    pdf.text(`Estadisticas  ${parqueaderoAdmin.nombreparqueadero}`, 15, 10);
+                    // Agrega un título a la gráfica
+                    pdf.setFontSize(14);
+                    // Agrega un espacio entre "Gráfica" y el número de la gráfica
+                    pdf.text(`Gráfica  ${index + 1}`, 15, 20);
+                    // Agrega la imagen de la gráfica al PDF
+                    pdf.addImage(imageData, 'PNG', 10, 30, 180, 100);
+                    if (index === chartContainers.length - 1) {
+                        pdf.save(`Estadisticas ${parqueaderoAdmin.nombreparqueadero}.pdf`);
+                    }
+                });
+        });
+    };
+
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("userLogged"));
@@ -144,7 +175,7 @@ const Estadisticas = () => {
                                 </RadioGroup>
                             </FormControl>
                         </div>
-                        <h2 id="exportarButton">Exportar</h2>
+                        <h2 id="exportarButton" onClick={handleExportPDF} >Exportar</h2>
                     </div>
                     <div className="parqueadero">
                         <label>PARQUEADERO</label>
