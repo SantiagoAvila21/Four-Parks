@@ -14,7 +14,7 @@ reserva_bp = Blueprint('reserva', __name__, url_prefix='/reserva')
 def crear_reserva():
     data = request.get_json()
     try:
-        now = datetime.now() - timedelta(days=4)
+        now = datetime.now()
 
         email = data['correoelectronico']
         
