@@ -10,25 +10,6 @@ from app.utils.db_utils import *
 
 reserva_bp = Blueprint('reserva', __name__, url_prefix='/reserva')
 
-def verificar_interseccion_reservas(email, fechareservaentrada, fechareservasalida):
-    # Consulta para obtener las reservas previas del usuario
-    reservas_query = """
-        SELECT fechareservaentrada, fechareservasalida 
-        FROM reserva 
-        JOIN usuario ON reserva.idusuario = usuario.idusuario 
-        WHERE usuario.correoelectronico = %s
-    """
-    reservas = DatabaseFacade.execute_query(reservas_query, (email,))
-    for reserva in reservas:
-        fecha_entrada_previa = reserva[0]
-        fecha_salida_previa = reserva[1]
-
-        # Verificar si la hora de entrada o salida se intersecta con la reserva previa
-        if (fechareservaentrada < fecha_salida_previa and fechareservasalida > fecha_entrada_previa):
-            return True
-
-    return False
-
 @reserva_bp.route("/crear_reserva", methods=["POST"])
 def crear_reserva():
     data = request.get_json()
@@ -36,11 +17,6 @@ def crear_reserva():
         now = datetime.now() - timedelta(days=4)
 
         email = data['correoelectronico']
-
-        # Verificar si la hora de entrada o salida se intersecta con alguna reserva existente
-        intersecta = verificar_interseccion_reservas(email, fechareservaentrada, fechareservasalida)
-        if intersecta:
-            raise Exception("La hora de entrada o salida de la reserva se intersecta con una reserva existente.")
         
         # Obtener el máximo numreserva actual
         max_numreserva_query = "SELECT MAX(CAST(SUBSTRING(numreserva, 2) AS INTEGER)) FROM reserva"
@@ -54,6 +30,24 @@ def crear_reserva():
         if not idusuario_result:
             raise Exception("Usuario no encontrado")
         idusuario = idusuario_result[0][0]
+
+        fechareservaentrada = data['fechareservaentrada']
+        fechareservasalida = data['fechareservasalida']
+
+        # Verificar intersección de fechas
+        interseccion_query = """
+            SELECT 1
+            FROM reserva
+            WHERE idusuario = %s
+              AND (
+                  (fechareservaentrada <= %s AND fechareservasalida >= %s) OR
+                  (fechareservaentrada <= %s AND fechareservasalida >= %s) OR
+                  (fechareservaentrada >= %s AND fechareservasalida <= %s)
+              )
+        """
+        interseccion_result = DatabaseFacade.execute_query(interseccion_query, (idusuario, fechareservaentrada, fechareservaentrada, fechareservasalida, fechareservasalida, fechareservaentrada, fechareservasalida))
+        if interseccion_result:
+            return jsonify({"error": "Ya tiene una reserva que se solapa con las fechas ingresadas"}), 400
 
         sql_query = """
             INSERT INTO reserva (numreserva, idusuario, idparqueadero, montototal, fechareservaentrada, fechareservasalida, fecharegistrada)
@@ -218,8 +212,6 @@ def cancelar_reserva():
         sql_delete_reserva = "DELETE FROM reserva WHERE numreserva = %s"
         DatabaseFacade.execute_query(sql_delete_reserva, (data['numreserva'],))
 
-        # Actualizar la capacidad del parqueadero
-        sql_update_capacidad = "UPDATE parqueadero SET capacidadactual = capacidadactual + 1 WHERE nombreparqueadero = %s"
         DatabaseFacade.execute_query(sql_update_capacidad, (data['parqueadero'],))
 
         return jsonify({"message": "Reserva cancelada con éxito"}), 200
