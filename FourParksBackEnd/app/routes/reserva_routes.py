@@ -8,8 +8,26 @@ from flask_mail import Mail, Message
 from app import mail
 from app.utils.db_utils import *
 
-
 reserva_bp = Blueprint('reserva', __name__, url_prefix='/reserva')
+
+def verificar_interseccion_reservas(email, fechareservaentrada, fechareservasalida):
+    # Consulta para obtener las reservas previas del usuario
+    reservas_query = """
+        SELECT fechareservaentrada, fechareservasalida 
+        FROM reserva 
+        JOIN usuario ON reserva.idusuario = usuario.idusuario 
+        WHERE usuario.correoelectronico = %s
+    """
+    reservas = DatabaseFacade.execute_query(reservas_query, (email,))
+    for reserva in reservas:
+        fecha_entrada_previa = reserva[0]
+        fecha_salida_previa = reserva[1]
+
+        # Verificar si la hora de entrada o salida se intersecta con la reserva previa
+        if (fechareservaentrada < fecha_salida_previa and fechareservasalida > fecha_entrada_previa):
+            return True
+
+    return False
 
 @reserva_bp.route("/crear_reserva", methods=["POST"])
 def crear_reserva():
@@ -18,6 +36,11 @@ def crear_reserva():
         now = datetime.now() - timedelta(days=4)
 
         email = data['correoelectronico']
+
+        # Verificar si la hora de entrada o salida se intersecta con alguna reserva existente
+        intersecta = verificar_interseccion_reservas(email, fechareservaentrada, fechareservasalida)
+        if intersecta:
+            raise Exception("La hora de entrada o salida de la reserva se intersecta con una reserva existente.")
         
         # Obtener el máximo numreserva actual
         max_numreserva_query = "SELECT MAX(CAST(SUBSTRING(numreserva, 2) AS INTEGER)) FROM reserva"
