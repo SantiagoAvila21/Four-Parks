@@ -59,7 +59,7 @@ const TablaUsuarios = ({ users, cb, fetchUsers }) => {
             </TableHead>
             <TableBody>
             {usuarios.map((usuario) => (
-                <TableRow key={usuario.nombre}>
+                <TableRow key={`${usuario.email}`}>
                     <TableCell component="th" scope="row">
                         {usuario.nombre}
                     </TableCell>
