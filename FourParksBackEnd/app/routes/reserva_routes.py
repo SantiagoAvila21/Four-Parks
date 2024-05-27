@@ -174,7 +174,7 @@ def factura():
 
 @reserva_bp.route('/cancelar_reserva', methods=["DELETE"])
 def cancelar_reserva():
-    now = datetime.now() + timedelta(minutes=30)
+    now = datetime.now()
     data = request.get_json()
 
     try:

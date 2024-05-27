@@ -103,6 +103,8 @@ const Estadisticas = () => {
     const handleExportPDF = () => {
         const chartContainers = document.querySelectorAll('.chart-container');
         const pdf = new jsPDF();
+
+        const infoParqueaderoSelected = parqueaderos.filter(parqueadero => parqueadero[0] === String(selectedParqueadero));
     
         // Itera sobre cada contenedor de gráfica
         chartContainers.forEach((container, index) => {
@@ -114,7 +116,7 @@ const Estadisticas = () => {
                     }
                     pdf.setFontSize(18);
                     // Agrega un espacio entre "Estadisticas" y el nombre del parqueadero
-                    pdf.text(`Estadisticas  ${parqueaderoAdmin.nombreparqueadero}`, 15, 10);
+                    pdf.text(`Estadisticas  ${infoParqueaderoSelected[0][2]}`, 15, 10);
                     // Agrega un título a la gráfica
                     pdf.setFontSize(14);
                     // Agrega un espacio entre "Gráfica" y el número de la gráfica
@@ -122,7 +124,7 @@ const Estadisticas = () => {
                     // Agrega la imagen de la gráfica al PDF
                     pdf.addImage(imageData, 'PNG', 10, 30, 180, 100);
                     if (index === chartContainers.length - 1) {
-                        pdf.save(`Estadisticas ${parqueaderoAdmin.nombreparqueadero}.pdf`);
+                        pdf.save(`Estadisticas ${infoParqueaderoSelected[0][2]}.pdf`);
                     }
                 });
         });
@@ -207,58 +209,58 @@ const Estadisticas = () => {
                     {selectedParqueadero && 
                         <div className="scrollable-container">
                             <div className="graficaEstadistica">
-                                    <FormControl variant="standard" sx={{ m: 1, minWidth: 300 }}>
-                                        <InputLabel id="demo-simple-select-standard-label">Variable</InputLabel>
-                                        <Select
-                                            labelId="demo-simple-select-standard-label"
-                                            id="demo-simple-select-standard"
-                                            value={statBar}
-                                            onChange={handleStatBarChange}
-                                            label="Age"
-                                        >
-                                            <MenuItem value={""}>Variable</MenuItem>
-                                            <MenuItem value={1}>Cantidad de reservas hechas</MenuItem>
-                                        </Select>
-                                    </FormControl>
+                                <FormControl variant="standard" sx={{ m: 1, minWidth: 300 }}>
+                                    <InputLabel id="demo-simple-select-standard-label">Variable</InputLabel>
+                                    <Select
+                                        labelId="demo-simple-select-standard-label"
+                                        id="demo-simple-select-standard"
+                                        value={statBar}
+                                        onChange={handleStatBarChange}
+                                        label="Age"
+                                    >
+                                        <MenuItem value={""}>Variable</MenuItem>
+                                        <MenuItem value={1}>Cantidad de reservas hechas</MenuItem>
+                                    </Select>
+                                </FormControl>
                                 <div className="chart-container">
                                     {!statBar && <h2>Selecciona la variable a graficar</h2>}
                                     {(statBar && barData) && <BarChart data={barData} />}
                                 </div>
                             </div>
                             <div className="graficaEstadistica">
-                                    <FormControl variant="standard" sx={{ m: 1, minWidth: 300 }}>
-                                        <InputLabel id="demo-simple-select-standard-label">Variable</InputLabel>
-                                        <Select
-                                            labelId="demo-simple-select-standard-label"
-                                            id="demo-simple-select-standard"
-                                            value={statLine}
-                                            onChange={handleStatLineChange}
-                                            label="Age"
-                                        >
-                                            <MenuItem value={""}>Variable</MenuItem>
-                                            <MenuItem value={1}>Duracion de las reservas</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                    <div className="chart-container">
+                                <FormControl variant="standard" sx={{ m: 1, minWidth: 300 }}>
+                                    <InputLabel id="demo-simple-select-standard-label">Variable</InputLabel>
+                                    <Select
+                                        labelId="demo-simple-select-standard-label"
+                                        id="demo-simple-select-standard"
+                                        value={statLine}
+                                        onChange={handleStatLineChange}
+                                        label="Age"
+                                    >
+                                        <MenuItem value={""}>Variable</MenuItem>
+                                        <MenuItem value={1}>Duracion de las reservas</MenuItem>
+                                    </Select>
+                                </FormControl>
+                                <div className="chart-container">
                                     {!statLine && <h2>Selecciona la variable a graficar</h2>}
                                     {(statLine && lineData) && <LineChart data={lineData} />}
                                 </div>
                             </div>
                             <div className="graficaEstadistica">
-                                    <FormControl variant="standard" sx={{ m: 1, minWidth: 300 }}>
-                                        <InputLabel id="demo-simple-select-standard-label">Variable</InputLabel>
-                                        <Select
-                                            labelId="demo-simple-select-standard-label"
-                                            id="demo-simple-select-standard"
-                                            value={statPie}
-                                            onChange={handleStatPieChange}
-                                            label="Age"
-                                        >
-                                            <MenuItem value={""}>Variable</MenuItem>
-                                            <MenuItem value={1}>Proporcion de reservas por duracion</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                    <div className="chart-container">
+                                <FormControl variant="standard" sx={{ m: 1, minWidth: 300 }}>
+                                    <InputLabel id="demo-simple-select-standard-label">Variable</InputLabel>
+                                    <Select
+                                        labelId="demo-simple-select-standard-label"
+                                        id="demo-simple-select-standard"
+                                        value={statPie}
+                                        onChange={handleStatPieChange}
+                                        label="Age"
+                                    >
+                                        <MenuItem value={""}>Variable</MenuItem>
+                                        <MenuItem value={1}>Proporcion de reservas por duracion</MenuItem>
+                                    </Select>
+                                </FormControl>
+                                <div className="chart-container">
                                     {!statPie && <h2>Selecciona la variable a graficar</h2>}
                                     {(statPie && pieData) && <PieChart data={pieData} />}
                                 </div>

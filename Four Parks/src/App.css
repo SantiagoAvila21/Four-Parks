@@ -7,8 +7,6 @@
   width: 100vw;
   height: 100vh;
   font-family: 'Open Sans';
-  background: -webkit-linear-gradient(90deg, #e0e0e0 ,#d6d8d8,#9b9b9b,#646464,#4f4e4e);
-  background: linear-gradient(90deg, #e0e0e0,#d6d8d8,#9b9b9b,#646464,#333333);
 }
 
 .headerDiv{
