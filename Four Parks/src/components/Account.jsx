@@ -1,6 +1,8 @@
 import '../styles/Account.css'
 import { useAuth } from '../Context/AuthProvider'
 import { Link } from 'react-router-dom';
+import { FaCoins } from "react-icons/fa";
+
 
 const Account = () => {
     const auth = useAuth();
@@ -25,7 +27,7 @@ const Account = () => {
           {auth.user.tipoUsuario == 'Administrador General' && opcionesAdminGeneral}
           {auth.user.tipoUsuario == 'Administrador de Punto' && opcionesAdminPunto}
 
-          <p> Puntos Fidelizacion: {auth.user.puntos}</p>
+          <p> Puntos Fidelizacion: {auth.user.puntos} <FaCoins /></p>
           <h4 onClick={() => auth.logOut()}> Cerrar cuenta </h4>
       </div>
     )

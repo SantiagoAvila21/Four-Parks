@@ -8,6 +8,7 @@ from app import mail
 from app.utils.password_utils import generate_password, generate_verification_code
 from app.utils.db_utils import *
 import hashlib
+import uuid
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -15,6 +16,8 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 def register():
     try:
         data = request.get_json()
+        print(data['correoelectronico'])
+
 
         # Verificar si el correo electrónico ya está en uso
         existe_usuario_query = "SELECT COUNT(*) FROM usuario WHERE correoelectronico = %s"
@@ -22,18 +25,9 @@ def register():
         if existe_usuario > 0:
             return jsonify({"error": "El correo electrónico ya está en uso"}), 400
 
-        # Obtener el último idusuario utilizado
-        ultimo_id_query = "SELECT MAX(idusuario) FROM usuario"
-        ultimo_id_result = DatabaseFacade.execute_query(ultimo_id_query)
-        ultimo_id = ultimo_id_result[0][0]
 
-        if ultimo_id:
-            # Incrementar el último idusuario en uno
-            numero = int(ultimo_id[1:]) + 1
-            nuevo_idusuario = 'P' + str(numero).zfill(3)
-        else:
-            # En caso de que no haya usuarios registrados aún
-            nuevo_idusuario = 'P001'
+
+        nuevo_idusuario = str(uuid.uuid4())
 
         nueva_contrasenia = generate_password()
         contraseniaHashed = hashlib.sha1(nueva_contrasenia.encode()).hexdigest()

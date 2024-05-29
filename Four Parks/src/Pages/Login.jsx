@@ -7,6 +7,10 @@ import { ToastContainer } from "react-toastify";
 import useNotification from "../Hooks/useNotification";
 import { useAuth } from "../Context/AuthProvider";
 import { Link } from "react-router-dom";
+import { RiLockPasswordFill } from "react-icons/ri";
+import { MdEmail } from "react-icons/md";
+
+
 
 const Login = () => {
     const { updateNotification } = useNotification();
@@ -86,23 +90,27 @@ const Login = () => {
                 <h1>INICIAR SESIÓN</h1>
                 <div className="login Form">
                     <form>
-                        <div className="login info">
+                        <div className="login info" style={{ position: "relative" }}>
                             <label>CORREO ELECTRÓNICO</label>
                             <input 
                                 type="text" 
                                 value={email} 
                                 onChange={onChangeEmail} 
                                 className="inputForm"
+                                style={{ paddingLeft: '30px' }}
                             />
+                            <MdEmail style={{ position: 'absolute', left: '5px', top: '52%', transform: 'translateY(-50%)' }} />
                         </div>
-                        <div className="login info">
+                        <div className="login info" style={{ position: "relative" }}>
                             <label>CONTRASEÑA</label>
                             <input 
                                 type="password" 
                                 value={password} 
                                 onChange={onChangePassword}
                                 className="inputForm"  
+                                style={{ paddingLeft: '30px' }}
                             />
+                            <RiLockPasswordFill style={{ position: 'absolute', left: '5px', top: '52%', transform: 'translateY(-50%)' }} />
                         </div>
                     </form>
                     <Link to="/register"> No tienes cuenta? Registrate aquí</Link>
