@@ -106,7 +106,7 @@ const Usuarios = () => {
                         </div>
                     }
                     {!isLoading && 
-                        <div className="tablaUsuarios" style={{ maxHeight: '600px', overflowY: 'auto' }}>
+                        <div className="tablaUsuarios" style={{ maxHeight: '80%', overflowY: 'auto' }}>
                             <TablaUsuarios users={usuarios} fetchUsers = {fetchUsuarios} cb = {(email, idtipousuario) => {
                                 setSelectedRol(idtipousuario);
                                 setSelectedCorreo(email);

@@ -25,9 +25,17 @@ def register():
         if existe_usuario > 0:
             return jsonify({"error": "El correo electrónico ya está en uso"}), 400
 
+        # Obtener el último idusuario utilizado
+        ultimo_id_query = "SELECT COUNT(idusuario) FROM usuario"
+        ultimo_id_result = DatabaseFacade.execute_query(ultimo_id_query)
+        ultimo_id = ultimo_id_result[0][0]
 
-
-        nuevo_idusuario = str(uuid.uuid4())
+        if ultimo_id:
+            # Incrementar el último idusuario en uno
+            nuevo_idusuario = 'P0' + str(ultimo_id + 1)
+        else:
+            # En caso de que no haya usuarios registrados aún
+            nuevo_idusuario = 'P001'
 
         nueva_contrasenia = generate_password()
         contraseniaHashed = hashlib.sha1(nueva_contrasenia.encode()).hexdigest()
