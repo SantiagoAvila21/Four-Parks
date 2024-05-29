@@ -4,66 +4,8 @@
       "paragraph": ""
     },
     "About": {
-      "paragraph": "En FOUR PARKS, hemos revolucionado la manera de parquear en las ciudades, ofreciendo un servicio de estacionamiento estandarizado y eficiente a nivel nacional. Con presencia en múltiples ciudades de Colombia, contamos con una amplia red de parqueaderos cubiertos, semi-cubiertos y descubiertos, adaptados a las necesidades y ubicaciones estratégicas, como hospitales, donde brindamos atención 24/7.",
-      "Why": [
-        "Parqueaderos en todo Colombia",
-        "Disponibilidad y Comodidad",
-        "Facilidad de Uso",
-        "Seguridad"
-      ],
-      "Why2": [
-        "Programa de Fidelización",
-        "Ubicación en tiempo real",
-        "Confiabilidad"
-      ]
+      "paragraph": "En FOUR PARKS, hemos revolucionado la manera de parquear en las ciudades, ofreciendo un servicio de estacionamiento estandarizado y eficiente a nivel nacional. Con presencia en múltiples ciudades de Colombia, contamos con una amplia red de parqueaderos cubiertos, semi-cubiertos y descubiertos, adaptados a las necesidades y ubicaciones estratégicas, como hospitales, donde brindamos atención 24/7."
     },
-    "Gallery": [
-      {
-        "title": "Project Title",
-        "largeImage": "img/portfolio/01-large.jpg",
-        "smallImage": "img/portfolio/01-small.jpg"
-      },
-      {
-        "title": "Project Title",
-        "largeImage": "img/portfolio/02-large.jpg",
-        "smallImage": "img/portfolio/02-small.jpg"
-      },
-      {
-        "title": "Project Title",
-        "largeImage": "img/portfolio/03-large.jpg",
-        "smallImage": "img/portfolio/03-small.jpg"
-      },
-      {
-        "title": "Project Title",
-        "largeImage": "img/portfolio/04-large.jpg",
-        "smallImage": "img/portfolio/04-small.jpg"
-      },
-      {
-        "title": "Project Title",
-        "largeImage": "img/portfolio/05-large.jpg",
-        "smallImage": "img/portfolio/05-small.jpg"
-      },
-      {
-        "title": "Project Title",
-        "largeImage": "img/portfolio/06-large.jpg",
-        "smallImage": "img/portfolio/06-small.jpg"
-      },
-      {
-        "title": "Project Title",
-        "largeImage": "img/portfolio/07-large.jpg",
-        "smallImage": "img/portfolio/07-small.jpg"
-      },
-      {
-        "title": "Project Title",
-        "largeImage": "img/portfolio/08-large.jpg",
-        "smallImage": "img/portfolio/08-small.jpg"
-      },
-      {
-        "title": "Project Title",
-        "largeImage": "img/portfolio/09-large.jpg",
-        "smallImage": "img/portfolio/09-small.jpg"
-      }
-    ],
     "Services": [
       {
         "icon": "fa fa-car",
@@ -145,14 +87,6 @@
         "job": "Project Manager"
       }
     ],
-    "Contact": {
-      "address": "4321 California St, San Francisco, CA 12345 ",
-      "phone": "+1 123 456 1234",
-      "email": "info@company.com",
-      "facebook": "fb.com",
-      "twitter": "twitter.com",
-      "youtube": "youtube.com"
-    },
     "Features": [
       {
         "icon": "fa fa-pencil",

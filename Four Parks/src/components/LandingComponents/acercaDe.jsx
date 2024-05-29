@@ -16,7 +16,6 @@ export const About = (props) => {
               <div className="about-text">
                 <h2>Acerca de Nosotros</h2>
                 <p>{props.data ? props.data.paragraph : "loading..."}</p>
-                
               </div>
             </div>
           </div>
