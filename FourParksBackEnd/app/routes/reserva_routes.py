@@ -55,7 +55,6 @@ def crear_reserva():
         """
         values = (nuevo_idreserva, idusuario, data['idparqueadero'], data['montototal'], data['fechareservaentrada'], data['fechareservasalida'], now)
         DatabaseFacade.execute_query(sql_query, values)
-        DatabaseFacade.execute_query("UPDATE parqueadero SET capacidadactual = capacidadactual - 1 WHERE idparqueadero = %s", (data['idparqueadero'],))
         puntosUsuario = int(math.floor(data['montototal'] / 4000))
         DatabaseFacade.execute_query("UPDATE usuario SET puntosacumulados = puntosacumulados + %s WHERE correoelectronico = %s", (puntosUsuario, email))
 
@@ -211,8 +210,6 @@ def cancelar_reserva():
         # Eliminar la reserva
         sql_delete_reserva = "DELETE FROM reserva WHERE numreserva = %s"
         DatabaseFacade.execute_query(sql_delete_reserva, (data['numreserva'],))
-
-        DatabaseFacade.execute_query(sql_update_capacidad, (data['parqueadero'],))
 
         return jsonify({"message": "Reserva cancelada con éxito"}), 200
     except Exception as e:
