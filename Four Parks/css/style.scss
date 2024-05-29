@@ -33,7 +33,7 @@
   bottom: -1px;
   width: 0;
   height: 2px;
-  background: linear-gradient(to right, #6372ff 0%, #5ca9fb 100%);
+  background: linear-gradient(to right, #eeb02b 0%, #ffffff 100%);
   content: "";
   transition: width 0.2s;
 }
@@ -54,7 +54,7 @@
   bottom: -1px !important;
   width: 100% !important;
   height: 2px !important;
-  background: linear-gradient(to right, #6372ff 0%, #5ca9fb 100%) !important;
+  background: linear-gradient(to right, #f3c21f 0%, #ffffff 100%) !important;
   content: "" !important;
   transition: width 0.2s !important;
 }
@@ -64,13 +64,17 @@
 .navbar-default .navbar-toggle:hover,
 .navbar-default .navbar-toggle:focus {
   background-color: #fff;
-  border-color: #608dfd;
+  border-color: #FFBC4B;
 }
 .navbar-default .navbar-toggle:hover > .icon-bar {
-  background-color: #608dfd;
+  background-color: #FFBC4B;
 }
 .section-title {
   margin-bottom: 70px;
+}
+#logoTop {
+  width: 90px;
+  height: 70px;
 }
 .section-title h2 {
   position: relative;
@@ -81,7 +85,7 @@
 .section-title h2::after {
   position: absolute;
   content: "";
-  background: linear-gradient(to right, #5ca9fb 0%, #6372ff 100%);
+  background: linear-gradient(to right, #ffffff 0%, #FFBC4B 40%);
   height: 4px;
   width: 60px;
   bottom: 0;
@@ -94,14 +98,14 @@
 .btn-custom {
   font-family: "Raleway", sans-serif;
   text-transform: uppercase;
-  color: #fff;
-  background-color: #5ca9fb;
-  background-image: linear-gradient(to right, #5ca9fb 0%, #6372ff 100%);
+  color: #000000;
+  background-color: #ffffff;
+  background-image: linear-gradient(to right, #FFBC4B 0%, #ffffff 100%);
   padding: 14px 34px;
   letter-spacing: 1px;
   margin: 0;
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 700;
   border-radius: 25px;
   transition: all 0.5s linear;
   border: 0;
@@ -113,7 +117,8 @@
 .btn-custom.active {
   color: #fff;
   background-image: none;
-  background-color: #6372ff;
+  background-color: #FFBC4B;
+
 }
 .btn:active,
 .btn.active {
@@ -137,7 +142,7 @@ a:focus,
   display: table;
   width: 100%;
   padding: 0;
-  background: url(../img/intro-bg.jpg) center center no-repeat;
+  background: url(../img/intro-bg71.jpg) center center no-repeat;
   background-color: #e5e5e5;
   -webkit-background-size: cover;
   -moz-background-size: cover;
@@ -186,7 +191,7 @@ header .intro-text {
   height: 100px;
   padding: 30px 0;
   border-radius: 50%;
-  background: linear-gradient(to right, #6372ff 0%, #5ca9fb 100%);
+  background: linear-gradient(to right, #FFBC4B 0%, #FFBC4B 100%);
   box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.05);
 }
 /* About Section */
@@ -205,7 +210,7 @@ header .intro-text {
 #about h2::after {
   position: absolute;
   content: "";
-  background: linear-gradient(to right, #5ca9fb 0%, #6372ff 100%);
+  background: linear-gradient(to right, #FFBC4B 0%, #ffffff 100%);
   height: 4px;
   width: 60px;
   bottom: 0;
@@ -239,14 +244,14 @@ header .intro-text {
 /* Services Section */
 #services {
   padding: 100px 0;
-  background: linear-gradient(to right, #6372ff 0%, #5ca9fb 100%);
+  background: linear-gradient(to right, #FFBC4B 0%, #FFBC4B 100%);
   color: #fff;
 }
 #services .service-desc {
   margin: 10px 10px 20px;
 }
 #services h2 {
-  color: #fff;
+  color: #000000;
 }
 #services .section-title h2::after {
   position: absolute;
@@ -263,18 +268,18 @@ header .intro-text {
   width: 120px;
   height: 120px;
   padding: 40px 0;
-  background: linear-gradient(to right, #6372ff 0%, #5ca9fb 100%);
+  background: linear-gradient(to right, #3948DF 0%, #3948DF 100%);
   border-radius: 50%;
-  color: #fff;
+  color: #ffffff;
   box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.05);
 }
 #services h3 {
   font-weight: 500;
   padding: 5px 0;
-  color: #fff;
+  color: #000000;
 }
 #services p {
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(0, 0, 0, 0.75);
 }
 #services .service-desc {
   margin-bottom: 40px;
