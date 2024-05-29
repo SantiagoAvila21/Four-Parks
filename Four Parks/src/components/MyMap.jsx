@@ -61,6 +61,13 @@ const MyMap = () => {
           </div>
         </Overlay>
       )}
+      <Overlay anchor={currentLocation} offset={[0,0]}>
+        <div className="dot">
+          <div className="centraldot"></div>
+          <div className="wave"></div>
+          <div className="wave2"></div>
+        </div>
+      </Overlay>
     </Map>
   );
 };

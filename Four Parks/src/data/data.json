@@ -67,32 +67,32 @@
     ],
     "Services": [
       {
-        "icon": "fa fa-wordpress",
+        "icon": "fa fa-car",
         "name": "Esto es un service melo jsjs",
         "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sed dapibus leo nec ornare diam sedasd commodo nibh ante facilisis bibendum dolor feugiat at."
       },
       {
-        "icon": "fa fa-cart-arrow-down",
+        "icon": "fa fa-clock-o",
         "name": "Consectetur adipiscing",
         "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sed dapibus leo nec ornare diam sedasd commodo nibh ante facilisis bibendum dolor feugiat at."
       },
       {
-        "icon": "fa fa-cloud-download",
+        "icon": "fa fa-smile-o",
         "name": "Lorem ipsum dolor",
         "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sed dapibus leo nec ornare diam sedasd commodo nibh ante facilisis bibendum dolor feugiat at."
       },
       {
-        "icon": "fa fa-language",
+        "icon": "fa fa-shield",
         "name": "Consectetur adipiscing",
         "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sed dapibus leo nec ornare diam sedasd commodo nibh ante facilisis bibendum dolor feugiat at."
       },
       {
-        "icon": "fa fa-plane",
+        "icon": "fa fa-gift",
         "name": "Lorem ipsum dolor",
         "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sed dapibus leo nec ornare diam sedasd commodo nibh ante facilisis bibendum dolor feugiat at."
       },
       {
-        "icon": "fa fa-pie-chart",
+        "icon": "fa fa-map-marker",
         "name": "Consectetur adipiscing",
         "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sed dapibus leo nec ornare diam sedasd commodo nibh ante facilisis bibendum dolor feugiat at."
       }
@@ -161,22 +161,22 @@
     },
     "Features": [
       {
-        "icon": "fa fa-comments-o",
+        "icon": "fa fa-pencil",
         "title": "Lorem ipsum",
         "text": "Lorem ipsum dolor sit amet placerat facilisis felis mi in tempus eleifend pellentesque natoque etiam."
       },
       {
-        "icon": "fa fa-bullhorn",
+        "icon": "fa fa-check-circle",
         "title": "Lorem ipsum",
         "text": "Lorem ipsum dolor sit amet placerat facilisis felis mi in tempus eleifend pellentesque natoque etiam."
       },
       {
-        "icon": "fa fa-group",
+        "icon": "fa fa-street-view",
         "title": "Lorem ipsum",
         "text": "Lorem ipsum dolor sit amet placerat facilisis felis mi in tempus eleifend pellentesque natoque etiam."
       },
       {
-        "icon": "fa fa-magic",
+        "icon": "fa fa-thumbs-up",
         "title": "Lorem ipsum",
         "text": "Lorem ipsum dolor sit amet placerat facilisis felis mi in tempus eleifend pellentesque natoque etiam."
       }
