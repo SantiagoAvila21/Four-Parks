@@ -2,8 +2,13 @@
 from flask import Blueprint, request, jsonify
 #from app.utils.db_utils import get_db_connection
 from app.utils.db_utils import *
+import logging
 
 parqueadero_bp = Blueprint('parqueadero', __name__, url_prefix='/parqueadero')
+
+@parqueadero_bp.route("/home", methods=["GET"])
+def helloWorld():
+    return {"hello": "world"}
 
 @parqueadero_bp.route("/crear_parqueadero", methods=["POST"])
 def crear_parqueadero():
@@ -60,9 +65,10 @@ def get_parqueaderos():
         if parqueadero_info:
             return jsonify(parqueadero_info), 200
         else:
-            return jsonify({"error": "Parqueaderos no encontrados"}), 404
+            return jsonify({"error": "Parqueaderos no encontrados"}), 500
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logging.error("Error en la consulta SQL: %s", str(e))
+        return jsonify({"error": "Ocurrió un error al procesar la solicitud"}), 500
 
 
 @parqueadero_bp.route("/get_parqueaderos/<idtipoparqueadero>", methods=["GET"])

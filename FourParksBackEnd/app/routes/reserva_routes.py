@@ -15,6 +15,7 @@ def crear_reserva():
     data = request.get_json()
     try:
         now = datetime.now()
+        now = datetime.now()
 
         email = data['correoelectronico']
         
@@ -49,13 +50,30 @@ def crear_reserva():
         if interseccion_result:
             return jsonify({"error": "Ya tiene una reserva que se solapa con las fechas ingresadas"}), 400
 
+        fechareservaentrada = data['fechareservaentrada']
+        fechareservasalida = data['fechareservasalida']
+
+        # Verificar intersección de fechas
+        interseccion_query = """
+            SELECT 1
+            FROM reserva
+            WHERE idusuario = %s
+              AND (
+                  (fechareservaentrada <= %s AND fechareservasalida >= %s) OR
+                  (fechareservaentrada <= %s AND fechareservasalida >= %s) OR
+                  (fechareservaentrada >= %s AND fechareservasalida <= %s)
+              )
+        """
+        interseccion_result = DatabaseFacade.execute_query(interseccion_query, (idusuario, fechareservaentrada, fechareservaentrada, fechareservasalida, fechareservasalida, fechareservaentrada, fechareservasalida))
+        if interseccion_result:
+            return jsonify({"error": "Ya tiene una reserva que se solapa con las fechas ingresadas"}), 400
+
         sql_query = """
             INSERT INTO reserva (numreserva, idusuario, idparqueadero, montototal, fechareservaentrada, fechareservasalida, fecharegistrada)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
         values = (nuevo_idreserva, idusuario, data['idparqueadero'], data['montototal'], data['fechareservaentrada'], data['fechareservasalida'], now)
         DatabaseFacade.execute_query(sql_query, values)
-        DatabaseFacade.execute_query("UPDATE parqueadero SET capacidadactual = capacidadactual - 1 WHERE idparqueadero = %s", (data['idparqueadero'],))
         puntosUsuario = int(math.floor(data['montototal'] / 4000))
         DatabaseFacade.execute_query("UPDATE usuario SET puntosacumulados = puntosacumulados + %s WHERE correoelectronico = %s", (puntosUsuario, email))
 
