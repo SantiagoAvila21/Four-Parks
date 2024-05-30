@@ -16,7 +16,7 @@ const CardProvider = ({ children }) => {
 
         try {
             // Realizar la solicitud de inicio de sesión al servidor
-            const response = await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/crear_tarjeta`, {
+            const response = await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/user/crear_tarjeta`, {
                 correoelectronico: data.correoelectronico,
                 numero_tarjeta: data.cardNumber.replace(/\s+/g, ''),
                 fecha_expiracion: data.expirationDate,

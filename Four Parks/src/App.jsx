@@ -13,6 +13,9 @@ import { Navigate } from 'react-router-dom';
 import CardProvider from './Context/CardProvider';
 import PagoTarjeta from './Pages/PagoTarjeta';
 import ReservaProvider from './Context/ReservaProvider';
+import CaracteristicasPunto from './Pages/CaracteristicasPunto';
+import Estadisticas from './Pages/Estadisticas';
+import Landing from './Pages/Landing';
 
 /* eslint-disable react/prop-types */
 const RequireAuth = ({ children, adminGeneral }) => {
@@ -32,7 +35,8 @@ function App() {
         <ParkingProvider>
           <ReservaProvider>
             <Routes>
-              <Route path='/' element={<Home/>} />
+              <Route path='/' element={<Landing/>} />
+              <Route path='/app' element={<Home/>} />
               <Route path='/login' element={<Login/>} />
               <Route path='/register' element={<Register/>} />
               <Route path='/users' element={<RequireAuth adminGeneral> <Usuarios/> </RequireAuth>} />
@@ -40,6 +44,8 @@ function App() {
               <Route path='/mis_reservas' element={<RequireAuth><MisReservas /></RequireAuth>} />
               <Route path='/crear_tarjeta' element={<CreditRegister />} />
               <Route path='/pago_tarjeta' element={<RequireAuth><PagoTarjeta /></RequireAuth>} />
+              <Route path='/caracteristicas' element={<RequireAuth><CaracteristicasPunto /></RequireAuth>} />
+              <Route path='/stats' element={<RequireAuth><Estadisticas /></RequireAuth>} />
             </Routes>
           </ReservaProvider>
         </ParkingProvider>

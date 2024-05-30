@@ -6,15 +6,27 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { useLocation, useNavigate } from 'react-router-dom';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
 import dayjs from "dayjs";
 import useNotification from "../Hooks/useNotification";
 import { useParking } from "../Context/ParkingsProvider";
 import { useReserva } from "../Context/ReservaProvider";
+import generarNumeroFactura from '../utils/factura_util';
+import { FaCar, FaCoins, FaMotorcycle, FaBicycle  } from "react-icons/fa";
+
 
 const Reserva = () => {
     const location = useLocation();
     const [fechaEntrada, setFechaEntrada] = useState(dayjs());
     const [fechaSalida, setFechaSalida] = useState(dayjs());
+    const [usePoints, setUsePoints] = useState(false);
+    const [freeHours, setFreeHours] = useState('');
     const { updateNotification } = useNotification();
     const parking = useParking();
     const navigate = useNavigate();
@@ -36,13 +48,16 @@ const Reserva = () => {
                 'tarifabici': infoParqueadero[11]
             });
         }
-    }, [parking.parqueaderos, location.state.nombreParqueadero]);
+    }, [parking.parqueaderos, location.state.nombreParqueadero, setParqueaderoSelected]);
 
     const [infoReserva, setInfoReserva] = useState({
         parqueadero: location.state.nombreParqueadero,
         tipoVehiculo: '',
         placa: '',
     });
+
+    const handleChangeUsePoints = (event) => setUsePoints(event.target.checked);
+    const handleChangeFreeHours = (event) => setFreeHours(event.target.value);
 
     const handleChangeForm = (event) => {
         const { name, value } = event.target;
@@ -65,28 +80,13 @@ const Reserva = () => {
         event.preventDefault();
 
         // MANEJO DE ERRORES EN LAS FECHAS INGRESADAS ------
-        if (!fechaEntrada.isValid() || fechaEntrada.minute() !== 0) {
-            updateNotification({ type: 'error', message: 'Por favor, seleccione una hora fija para la fecha de entrada.' });
-            return;
-        }
-
-        if (!fechaSalida.isValid() || fechaSalida.minute() !== 0) {
-            updateNotification({ type: 'error', message: 'Por favor, seleccione una hora fija para la fecha de salida.' });
-            return;
-        }
-
-        if(fechaSalida.isBefore(fechaEntrada, 'hour')){
+        if(fechaSalida.isBefore(fechaEntrada, 'hour') || fechaSalida.isSame(fechaEntrada)){
             updateNotification({ type: 'error', message: 'Por favor, seleccione una hora de salida posterior a la de entrada.' });
             return;
         }
 
         const fechaEntradaFormateada = dayjs(fechaEntrada).format('YYYY-MM-DD HH:mm:ss');
         const fechaSalidaFormateada = dayjs(fechaSalida).format('YYYY-MM-DD HH:mm:ss');
-
-        if(Object.values(infoReserva).includes('')){
-            updateNotification({ type: 'error', message: 'Hay al menos un espacio en blanco' });
-            return;
-        }
 
         // MANEJO DE ERRORES DE PLACAS INGRESADAS -----
         const placaRegexCarro = /^[A-Z]{3}-?\d{3}$/;
@@ -103,8 +103,26 @@ const Reserva = () => {
         }
 
         // MANEJO DE ERRORES GENERAL -----
+        let cantidadhoras = Math.abs(fechaEntrada.diff(fechaSalida, 'hour'));
+
         if(Object.values(infoReserva).includes('')){
             updateNotification({ type: 'error', message: 'Hay al menos un espacio en blanco' });
+            return;
+        }
+
+        const puntosUser = JSON.parse(localStorage.getItem("userLogged")).puntos; 
+        if(usePoints && ((freeHours == 1 && puntosUser < 25) || (freeHours == 2 && puntosUser < 50))){
+            updateNotification({ type: 'error', message: 'Puntos Insuficientes' });
+            return;
+        }
+
+        if(usePoints && freeHours == 0){
+            updateNotification({ type: 'error', message: 'Porfavor selecciona cuantas horas quieres reclamar' });
+            return;
+        }
+
+        if(usePoints && cantidadhoras < freeHours){
+            updateNotification({ type: 'error', message: 'Porfavor selecciona una cantidad de horas mayor o igual a las gratis' });
             return;
         }
 
@@ -120,25 +138,21 @@ const Reserva = () => {
             tarifa = tarifas.tarifabici;
             tipoV = "BICI";
         } 
-
-        let cantidadhoras = fechaEntrada.diff(fechaSalida, 'hour');
-
-        const generarNumeroFactura = () => {
-            const letras = Array.from({ length: 3 }, () => String.fromCharCode(65 + Math.floor(Math.random() * 26))).join('');
-            const numeros = Array.from({ length: 7 }, () => Math.floor(Math.random() * 10)).join('');
-            return letras + numeros;
-        }
+        
+        // Se le restan la cantidad de horas en el caso que reclame sus puntos de fidelizacion
+        cantidadhoras -= freeHours;
 
         setReserva({
             parqueaderoSelected,
-            monto: Math.abs(tarifa * cantidadhoras),
+            monto: tarifa * cantidadhoras,
             fechaEntradaFormateada,
             fechaSalidaFormateada,
             cantidadhoras,
             tarifa,
             placa: infoReserva.placa,
             tipoVehiculo: tipoV,
-            numfactura: generarNumeroFactura(),
+            horasGratis: (freeHours === '' || !usePoints) ? 0 : freeHours,
+            numfactura: generarNumeroFactura()
         });
 
         navigate("/pago_tarjeta");
@@ -214,7 +228,7 @@ const Reserva = () => {
                             {infoReserva.tipoVehiculo === '3' && <p> <strong> Tarifa: </strong> $ {tarifas.tarifabici} COP / hora</p>}
                         </div>
                         {infoReserva.tipoVehiculo && 
-                            <div className="reserva info" id="placa">
+                            <div className="reserva info" id="placa" style={{ position: "relative" }}>
                                 <label>{infoReserva.tipoVehiculo === '3' ? 'Marco' : 'PLACA'}</label>
                                 <input 
                                     type="text" 
@@ -224,7 +238,11 @@ const Reserva = () => {
                                     placeholder={getPlacaPlaceholder()}
                                     onChange={handleChangePlaca} 
                                     className="inputForm"
+                                    style={{ paddingLeft: '30px' }}
                                 />
+                                {infoReserva.tipoVehiculo === '1' && <FaCar style={{ position: 'absolute', left: '5px', top: '52%', transform: 'translateY(-50%)' }}/>}
+                                {infoReserva.tipoVehiculo === '2' && <FaMotorcycle style={{ position: 'absolute', left: '5px', top: '52%', transform: 'translateY(-50%)' }} />}
+                                {infoReserva.tipoVehiculo === '3' && <FaBicycle style={{ position: 'absolute', left: '5px', top: '52%', transform: 'translateY(-50%)' }} />}
                             </div>
                         }
                         <div className="reserva info fechaEntrada">
@@ -237,8 +255,8 @@ const Reserva = () => {
                                     disablePast={true} // No permitir fechas anteriores al día de hoy
                                     shouldDisableDate={date => !isValidDate(date)} // Deshabilitar fechas mayores a 8 días
                                     disableTimeValidation={true} // Deshabilitar validación de hora
-                                    minutesStep={60}
                                     allowSameDateSelection={true} // Permitir selección de la misma fecha
+                                    views={['year', 'month', 'day', 'hours']}
                                 />  
                             </LocalizationProvider>
                         </div>
@@ -252,11 +270,34 @@ const Reserva = () => {
                                     disablePast={true} // No permitir fechas anteriores al día de hoy
                                     shouldDisableDate={date => !isValidDate(date)} // Deshabilitar fechas mayores a 8 días
                                     disableTimeValidation={true} // Deshabilitar validación de hora
-                                    minutesStep={60}
                                     allowSameDateSelection={true} // Permitir selección de la misma fecha
+                                    views={['year', 'month', 'day', 'hours']}
                                 />  
                             </LocalizationProvider>
                         </div>
+                        <div className="reserva info">
+                            <FormGroup>
+                                <FormControlLabel control={<Switch checked={usePoints} onChange={handleChangeUsePoints} />} label="Usar puntos de Fidelización" />
+                            </FormGroup>
+                        </div>
+                        {usePoints && (
+                            <div className="reserva info">
+                                <p>Tus puntos: {JSON.parse(localStorage.getItem("userLogged")).puntos} <FaCoins /></p>
+                                <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+                                    <InputLabel id="demo-simple-select-standard-label">Horas Gratis:</InputLabel>
+                                    <Select
+                                        labelId="demo-simple-select-standard-label"
+                                        id="demo-simple-select-standard"
+                                        value={freeHours}
+                                        onChange={handleChangeFreeHours}
+                                        label="Age"
+                                    >
+                                        <MenuItem value={1}>1 Hora</MenuItem>
+                                        <MenuItem value={2}>2 Horas</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </div>
+                        )}
                     </form>
                 </div>
                 <button id="submitButton" type="submit" onClick={handleSubmit}>RESERVAR</button>

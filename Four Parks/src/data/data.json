@@ -1,0 +1,113 @@
+{
+    "Header": {
+      "title": "Reserva tu parqueadero y olvídate de las preocupaciones.",
+      "paragraph": ""
+    },
+    "About": {
+      "paragraph": "En FOUR PARKS, hemos revolucionado la manera de parquear en las ciudades, ofreciendo un servicio de estacionamiento estandarizado y eficiente a nivel nacional. Con presencia en múltiples ciudades de Colombia, contamos con una amplia red de parqueaderos cubiertos, semi-cubiertos y descubiertos, adaptados a las necesidades y ubicaciones estratégicas, como hospitales, donde brindamos atención 24/7."
+    },
+    "Services": [
+      {
+        "icon": "fa fa-car",
+        "name": "Parquea en todo Colombia",
+        "text": "Contamos con una amplia red de parqueaderos en diversas ciudades de Colombia. No importa dónde te encuentres, podrás acceder a nuestro servicio y de alta calidad."
+      },
+      {
+        "icon": "fa fa-clock-o",
+        "name": "Disponibilidad y Comodidad",
+        "text": "Nuestros parqueaderos ubicados estratégicamente ofrecen horarios de operación flexibles, incluyendo opciones 24/7 para adaptarse a tus necesidades."
+      },
+      {
+        "icon": "fa fa-smile-o",
+        "name": "Facilidad de Uso",
+        "text": "El sistema de registro y reserva es intuitivo y fácil de usar. Puedes hacer todo desde la comodidad de tu hogar o sobre la marcha, asegurando que siempre tengas un lugar reservado cuando lo necesites."
+      },
+      {
+        "icon": "fa fa-shield",
+        "name": "Seguridad",
+        "text": "Nos tomamos la seguridad muy en serio. Implementamos medidas robustas de seguridad, incluyendo la verificación de tarjetas de crédito y el almacenamiento cifrado de contraseñas. Además, ofrecemos autenticación de doble factor para proteger tu cuenta."
+      },
+      {
+        "icon": "fa fa-gift",
+        "name": "Programa de Fidelización",
+        "text": "Valoramos a nuestros clientes frecuentes. Por eso, muchos de nuestros parqueaderos ofrecen programas de fidelización que te permiten acumular puntos y recibir beneficios adicionales por utilizar nuestros servicios."
+      },
+      {
+        "icon": "fa fa-map-marker",
+        "name": "Ubicación en tiempo real",
+        "text": "La actualización de ubicación en tiempo real te permite encontrar y reservar tu espacio de manera eficiente, y el mapa interactivo facilita la navegación hacia el parqueadero más cercano."
+      }
+    ],
+    "Testimonials": [
+      {
+        "img": "img/testimonials/04.jpg",
+        "text": "\"¡Increíblemente conveniente! Reservar mi espacio de estacionamiento con anticipación ha hecho que mis viajes al centro de la ciudad sean mucho más tranquilos. La página es fácil de usar y siempre encuentro un lugar disponible cerca de mis destinos.\"",
+        "name": "Maria G."
+      },
+      {
+        "img": "img/testimonials/02.jpg",
+        "text": "\"¡Excelente servicio! La primera vez que usé la página, me sorprendió lo rápido y sencillo que fue registrarme y reservar. Además, la opción de pagar en línea me ahorra tiempo y estrés. Definitivamente la recomiendo.\"",
+        "name": "Carlos R."
+      },
+      {
+        "img": "img/testimonials/03.jpg",
+        "text": "\"Me encanta esta página. La uso regularmente para reservar estacionamiento en diferentes partes de la ciudad. Es muy intuitiva, y la función de guardar mis ubicaciones favoritas es un gran plus. Nunca más volveré a dar vueltas buscando parqueadero.\"",
+        "name": "Juanito P."
+      },
+      {
+        "img": "img/testimonials/01.jpg",
+        "text": "\"Tuve una gran experiencia con esta página. La interfaz es amigable y las indicaciones son claras. Lo mejor es que puedo comparar precios y elegir el parqueadero que más me conviene. ¡Cinco estrellas!\"",
+        "name": "Javier L."
+      },
+      {
+        "img": "img/testimonials/06.jpg",
+        "text": "\"Reservar estacionamiento nunca ha sido tan fácil. La página me permite ver la disponibilidad en tiempo real y hacer la reserva en minutos. Además, el soporte al cliente es muy eficiente y siempre están dispuestos a ayudar si surge algún problema. Totalmente recomendable.\"",
+        "name": "Laura M."
+      }
+    ],
+    "Team": [
+      {
+        "img": "img/team/01.jpg",
+        "name": "John Doe",
+        "job": "Director"
+      },
+      {
+        "img": "img/team/02.jpg",
+        "name": "Mike Doe",
+        "job": "Senior Designer"
+      },
+      {
+        "img": "img/team/03.jpg",
+        "name": "Jane Doe",
+        "job": "Senior Designer"
+      },
+      {
+        "img": "img/team/04.jpg",
+        "name": "Karen Doe",
+        "job": "Project Manager"
+      }
+    ],
+    "Features": [
+      {
+        "icon": "fa fa-pencil",
+        "title": "Regístra tu cuenta.",
+        "text": ""
+      },
+      {
+        "icon": "fa fa-check-circle",
+        "title": "Inicia Sesión",
+        "text": ""
+      },
+      {
+        "icon": "fa fa-street-view",
+        "title": "Busca tu punto más cercano",
+        "text": ""
+      },
+      {
+        "icon": "fa fa-thumbs-up",
+        "title": "Reserva tu parqueadero",
+        "text": ""
+      }
+    ]
+  }
+  

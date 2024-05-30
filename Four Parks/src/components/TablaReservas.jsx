@@ -6,25 +6,21 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
-import { useEffect } from 'react';
 import { ImCross } from "react-icons/im";
+import moment from 'moment'
+import { FaCoins, FaDollarSign, FaClock, FaParking  } from "react-icons/fa";
 
 
 // Función para crear filas a partir de los datos proporcionados
-function createData(parqueadero, fechareserva, costo, puntos) {
+function createData(parqueadero, fechareserva, costo, puntos, numreserva, estado) {
 
-    // Crear un objeto Date a partir del string
-    const fecha = new Date(fechareserva);
+    // Crear un objeto Moment a partir del string y establecer la zona horaria como UTC
+    const fecha = moment.utc(fechareserva);
 
-    // Extraer el día, mes y año
-    const dia = fecha.getUTCDate();
-    const mes = fecha.getUTCMonth() + 1; // Los meses son indexados desde 0, por lo que enero es 0 y diciembre es 11
-    const año = fecha.getUTCFullYear();
+    // Formatear la fecha sin alterar la hora
+    const fechaFormateada = fecha.format('DD/MM/YYYY, h a');
 
-    // Formatear la fecha como dd/mm/yyyy
-    const fechaFormateada = `${dia.toString().padStart(2, '0')}/${mes.toString().padStart(2, '0')}/${año}`;
-
-    return { parqueadero , fechaFormateada, costo, puntos };
+    return { parqueadero , fechaFormateada, costo, puntos, numreserva, estado };
 }
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -40,16 +36,8 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 // Componente de tabla
 /* eslint-disable react/prop-types */
 const TablaReservas = ({ reservas, cb }) => {
-    //c onst auth = useAuth();
 
-    useEffect(() => {
-        console.log(reservas);
-    }, []);
-
-    /* const handleChangeRol = (idtipousuario, correo) => {
-        cb(correo, idtipousuario);
-    } */
-    reservas = reservas.map(reserva => createData(reserva.nombreparqueadero, reserva.fechareserva, reserva.costo, reserva.puntos));
+    reservas = reservas.map(reserva => createData(reserva.nombreparqueadero, reserva.fechareserva, reserva.costo, reserva.puntos, reserva.numreserva, reserva.estado));
 
     //const usuarios = reservas.map(reserva => createData(...usuario));
 
@@ -67,21 +55,22 @@ const TablaReservas = ({ reservas, cb }) => {
             </TableHead>
             <TableBody>
             {reservas.map((reserva) => (
-                <TableRow key={reserva.parqueadero}>
+                <TableRow key={reserva.numreserva}>
                     <TableCell component="th" scope="row">
-                        {reserva.parqueadero}
+                        <FaParking />{reserva.parqueadero}
                     </TableCell>
                     <TableCell component="th" scope="row">
-                        {reserva.fechaFormateada}
+                    <FaClock /> {reserva.fechaFormateada}
                     </TableCell>
                     <TableCell align="left">
-                        {reserva.costo}
+                        <FaDollarSign />{reserva.costo}
                     </TableCell>
                     <TableCell align="left">
-                        {reserva.puntos}
+                        {reserva.puntos} <FaCoins />
                     </TableCell>
                     <TableCell align="center">
-                        <ImCross className='cancelarButton' onClick={cb}/>
+                        { reserva.estado == 'Cancelar' && <ImCross className='cancelarButton' onClick={() => cb(reserva.numreserva, reserva.parqueadero)}/> }
+                        { reserva.estado != 'Cancelar' && <p>{ reserva.estado }</p> }
                     </TableCell>
                 </TableRow>
             ))}

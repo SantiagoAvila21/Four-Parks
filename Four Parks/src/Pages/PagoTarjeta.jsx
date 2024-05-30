@@ -40,7 +40,7 @@ const PagoTarjeta = () => {
             };
             
             try{
-                const responseCard = await axios.get(`${import.meta.env.VITE_FLASK_SERVER_URL}/obtener_tarjeta/${userFromLocalStorage.correo}`);
+                const responseCard = await axios.get(`${import.meta.env.VITE_FLASK_SERVER_URL}/user/obtener_tarjeta/${userFromLocalStorage.correo}`);
 
                 if(responseCard.status == 200){
                     setFormData(prevFormData => ({
@@ -54,7 +54,7 @@ const PagoTarjeta = () => {
 
             }catch (error){
                 console.error(error);
-                updateNotification({type: 'error', message: 'Ocurrio un error en la aplicación'});
+                updateNotification({type: 'error', message: 'Este usuario no tiene una tarjeta asociada.'});
             } finally {
                 setIsLoadingCard(false);
             }
@@ -120,7 +120,7 @@ const PagoTarjeta = () => {
                         <h5>COSTO</h5>
                         <p>${reserva.monto},0</p>
                     </div>
-                    <button id="submitButton" type="submit" onClick={() => navigate("/")}>VOLVER A PAGINA PRINCIPAL</button>
+                    <button id="submitButton" type="submit" onClick={() => navigate("/app")}>VOLVER A PAGINA PRINCIPAL</button>
                 </div>
             </Modal>
             <SideLogo />
@@ -132,6 +132,7 @@ const PagoTarjeta = () => {
                 {!isLoadingCard && 
                     <>
                         <CardForm formData={formData} setFormData={setFormData} pago/>
+                        <p style={{marginTop: "10px", fontWeight: "bold", color: "green"}}>Tu pago será de: $ { reserva.monto } COP</p>
                         <button id="submitButton" type="submit" onClick={handleSubmit}>PAGAR</button>
                     </>
                 }

@@ -8,9 +8,11 @@ import { ToastContainer } from "react-toastify";
 import useNotification from "../Hooks/useNotification"
 import { useAuth } from "../Context/AuthProvider"
 import Modal from "../components/Modal"
+import { useParking } from "../Context/ParkingsProvider"
 
 const Home = () => {
   const { updateNotification } = useNotification();
+  const { fetchParqueaderos } = useParking();
   const auth = useAuth();
   const [showModal, setshowModal] = useState(false);
   const [newPassword, setNewPassword] = useState('');
@@ -43,6 +45,7 @@ const Home = () => {
         updateNotification({ type: 'success', message: 'Inicio de sesión exitoso.', position: 'top-left' });
       }
     };
+    fetchParqueaderos("");
     
     handleFirstLogin();
     auth.setState('');

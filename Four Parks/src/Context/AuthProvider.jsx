@@ -25,7 +25,7 @@ const AuthProvider = ({ children }) => {
     const blockAction = async (email) =>{
         try{
             updateNotification({type: 'error', message: 'Tu cuenta ha sido bloqueada, espera a que el administrador te desbloquee'})
-            const response = await axios.put(`${import.meta.env.VITE_FLASK_SERVER_URL}/block_usuario`, {
+            const response = await axios.put(`${import.meta.env.VITE_FLASK_SERVER_URL}/auth/block_usuario`, {
                 correoelectronico: email
             });
             console.log(response);
@@ -43,7 +43,7 @@ const AuthProvider = ({ children }) => {
         try{
             updateNotification({ type: 'loading', message: 'Desbloqueando...'})
 
-            const response = await axios.put(`${import.meta.env.VITE_FLASK_SERVER_URL}/unlock_usuario`, {
+            const response = await axios.put(`${import.meta.env.VITE_FLASK_SERVER_URL}/auth/unlock_usuario`, {
                 correoelectronico: email
             });
             console.log(response);
@@ -62,7 +62,7 @@ const AuthProvider = ({ children }) => {
         updateNotification({type: 'loading', message: 'Cargando...'});
         try {
             // Realizar la solicitud de inicio de sesión al servidor
-            const response = await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/login`, {
+            const response = await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/auth/login`, {
                 correoelectronico: data.email,
                 contrasenia: data.password
             });
@@ -99,7 +99,7 @@ const AuthProvider = ({ children }) => {
         updateNotification({type: 'loading', message: 'Cargando...'});
         try {
             // Realizar la solicitud de verificación al servidor
-            const response = await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/verify`, {
+            const response = await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/auth/verify`, {
                 correoelectronico: email,
                 codigo: code
             });
@@ -115,7 +115,7 @@ const AuthProvider = ({ children }) => {
                     setState('first_logged');
                 } else setState('logged');
                 // Redirigir a la página de inicio
-                navigate("/");
+                navigate("/app");
                 return;
             }
         } catch (error) {
@@ -133,7 +133,7 @@ const AuthProvider = ({ children }) => {
         updateNotification({type: 'loading', message: 'Cargando...'});
         try{
             // Realizar la solicitud de registro al servidor
-            const responseRegister = await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/register`, {
+            const responseRegister = await axios.post(`${import.meta.env.VITE_FLASK_SERVER_URL}/auth/register`, {
                 idtipousuario: "3",
                 idtipodocumento: data.tipoDoc,
                 nombreusuario: `${data.nombre}_${data.apellido}`,
@@ -166,7 +166,7 @@ const AuthProvider = ({ children }) => {
         try {
             console.log(data);
             // Realizar la solicitud de verificación al servidor
-            const response = await axios.put(`${import.meta.env.VITE_FLASK_SERVER_URL}/api/cambiar_contrasenia`, {
+            const response = await axios.put(`${import.meta.env.VITE_FLASK_SERVER_URL}/user/cambiar_contrasenia`, {
                 "correoelectronico": data.email,
                 "contrasenia": data.password
             });

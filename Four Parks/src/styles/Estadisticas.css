@@ -1,0 +1,84 @@
+.Estadisticas{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.estadistica{
+    display: flex;
+    flex-direction: column;
+}
+
+label{
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.Page{
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.FormReservaStat{
+    width: 70%;
+    height: fit-content;
+    background-color: #FFBC4B;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed black;
+    padding: 30px;
+}
+
+.tiempoExportar{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#exportarButton{
+    cursor: pointer;
+}
+
+#exportarButton:hover{
+    text-decoration: underline;
+}
+
+.parqueadero{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.graficaEstadistica{
+    width: 100%;
+    margin: 10px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+}
+
+.chart-container {
+    display: grid;
+    place-items: center;
+    width: 600px; /* Ajusta el ancho según tus necesidades */
+    height: 300px; /* Ajusta el alto según tus necesidades */
+    margin: 0 auto; /* Centrar los gráficos horizontalmente */
+    background-color: white;
+}
+
+.scrollable-container {
+    width: 100%;
+    max-height: 50vh; /* Ajusta la altura máxima según tus necesidades */
+    overflow-y: auto; /* Solo scroll vertical */
+    overflow-x: hidden; /* Evitar scroll horizontal */
+    padding-right: 20px; /* Para evitar que el contenido quede detrás de la barra de desplazamiento */
+}
