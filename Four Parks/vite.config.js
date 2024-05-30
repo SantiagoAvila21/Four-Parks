@@ -9,4 +9,9 @@ export default defineConfig({
         usePolling: true
     }
   },
+  build: {
+    rollupOptions: {
+      external: ['react-awesome-reveal']
+    }
+  }
 })
