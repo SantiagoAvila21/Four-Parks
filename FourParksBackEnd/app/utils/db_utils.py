@@ -18,17 +18,10 @@ class DatabaseConnection:
             raise Exception("This class is a singleton!")
         else:
             try:
-                """ self.connection_pool = psycopg2.pool.SimpleConnectionPool(
+                self.connection_pool = psycopg2.pool.SimpleConnectionPool(
                     minconn=1,
                     maxconn=10,
                     dsn=os.getenv('DATABASE_URL')
-                ) """
-                self.connection_pool = psycopg2.pool.SimpleConnectionPool(1, 20,
-                    user=os.getenv("DB_USER"),
-                    password=os.getenv("DB_PASSWORD"),
-                    host=os.getenv("DB_HOST"),
-                    port=os.getenv("DB_PORT"),
-                    database=os.getenv("DB_NAME")
                 )
                 DatabaseConnection.__instance = self
             except Exception as e:

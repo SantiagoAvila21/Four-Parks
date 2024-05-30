@@ -8,8 +8,8 @@ export const Navigation = () => {
       <nav id="menu" className="navbar navbar-default navbar-fixed-top">
       
         <div className="container">
-          <div className="navbar-header">
-          <img id="logoTop" src={logoFP} alt="Logo Four Parks" />
+          <div className="navbar-header" style={{display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center"}}>
+            <img id="logoTop" src={logoFP} alt="Logo Four Parks" />
             <button
               type="button"
               className="navbar-toggle collapsed"

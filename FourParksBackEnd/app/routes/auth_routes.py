@@ -18,24 +18,14 @@ def register():
         data = request.get_json()
         print(data['correoelectronico'])
 
-
         # Verificar si el correo electrónico ya está en uso
         existe_usuario_query = "SELECT COUNT(*) FROM usuario WHERE correoelectronico = %s"
         existe_usuario = DatabaseFacade.execute_query(existe_usuario_query, (data['correoelectronico'],))[0][0]
         if existe_usuario > 0:
             return jsonify({"error": "El correo electrónico ya está en uso"}), 400
 
-        # Obtener el último idusuario utilizado
-        ultimo_id_query = "SELECT COUNT(idusuario) FROM usuario"
-        ultimo_id_result = DatabaseFacade.execute_query(ultimo_id_query)
-        ultimo_id = ultimo_id_result[0][0]
-
-        if ultimo_id:
-            # Incrementar el último idusuario en uno
-            nuevo_idusuario = 'P0' + str(ultimo_id + 1)
-        else:
-            # En caso de que no haya usuarios registrados aún
-            nuevo_idusuario = 'P001'
+        # Generar un nuevo UUID para el idusuario
+        nuevo_idusuario = str(uuid.uuid4())
 
         nueva_contrasenia = generate_password()
         contraseniaHashed = hashlib.sha1(nueva_contrasenia.encode()).hexdigest()
@@ -48,15 +38,16 @@ def register():
                   data['numdocumento'], contraseniaHashed, data['puntosacumulados'], data['correoelectronico'], 'unlocked', True)
         DatabaseFacade.execute_query(sql_query, values)
 
-        # Se manda directamente el correo al nuevo usuario con su contraseña 
+        # Enviar el correo electrónico con la nueva contraseña
         msg = Message("Nueva Contraseña para Four Parks",
-            sender=os.getenv("MAIL_USERNAME"),
-            recipients=[data['correoelectronico']])
+                      sender=os.getenv("MAIL_USERNAME"),
+                      recipients=[data['correoelectronico']])
         msg.body = f'Tu nueva contraseña para el sistema Four Parks es: {nueva_contrasenia}'
         mail.send(msg)
 
-        return jsonify({"message": "Usuario insertado con éxito"}), 201  
+        return jsonify({"message": "Usuario insertado con éxito"}), 201
     except Exception as e:
+        print(f"Error: {e}")
         return jsonify({"error": str(e)}), 400
 
 

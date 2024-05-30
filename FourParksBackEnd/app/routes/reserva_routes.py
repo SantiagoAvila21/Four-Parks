@@ -230,8 +230,6 @@ def cancelar_reserva():
         sql_delete_reserva = "DELETE FROM reserva WHERE numreserva = %s"
         DatabaseFacade.execute_query(sql_delete_reserva, (data['numreserva'],))
 
-        DatabaseFacade.execute_query(sql_update_capacidad, (data['parqueadero'],))
-
         return jsonify({"message": "Reserva cancelada con éxito"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

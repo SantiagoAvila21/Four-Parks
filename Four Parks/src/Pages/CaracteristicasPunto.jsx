@@ -96,7 +96,7 @@ const CaracteristicasPunto = () => {
         <div className="Reserva">
             <SideLogo />
             <div className="reserva Page">
-                <h1 style={{marginBottom: "50px"}}>CARACTERISTICAS DE PUNTO</h1>
+                <h1 style={{marginBottom: "50px"}}>CARACTERÍSTICAS DE PUNTO</h1>
                 <div className="reserva FormReserva">
                     <form>
                         <div className="reserva info">

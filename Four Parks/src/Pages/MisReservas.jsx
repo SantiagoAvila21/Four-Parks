@@ -8,6 +8,7 @@ import TablaReservas from "../components/TablaReservas";
 import axios from 'axios'
 import useNotification from "../Hooks/useNotification";
 import { useReserva } from "../Context/ReservaProvider";
+import { VscEmptyWindow } from "react-icons/vsc";
 
 
 const MisReservas = () => {
@@ -76,7 +77,13 @@ const MisReservas = () => {
                             <CircularProgress />
                         </div>
                     }
-                    {!isLoading && reservas.length === 0 && <h1>TODAVIA NO HAS REALIZADO NINGUNA RESERVA</h1>}
+                    {!isLoading && reservas.length === 0 && 
+                        <div style={{width: "100%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center"}}>
+                            <h1>No encontramos ninguna reserva a tu nombre</h1>
+                            <VscEmptyWindow style={{color: "#fefefefe", width: "150px", height: "150px"}} />
+                            <h3>Te invitamos a que realices tu primera reserva</h3>
+                        </div>
+                    }
                     {!isLoading && reservas.length > 0 && 
                         <div className="tablaUsuarios" style={{ maxHeight: '600px', overflowY: 'auto' }}>
                             <TablaReservas reservas={reservas} cb={(numreserva, parqueadero) => {

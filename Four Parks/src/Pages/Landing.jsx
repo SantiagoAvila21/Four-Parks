@@ -5,6 +5,8 @@ import { About } from "../components/LandingComponents/acercaDe";
 import { Services } from "../components/LandingComponents/ventajas";
 import { Testimonials } from "../components/LandingComponents/experiencias";
 import JsonData from "../data/data.json";
+import { Fade, Slide, JackInTheBox } from "react-awesome-reveal";
+
 
 const Landing = () => {
   const landingPageData = JsonData;
@@ -12,11 +14,17 @@ const Landing = () => {
   return (
     <div>
         <Navigation />
-        <Header data={landingPageData.Header} />
+        <Fade triggerOnce>
+          <Header data={landingPageData.Header} />
+        </Fade>
         <Features data={landingPageData.Features} /> 
-        <About data={landingPageData.About} />
+        <Slide triggerOnce>
+          <About data={landingPageData.About} />
+        </Slide>
         <Services data={landingPageData.Services} />
-        <Testimonials data={landingPageData.Testimonials} />
+        <JackInTheBox triggerOnce>
+          <Testimonials data={landingPageData.Testimonials} />
+        </JackInTheBox>
     </div>
   );
 };

@@ -124,7 +124,7 @@ const Estadisticas = () => {
                     // Agrega la imagen de la gráfica al PDF
                     pdf.addImage(imageData, 'PNG', 10, 30, 180, 100);
                     if (index === chartContainers.length - 1) {
-                        pdf.save(`Estadisticas ${infoParqueaderoSelected[0][2]}.pdf`);
+                        pdf.save(`Estadísticas ${infoParqueaderoSelected[0][2]}.pdf`);
                     }
                 });
         });
@@ -157,7 +157,7 @@ const Estadisticas = () => {
         <div className="Estadisticas">
             <SideLogo />
             <div className="estadistica Page">
-                <h1 style={{ marginBottom: "10px" }}>ESTADISTICAS</h1>
+                <h1 style={{ marginBottom: "10px" }}>ESTADÍSTICAS</h1>
                 <div className="estadistica FormReservaStat">
                     <div className="tiempoExportar">
                         <div className="tiempoStat">
@@ -223,7 +223,7 @@ const Estadisticas = () => {
                                     </Select>
                                 </FormControl>
                                 <div className="chart-container">
-                                    {!statBar && <h2>Selecciona la variable a graficar</h2>}
+                                    {!statBar && <h2>Selecciona la variable a gráficar</h2>}
                                     {(statBar && barData) && <BarChart data={barData} />}
                                 </div>
                             </div>
@@ -238,11 +238,11 @@ const Estadisticas = () => {
                                         label="Age"
                                     >
                                         <MenuItem value={""}>Variable</MenuItem>
-                                        <MenuItem value={1}>Duracion de las reservas</MenuItem>
+                                        <MenuItem value={1}>Duración de las reservas</MenuItem>
                                     </Select>
                                 </FormControl>
                                 <div className="chart-container">
-                                    {!statLine && <h2>Selecciona la variable a graficar</h2>}
+                                    {!statLine && <h2>Selecciona la variable a gráficar</h2>}
                                     {(statLine && lineData) && <LineChart data={lineData} />}
                                 </div>
                             </div>
@@ -257,11 +257,11 @@ const Estadisticas = () => {
                                         label="Age"
                                     >
                                         <MenuItem value={""}>Variable</MenuItem>
-                                        <MenuItem value={1}>Proporcion de reservas por duracion</MenuItem>
+                                        <MenuItem value={1}>Proporción de reservas por duración</MenuItem>
                                     </Select>
                                 </FormControl>
                                 <div className="chart-container">
-                                    {!statPie && <h2>Selecciona la variable a graficar</h2>}
+                                    {!statPie && <h2>Selecciona la variable a gráficar</h2>}
                                     {(statPie && pieData) && <PieChart data={pieData} />}
                                 </div>
                             </div>

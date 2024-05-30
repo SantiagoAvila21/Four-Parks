@@ -35,7 +35,7 @@ const ReservaProvider = ({ children }) => {
             
         }catch (error){
             updateNotification({type: "error", message: error.response.data.error});
-            console.error(error, "MUAJAJAJA");
+            console.error(error);
             throw error;  // Lanzar el error para que el flujo se detenga
         }finally{
             closeNoti();
@@ -57,7 +57,7 @@ const ReservaProvider = ({ children }) => {
                 console.log(responsePago)
                 const updatedUser = {
                     ...prev,
-                    puntos: responsePago.data.puntos
+                    puntos: prev.puntos + Math.floor(reserva.monto / 4000)
                 };
                 console.log(updatedUser)
                 // Guardar el usuario actualizado en localStorage
