@@ -7,7 +7,6 @@ import { Testimonials } from "../components/LandingComponents/experiencias";
 import JsonData from "../data/data.json";
 import { Fade, Slide, JackInTheBox } from "react-awesome-reveal";
 
-
 const Landing = () => {
   const landingPageData = JsonData;
 
