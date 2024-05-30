@@ -1,5 +1,5 @@
-import "../../../css/bootstrap.scss"
-import "../../../css/style.scss"
+import "../../styles/bootstrap.scss"
+import "../../styles/style.scss"
 import logoFP from '../../assets/FourParksLogo.png';
 
 export const Navigation = () => {

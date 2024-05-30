@@ -1,5 +1,5 @@
-import "../../../css/bootstrap.scss"
-import "../../../css/style.scss"
+import "../../styles/bootstrap.scss"
+import "../../styles/style.scss"
 
 /* eslint-disable react/prop-types */
 export const Testimonials = (props) => {
