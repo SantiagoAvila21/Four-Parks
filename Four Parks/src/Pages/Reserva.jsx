@@ -1,5 +1,5 @@
 import SideLogo from "../components/SideLogo";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "../styles/Reserva.css";
 import { ToastContainer } from "react-toastify";
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -22,9 +22,10 @@ import { FaCar, FaCoins, FaMotorcycle, FaBicycle  } from "react-icons/fa";
 
 const Reserva = () => {
     const location = useLocation();
-    const [fechaEntrada, setFechaEntrada] = useState(dayjs().add(1, 'hour'));
-    const [fechaSalida, setFechaSalida] = useState(dayjs().add(1, 'hour'));
+    const [fechaEntrada, setFechaEntrada] = useState(dayjs());
+    const [fechaSalida, setFechaSalida] = useState(dayjs());
     const [usePoints, setUsePoints] = useState(false);
+    const usePointsRef = useRef(false);
     const [freeHours, setFreeHours] = useState('');
     const { updateNotification } = useNotification();
     const parking = useParking();
@@ -55,7 +56,11 @@ const Reserva = () => {
         placa: '',
     });
 
-    const handleChangeUsePoints = (event) => setUsePoints(event.target.checked);
+    const handleChangeUsePoints = (event) => {
+        setUsePoints(event.target.checked);
+        usePointsRef.current = event.target.checked;
+    }
+
     const handleChangeFreeHours = (event) => setFreeHours(event.target.value);
 
     const handleChangeForm = (event) => {
@@ -110,17 +115,17 @@ const Reserva = () => {
         }
 
         const puntosUser = JSON.parse(localStorage.getItem("userLogged")).puntos; 
-        if(usePoints && ((freeHours == 1 && puntosUser < 25) || (freeHours == 2 && puntosUser < 50))){
+        if(usePointsRef.current && ((freeHours == 1 && puntosUser < 25) || (freeHours == 2 && puntosUser < 50))){
             updateNotification({ type: 'error', message: 'Puntos Insuficientes' });
             return;
         }
 
-        if(usePoints && freeHours == 0){
+        if(usePointsRef.current && freeHours == 0){
             updateNotification({ type: 'error', message: 'Porfavor selecciona cuantas horas quieres reclamar' });
             return;
         }
 
-        if(usePoints && cantidadhoras < freeHours){
+        if(usePointsRef.current && cantidadhoras < freeHours){
             updateNotification({ type: 'error', message: 'Porfavor selecciona una cantidad de horas mayor o igual a las gratis' });
             return;
         }
@@ -139,7 +144,7 @@ const Reserva = () => {
         } 
         
         // Se le restan la cantidad de horas en el caso que reclame sus puntos de fidelizacion
-        if(!(usePoints && ((freeHours == 1 && puntosUser < 25) || (freeHours == 2 && puntosUser < 50)))) cantidadhoras -= freeHours;
+        if(!(usePointsRef.current && ((freeHours == 1 && puntosUser < 25) || (freeHours == 2 && puntosUser < 50)))) cantidadhoras -= freeHours;
 
         setReserva({
             parqueaderoSelected,
@@ -150,7 +155,7 @@ const Reserva = () => {
             tarifa,
             placa: infoReserva.placa,
             tipoVehiculo: tipoV,
-            horasGratis: (freeHours === '' || !usePoints) ? 0 : freeHours,
+            horasGratis: (freeHours === '' || !usePointsRef.current) ? 0 : freeHours,
             numfactura: generarNumeroFactura()
         });
 
@@ -190,15 +195,11 @@ const Reserva = () => {
     };
 
     // Función que valida los datos de la fecha
-    const isValidDate = (date, isEntrada) => {
-        const now = dayjs();
-        const oneHourLater = now.add(1, 'hour');
-        const eightDaysLater = now.add(8, 'days');
-        if (isEntrada) {
-            return date.isBetween(oneHourLater, eightDaysLater, null, '[]');
-        } else {
-            return date.isBetween(now, eightDaysLater, null, '[]');
-        }
+    const isValidDate = (date) => {
+        const today = dayjs().startOf('day');
+        const eightDaysLater = today.add(8, 'days');
+    
+        return date.isBetween(today.add(1, 'hour'), eightDaysLater, null, '[]'); // Retorna verdadero si la fecha está dentro del rango permitido
     };
 
     return (
@@ -257,9 +258,9 @@ const Reserva = () => {
                                     name="fecha"
                                     onChange={date => handleDateChange(date, true)}
                                     disablePast={true} // No permitir fechas anteriores al día de hoy
-                                    shouldDisableDate={date => !isValidDate(date, true)} // Deshabilitar fechas mayores a 8 días y fechas anteriores a una hora desde ahora
+                                    shouldDisableDate={date => !isValidDate(date)} // Deshabilitar fechas mayores a 8 días y fechas anteriores a una hora desde ahora
                                     disableTimeValidation={true} // Deshabilitar validación de hora
-                                    allowSameDateSelection={true} // Permitir selección de la misma fecha
+
                                     views={['year', 'month', 'day', 'hours']}
                                 />  
                             </LocalizationProvider>
@@ -272,16 +273,16 @@ const Reserva = () => {
                                     name="fecha"
                                     onChange={date => handleDateChange(date, false)}
                                     disablePast={true} // No permitir fechas anteriores al día de hoy
-                                    shouldDisableDate={date => !isValidDate(date, false)} // Deshabilitar fechas mayores a 8 días
+                                    shouldDisableDate={date => !isValidDate(date)} // Deshabilitar fechas mayores a 8 días
                                     disableTimeValidation={true} // Deshabilitar validación de hora
-                                    allowSameDateSelection={true} // Permitir selección de la misma fecha
+
                                     views={['year', 'month', 'day', 'hours']}
                                 />  
                             </LocalizationProvider>
                         </div>
                         <div className="reserva info">
                             <FormGroup>
-                                <FormControlLabel control={<Switch checked={usePoints} onChange={handleChangeUsePoints} />} label="Usar puntos de Fidelización" />
+                                <FormControlLabel control={<Switch checked={usePoints} ref={usePointsRef} onChange={handleChangeUsePoints} />} label="Usar puntos de Fidelización" />
                             </FormGroup>
                         </div>
                         {usePoints && (
