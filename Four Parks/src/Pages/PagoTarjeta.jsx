@@ -111,7 +111,7 @@ const PagoTarjeta = () => {
                         <p>{reserva.placa}</p>
                         <h5>PARQUEADERO</h5>
                         <p>{reserva.parqueaderoSelected[2]}</p>
-                        <h5>TIPO DE VEHICULO</h5>
+                        <h5>TIPO DE VEHÍCULO</h5>
                         <p>{reserva.tipoVehiculo}</p>
                         <h5>FECHA LLEGADA</h5>
                         <p>{reserva.fechaEntradaFormateada}</p>

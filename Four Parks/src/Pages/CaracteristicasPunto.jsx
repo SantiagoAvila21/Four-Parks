@@ -136,9 +136,9 @@ const CaracteristicasPunto = () => {
                         </div>
                         {caracteristicaCambiar == 'Tarifas' && (
                             <div className="reserva info">
-                                <label>TIPO VEHICULO</label>
+                                <label>TIPO VEHÍCULO</label>
                                 <select name="tipoVehiculo" className="inputForm" ref={tipoVehiculoRef}>
-                                    <option value={""}>Seleccione un tipo de vehiculo</option>
+                                    <option value={""}>Seleccione un tipo de vehículo</option>
                                     <option value={"1"}> <><FaCar /> Carro</> </option>
                                     <option value={"2"}> <><FaMotorcycle /> Moto</></option>
                                     <option value={"3"}> <><FaBicycle /> Bicicleta</></option>
