@@ -10,7 +10,7 @@
       {
         "icon": "fa fa-car",
         "name": "Parquea en todo Colombia",
-        "text": "Contamos con una amplia red de parqueaderos en diversas ciudades de Colombia. No importa dónde te encuentres, podrás acceder a nuestro servicio y de alta calidad."
+        "text": "Contamos con una amplia red de parqueaderos en diversas ciudades de Colombia. No importa donde te encuentres, podrás acceder a nuestro servicio y de alta calidad."
       },
       {
         "icon": "fa fa-clock-o",
@@ -90,7 +90,7 @@
     "Features": [
       {
         "icon": "fa fa-pencil",
-        "title": "Regístra tu cuenta.",
+        "title": "Registra tu cuenta.",
         "text": ""
       },
       {
