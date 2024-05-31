@@ -56,8 +56,8 @@ const CreditRegister = () => {
             <SideLogo />
             <div className="register Page">
                 <h1>
-                    <span>REGISTRAR TARJETA</span>
-                    <span>DE CRÉDITO</span>
+                    <span>REGISTRAR MÉTODO</span>
+                    <span>DE PAGO</span>
                 </h1>
                 <CardForm formData={formData} setFormData={setFormData} />
                 <button id="submitButton" type="submit" onClick={handleSubmit}>REGISTRAR</button>

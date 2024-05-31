@@ -15,7 +15,6 @@ def crear_reserva():
     data = request.get_json()
     try:
         now = datetime.now()
-        now = datetime.now()
 
         email = data['correoelectronico']
         

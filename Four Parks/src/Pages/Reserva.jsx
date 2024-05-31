@@ -20,11 +20,10 @@ import { useReserva } from "../Context/ReservaProvider";
 import generarNumeroFactura from '../utils/factura_util';
 import { FaCar, FaCoins, FaMotorcycle, FaBicycle  } from "react-icons/fa";
 
-
 const Reserva = () => {
     const location = useLocation();
-    const [fechaEntrada, setFechaEntrada] = useState(dayjs());
-    const [fechaSalida, setFechaSalida] = useState(dayjs());
+    const [fechaEntrada, setFechaEntrada] = useState(dayjs().add(1, 'hour'));
+    const [fechaSalida, setFechaSalida] = useState(dayjs().add(1, 'hour'));
     const [usePoints, setUsePoints] = useState(false);
     const [freeHours, setFreeHours] = useState('');
     const { updateNotification } = useNotification();
@@ -140,7 +139,7 @@ const Reserva = () => {
         } 
         
         // Se le restan la cantidad de horas en el caso que reclame sus puntos de fidelizacion
-        cantidadhoras -= freeHours;
+        if(!(usePoints && ((freeHours == 1 && puntosUser < 25) || (freeHours == 2 && puntosUser < 50)))) cantidadhoras -= freeHours;
 
         setReserva({
             parqueaderoSelected,
@@ -191,10 +190,15 @@ const Reserva = () => {
     };
 
     // Función que valida los datos de la fecha
-    const isValidDate = (date) => {
-        const today = dayjs().startOf('day');
-        const eightDaysLater = today.add(8, 'days');
-        return date.isBetween(today, eightDaysLater, null, '[]');
+    const isValidDate = (date, isEntrada) => {
+        const now = dayjs();
+        const oneHourLater = now.add(1, 'hour');
+        const eightDaysLater = now.add(8, 'days');
+        if (isEntrada) {
+            return date.isBetween(oneHourLater, eightDaysLater, null, '[]');
+        } else {
+            return date.isBetween(now, eightDaysLater, null, '[]');
+        }
     };
 
     return (
@@ -253,7 +257,7 @@ const Reserva = () => {
                                     name="fecha"
                                     onChange={date => handleDateChange(date, true)}
                                     disablePast={true} // No permitir fechas anteriores al día de hoy
-                                    shouldDisableDate={date => !isValidDate(date)} // Deshabilitar fechas mayores a 8 días
+                                    shouldDisableDate={date => !isValidDate(date, true)} // Deshabilitar fechas mayores a 8 días y fechas anteriores a una hora desde ahora
                                     disableTimeValidation={true} // Deshabilitar validación de hora
                                     allowSameDateSelection={true} // Permitir selección de la misma fecha
                                     views={['year', 'month', 'day', 'hours']}
@@ -268,7 +272,7 @@ const Reserva = () => {
                                     name="fecha"
                                     onChange={date => handleDateChange(date, false)}
                                     disablePast={true} // No permitir fechas anteriores al día de hoy
-                                    shouldDisableDate={date => !isValidDate(date)} // Deshabilitar fechas mayores a 8 días
+                                    shouldDisableDate={date => !isValidDate(date, false)} // Deshabilitar fechas mayores a 8 días
                                     disableTimeValidation={true} // Deshabilitar validación de hora
                                     allowSameDateSelection={true} // Permitir selección de la misma fecha
                                     views={['year', 'month', 'day', 'hours']}
