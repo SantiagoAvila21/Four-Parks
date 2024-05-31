@@ -64,7 +64,7 @@ const MisReservas = () => {
             }}>
                 <div className="twoFactor">
                     <p>¿Está seguro que desea cancelar la reserva?</p>
-                    <strong><p style={{color: "red", textAlign: "center"}}>Recuerda que si cancelas una reserva con 30 minutos de anticipacion se te cobrará una multa, y la factura te llegara a tu correo</p></strong>
+                    <strong><p style={{color: "red", textAlign: "center"}}>Recuerda que si cancelas una reserva con 30 minutos de anticipación se te cobrará una multa, y la factura te llegará a tu correo</p></strong>
                     <button id="submitButton" type="submit" onClick={handleCancel}>CANCELAR RESERVA</button>
                 </div>
             </Modal>
