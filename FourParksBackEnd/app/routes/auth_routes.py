@@ -39,11 +39,11 @@ def register():
         DatabaseFacade.execute_query(sql_query, values)
 
         # Enviar el correo electrónico con la nueva contraseña
-        #msg = Message("Nueva Contraseña para Four Parks",
-        #              sender=os.getenv("MAIL_USERNAME"),
-        #              recipients=[data['correoelectronico']])
-        #msg.body = f'Tu nueva contraseña para el sistema Four Parks es: {nueva_contrasenia}'
-        #mail.send(msg)
+        msg = Message("Nueva Contraseña para Four Parks",
+                      sender=os.getenv("MAIL_USERNAME"),
+                      recipients=[data['correoelectronico']])
+        msg.body = f'Tu nueva contraseña para el sistema Four Parks es: {nueva_contrasenia}'
+        mail.send(msg)
 
         return jsonify({"message": "Usuario insertado con éxito"}), 201
     except Exception as e:
@@ -82,11 +82,11 @@ def login():
             update_code_query = 'UPDATE usuario SET codigo = %s WHERE correoelectronico = %s'
             DatabaseFacade.execute_query(update_code_query, (verification_code, email))
 
-            #msg = Message('Código de verificación', 
-            #    sender=os.getenv("MAIL_USERNAME"), 
-            #    recipients=[email])
-            #msg.body = f'Su código de verificación es: {verification_code}'
-            #mail.send(msg)
+            msg = Message('Código de verificación', 
+                sender=os.getenv("MAIL_USERNAME"), 
+                recipients=[email])
+            msg.body = f'Su código de verificación es: {verification_code}'
+            mail.send(msg)
             
             return jsonify({"message": "Codigo de Verificacion enviado por Correo Electronico"}), 200
         else:
@@ -143,11 +143,11 @@ def block_usuario():
         update_estado_query = "UPDATE usuario SET estado = 'locked' WHERE correoelectronico = %s"
         DatabaseFacade.execute_query(update_estado_query, (email,))
 
-        #msg = Message('Bloqueo de usuario', 
-        #    sender=os.getenv("MAIL_USERNAME"), 
-        #    recipients=[os.getenv("MAIL_USERNAME")])
-        #msg.body = f'El usuario con correo: {email} ha sido bloqueado debido a 3 intentos fallidos de inicio de sesión.'
-        #mail.send(msg)
+        msg = Message('Bloqueo de usuario', 
+            sender=os.getenv("MAIL_USERNAME"), 
+            recipients=[os.getenv("MAIL_USERNAME")])
+        msg.body = f'El usuario con correo: {email} ha sido bloqueado debido a 3 intentos fallidos de inicio de sesión.'
+        mail.send(msg)
 
         return jsonify({"message": "Usuario bloqueado"}), 200
     except Exception as e:
@@ -164,11 +164,11 @@ def unlock_usuario():
         update_estado_query = "UPDATE usuario SET estado = 'unlocked' WHERE correoelectronico = %s"
         DatabaseFacade.execute_query(update_estado_query, (email,))
 
-        #msg = Message('Cuenta Desbloqueada', 
-        #    sender=os.getenv("MAIL_USERNAME"), 
-        #    recipients=[email])
-        #msg.body = f'Tu cuenta de Four Parks ha sido desbloqueada, por nuestro Administrador General'
-        #mail.send(msg)
+        msg = Message('Cuenta Desbloqueada', 
+            sender=os.getenv("MAIL_USERNAME"), 
+            recipients=[email])
+        msg.body = f'Tu cuenta de Four Parks ha sido desbloqueada, por nuestro Administrador General'
+        mail.send(msg)
 
         return jsonify({"message": "Usuario desbloqueado"}), 200
     except Exception as e:
